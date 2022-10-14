@@ -1,0 +1,19 @@
+{
+  "beers": {
+    "belongsTo": {
+      "producers": {
+        "pk": "id",
+        "label": "name",
+        "fk": "producers_id"
+      }
+    }
+  },
+  "instruments": {
+    "belongsTo": {
+      "orchestras": {
+        "pk": "id",
+        "fk": "orchestraId"
+      }
+    }
+  }
+}

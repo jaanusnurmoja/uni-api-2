@@ -33,11 +33,19 @@
   "relations": {
     "beers": {
       "hasOne": ["producers"],
-      "hasMany": []
+      "hasMany": ["events"]
+    },
+    "producers": {
+      "hasOne": [],
+      "hasMany": ["beers"]
     },
     "events": {
       "hasOne": [],
       "hasMany": ["beers"]
+    },
+    "orchestras": {
+      "hasOne": [],
+      "hasMany": ["instruments"]
     }
   }
 }
