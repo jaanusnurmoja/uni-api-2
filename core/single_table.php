@@ -169,7 +169,11 @@ if ($method != 'GET') {
               while ($row = mysqli_fetch_assoc($result)) {
                 $dataRows[$row['rowid']][] = $row;
               }
-              echo json_encode($dataRows);
+/*               foreach ($dataRows as $rowid => $mainRow) {
+
+                print_r(buildQueryResults($data, $rowid));
+            }
+ */              echo json_encode($dataRows);
             }
             break;
 

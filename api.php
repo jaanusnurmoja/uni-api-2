@@ -196,7 +196,31 @@ switch (count($request)) {
         echo (json_encode(array('error' => 'Welcome on Uni-API!')));
         break;
 }
+function splitColsBySeparator($col) {
+    
+    $attribute = explode(':',$col, 2);
+    if (count($attribute) == 1) {
+        $subCols[$col] = 'value';
+    }
+    elseif (!strpos($attribute[1], ':')) {
+        $subCols[$attribute[0]][$attribute[1]] = 'value';
+    }
+    else {
+        $subCols[$attribute[0]] = splitColsBySeparator($col);
+    }
+    return $subCols;
 
+}
+
+function buildQueryResults($data, $rowid)
+{
+    $cols = array_keys($data[0]);
+    $subCols = [];
+    foreach ($cols as $col) {
+        $subCols[] = splitColsBySeparator($col);
+    }
+    return $subCols;
+}
 /*
 function buildQueryResults($data)
 {
