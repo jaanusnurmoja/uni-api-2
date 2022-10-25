@@ -1,34 +1,39 @@
 <?php
   // retrieve the table and key from the path
-  $table = preg_replace('/[^a-z0-9_]+/i', '', $request[1]);
+  //$table = preg_replace('/[^a-z0-9_]+/i', '', $request[1]);
+  $table = $request[1];
   header('Content-Type: application/json');
-  if($table == "") {
+  if ($table == "") {
     echo(json_encode(array('error' => 'Invalid Endpoint!')));
     http_response_code(501);
     return;
   }
 
-  if(!empty($request[2])) {
+
+  if (!empty($request[2])) {
     $key = $request[2] ? $request[2] : "";
   }
   
+//print_r(buildQuery());
+if ($_POST) {
   // escape the columns and values from the input object
-  $columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
+  //$columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
+  $columns = array_keys($input);
   $values = array_map(function ($value) use ($link) {
     if ($value === null) {
       return null;
     }
     return mysqli_real_escape_string($link, (string)$value);
   }, array_values($input));
-  
+  print_r('DEBUUUUUG');
   // build the SET part of the SQL command
   $set = '';
   for ($i=0; $i<count($columns); $i++) {
-    if($columns[$i] == "id") continue;
+    if ($columns[$i] == "id") continue;
     $set .= ($i>0?',':'').'`'.$columns[$i].'`=';
     $set .= ($values[$i] === null ? 'NULL':'"'.$values[$i].'"');
   }
-  
+ }
 
   // create SQL based on HTTP method
   switch ($table) {
@@ -65,13 +70,15 @@
     default:
       switch ($method) {
       case 'GET':
-        $sql = "SELECT * 
+  $sql = buildQuery();
+
+/*         $sql = "SELECT * 
                 FROM `$table`"
                 .($key ? " WHERE `id`='$key'" : '');
-        break;
+ */        break;
 
       case 'PUT':
-        if(check_token()) {
+        if (check_token()) {
           $sql = "UPDATE `$table` 
                   SET $set
                   WHERE `id`='$key'";
@@ -79,14 +86,14 @@
         break;
 
       case 'POST':
-        if(check_token()) {
+        if (check_token()) {
           $sql = "INSERT INTO `$table` 
                   SET $set";
         }
         break;
 
       case 'DELETE':
-        if(check_token()) {
+        if (check_token()) {
           $sql = "DELETE FROM `$table` 
                   WHERE `id`='$key'";
         }
@@ -98,6 +105,7 @@
     }
     break;
   }
+
   
   // excecute SQL statement
   $result = mysqli_query($link, $sql);
@@ -107,7 +115,7 @@
     case 'user':
       switch ($method) {
         case 'POST':
-          if($result->num_rows == 0) {
+          if ($result->num_rows == 0) {
             error_response(403, 'No account founded or invalid username/password');
           }
           else {
@@ -138,8 +146,8 @@
       } else {
         switch ($method) {
           case 'GET':
-            if(mysqli_affected_rows($link) == 0) {
-              if($key == null) {
+            if (mysqli_affected_rows($link) == 0) {
+              if ($key == null) {
                 echo '[]';
                 http_response_code(200);
               }
@@ -147,7 +155,7 @@
                 error_response(404, 'No element founded with this ID: '.$key);
               }
             }
-            elseif(mysqli_affected_rows($link) == 1 && $key) {
+            elseif (mysqli_affected_rows($link) == 1 && $key) {
               echo(json_encode(mysqli_fetch_object($result), 128));
             }
             else {
@@ -166,7 +174,7 @@
               . "WHERE `id` = ". $key . "\n"
             );
             $res = mysqli_fetch_object($last_row);
-            if(!$res) {
+            if (!$res) {
               error_response(404, 'No element founded with this ID: '.$key);
             } else {
               echo(json_encode($res));

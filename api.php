@@ -13,6 +13,7 @@ function getRequest()
 {
     return explode('/', $_SERVER['PATH_INFO']);
 }
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 // connect to the mysql database
@@ -67,41 +68,126 @@ function getRelations()
 }
 
 // var_dump($request);
-function getDataWithRelations($tableData = [], $table = null, $foreignKey = null, $parentKey = null)
+function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
 {
     $d = [];
     $thisTableData = [];
-    $request = getRequest();
-    if (empty($tableData)) {
-        $table = $request[1];
-        $thisTableData = $d[$table];
-    } else { $thisTableData = $tableData;}
-    if (!empty($foreignKey)) {
-        $thisTableData['belongsTo']['fk'] = $foreignKey['fk'];
-    }
-    // $d['table']['name'] = $table;
+    global $request;
     $relations = getRelations();
+    if (empty($table)) {
+        $table = $request[1];
+        if (isset($request[2])) {
+            $pkValue = $request[2];
+            $relations[$table]['rowid'] = $pkValue;
+        }
+    }
+
+    $thisTableData = $relations[$table];
+
     $r = [];
 
     foreach ($relations as $rtbl => $relation) {
-        if (isset($relations[$rtbl]['belongsTo'][$table])) {
-            $childTableData = $relations[$rtbl]['belongsTo'][$table];
-            $r = getDataWithRelations($childTableData, $rtbl, $relation['fk'], $d['table']['pk']);
+        if (isset($relation['belongsTo'][$table])) {
+            //$childTableData = $relations[$rtbl];
+            $r = getDataWithRelations($rtbl, null, $pkValue);
             $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
         }
     }
     $d[$table] = $thisTableData;
     return $d;
 }
-print_r(getDataWithRelations([], $table));
+
+function getColumns($table, $parent = null)
+{
+    global $link;
+    $cols = new stdClass();
+    $cols->list = [];
+    $cols->withAlias = [];
+    $alias = $parent ? "$parent:" : '';
+    $sql = "SHOW COLUMNS FROM `$table`";
+    if ($result = $link->query($sql)) {
+        while ($column = $result->fetch_assoc()) {
+            $cols->list[] = `$table` . `{$column['Field']}`;
+            $cols->withAlias[] = "`$table`.`{$column['Field']}` AS `$alias{$column['Field']}`";
+        }
+    }
+    return $cols;
+}
+
+function getJoinColumns($table, $tableData, $parent, $cols = '')
+{
+    $cols .= implode(', ', getColumns($table, $parent)->withAlias);
+    if (isset($tableData['hasMany'])) {
+        foreach ($tableData['hasMany'] as $t => $d) {
+            $newParent = "$parent:$t";
+            $cols .= ', ';
+            $cols .= getJoinColumns($t, $d, $newParent);
+        }
+    }
+    return $cols;
+}
+function buildQuery()
+{
+    foreach (getDataWithRelations() as $table => $tableData) {
+
+        $columns = "$table.{$tableData['pk']} AS `rowid`, ";
+        $columns .= implode(', ', getColumns($table)->withAlias);
+        if (isset($tableData['hasMany'])) {
+            foreach ($tableData['hasMany'] as $jt => $jtData) {
+                $columns .= ', ' . getJoinColumns($jt, $jtData, $jt);
+            }
+        }
+        $sql = "SELECT $columns FROM `$table`
+        ";
+        if (isset($tableData['hasMany'])) {
+            foreach ($tableData['hasMany'] as $joinTable => $joinTableData) {
+                $sql .= buildQueryJoins($joinTable, $joinTableData, $table, $tableData);
+            }
+        }
+
+        if (isset($tableData['rowid'])) {
+            $sql .= "WHERE `$table`.`{$tableData['pk']}` = {$tableData['rowid']}";
+        }
+        return $sql;
+
+    }
+}
+
+function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = null)
+{
+    foreach ($joinTableData['belongsTo'][$table] as $join) {
+        $sql .= "LEFT JOIN `$joinTable` ON
+        `$joinTable`.`{$join['fk']}` = `$table`.`{$tableData['pk']}`
+        ";
+    }
+    if (isset($joinTableData['hasMany'])) {
+        foreach ($joinTableData['hasMany'] as $nextTable => $nextTableData) {
+            $sql .= buildQueryJoins($nextTable, $nextTableData, $joinTable, $joinTableData);
+        }
+
+    }
+    return $sql;
+}
+
+
 
 switch (count($request)) {
 
     case 2:
     case 3:
-        // echo("NO RELAZIONE");
         require_once './core/single_table.php';
         break;
+        // echo("NO RELAZIONE");
+        //$sql = buildQuery();
+       //echo "<pre>$sql</pre>";
+        //echo json_encode(getDataWithRelations());
+        //$result = mysqli_query($link, $sql);
+        //$rows = [];
+/*         while($row = $result->fetch_assoc()) {
+            $rows[$row['rowid']][] = $row;
+        }
+        echo json_encode($rows);
+ */     
     case 4:
     case 5:
         require_once './core/multi_table.php';
@@ -111,5 +197,94 @@ switch (count($request)) {
         break;
 }
 
+/*
+function buildQueryResults($data)
+{
+    $d = [];
+    $newItem = [];
+    $table = getRequest()[1];
+
+    $structure = getDataWithRelations();
+    print_r($structure);
+     foreach ($data as $rowid => $rowData) {
+        foreach ($rowData as $key => $item) {
+            $recursive = [];
+            $itemRowId = [];
+            foreach ($item as $fieldKey => $fieldItem) {
+                if (strpos($fieldKey, ':id')) {
+                    $itemRowId[$fieldKey] = $fieldItem;
+                }
+
+            }
+            foreach ($item as $fieldKey => $fieldItem) {
+                if (!strpos($fieldKey, ':')) {
+                    $special = false;
+                    //unset($fieldItem);
+                    if ($fieldKey == $structure[$table]['pk']) {
+                        $d[$rowid]['id'][$fieldKey] = $fieldItem;
+                        $special = true;
+                    }
+                    if (isset($structure['belongsTo'])) {
+                        foreach ($structure[$table]['belongsTo'] as $belongsToTable => $belongsTo) {
+                            if ($fieldKey == $belongsTo['fk']) {
+                                $d[$rowid]['belongsTo'][$belongsToTable]['fk'][$fieldKey] = $fieldItem;
+                            }
+                        }
+                        $special = true;
+                    }
+                    if ($special === false) {
+                        $d[$rowid]['data'][$fieldKey] = $fieldItem;
+                    }
+                } else {
+ */                    /*                     if (strpos($fieldKey, ':id')) {
+                    $id = $fieldItem;
+                    }
+                     */
+/*                     $fieldArr = explode(':', $fieldKey, 2);
+                    $d[$rowid]['hasMany'][$fieldArr[0]] = [];
+                    foreach ($rowData as $relKey => $relItem) {
+                        foreach ($relItem as $rKey => $rData) {
+                            if ($rKey == $fieldKey) {
+                                $d[$rowid]['hasMany'][$fieldArr[0]][$relKey][$fieldArr[1]] = get_recursive_var($fieldArr, $recursive, $rData, $itemRowId[$fieldKey]);
+                            } // $related = $recursive[$fieldArr[0]];
+                        }
+ */                        /*                     if (!strpos($fieldArr[1], ':'))
+                        {
+                        if ($fieldArr[1] == 'id' && !empty($fieldItem)) $id = $fieldItem;
+                        $d[$rowid]['hasMany'][$fieldArr[0]][$id][$fieldArr[1]] = $fieldItem;
+                        //$d[$rowid]['hasMany'][$fieldArr[0]] = array_unique($d[$rowid]['hasMany'][$fieldArr[0]]);
+                        }
+                         *///$d[$rowid][$key][$fieldKey]['v'] = $fieldItem;                        //$d[$rowid][$key][$fieldKey]['fieldKeys'] = $fieldArr;
+/*                 }
+            }
+            // $d[$rowid]['hasMany'] = $recursive;
+        }
+        //$mainData = array_combine($mainData);
+    }
+    // foreach (getDataWithRelations() as $table => $tableData) {
+
+    // }
+    return $d;
+} 
+*/
+
+/*
+function get_recursive_var($keys, $arr, $value, $id = null)
+{
+    $finalArray = [];
+    if (strpos($keys[1], ':')) {
+        $nextKeys = explode(':', $keys[1]);
+        $newArr = array();
+        $newArr['hasMany'] = get_recursive_var($nextKeys, $newArr[$nextKeys[0]], $value, $id);
+        array_push($arr[$keys[0]], $newArr);
+    } else {
+        //$arr[$keys[0]][][$keys[1]] = $value;
+        $arr[$keys[1]] = $value;
+        array_push($finalArray, $arr);
+    }
+    return $finalArray[$keys[1]];
+
+}
+*/
 // close mysql connection
 mysqli_close($link);
