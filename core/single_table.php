@@ -15,7 +15,7 @@
   }
   
 //print_r(buildQuery());
-if ($_POST) {
+if ($method != 'GET') {
   // escape the columns and values from the input object
   //$columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
   $columns = array_keys($input);
@@ -25,7 +25,6 @@ if ($_POST) {
     }
     return mysqli_real_escape_string($link, (string)$value);
   }, array_values($input));
-  print_r('DEBUUUUUG');
   // build the SET part of the SQL command
   $set = '';
   for ($i=0; $i<count($columns); $i++) {
@@ -159,11 +158,18 @@ if ($_POST) {
               echo(json_encode(mysqli_fetch_object($result), 128));
             }
             else {
+/*               
               if (!$key) echo '[';
               for ($i = 0; $i < mysqli_num_rows($result); $i++) {
                 echo ($i > 0 ? ',' : '').json_encode(mysqli_fetch_object($result));
               }
               if (!$key) echo ']';
+ */              
+              $dataRows = [];
+              while ($row = mysqli_fetch_assoc($result)) {
+                $dataRows[$row['rowid']][] = $row;
+              }
+              echo json_encode($dataRows);
             }
             break;
 
