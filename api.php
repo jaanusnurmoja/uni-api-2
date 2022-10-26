@@ -169,7 +169,69 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = 
     return $sql;
 }
 
+function splitColsBySeparator($col) {
+    
+    $attribute = explode(':',$col, 2);
+    if (count($attribute) == 1) {
+        $subCols[$col] = 'value';
+    }
+    elseif (!strpos($attribute[1], ':')) {
+        $subCols[$attribute[0]][$attribute[1]] = 'value';
+    }
+    else {
+        $subCols[$attribute[0]] = splitColsBySeparator($col);
+    }
+    return $subCols;
 
+}
+
+function buildQueryResults($data)
+{
+/*     $cols = array_keys($data[0]);
+    $subCols = [];
+    foreach ($cols as $col) {
+        $subCols[] = splitColsBySeparator($col);
+    }
+ */
+
+ $d = [];
+
+foreach ($data as $rowid => $dataRows) {
+    $d[$rowid] = [];
+    foreach ($dataRows as $row) {
+        foreach (array_keys($row) as $rKey) {
+            if ($rKey == 'id' || strpos($rKey, ':id')) {
+                foreach($row as $key => $value) {
+                $d[$rowid] += keySplitter($row, $rKey, $key, $value);
+                }
+            }
+        }
+    }
+}
+ return $d;
+}
+
+function keySplitter($row, $rKey, $key, $value, $newRow = []) {
+
+        $keyParts = explode(':', $key);
+        $partsOFrKey = explode(':', $rKey);
+        if (count($keyParts) == 1) {
+            $newRow[$key] = $value;
+        }
+/*
+// kuidas näidata seotud alamridu?
+        else {
+            $lastKeyPart = array_pop($keyParts);
+            $lastIdPart = array_pop($partsOFrKey);
+            if ($keyParts == $partsOFrKey){
+                array_push($keyParts, $lastKeyPart);
+                array_push($partsOFrKey, $lastIdPart);
+                $newRow['hasMany'][$keyParts[0]] = keySplitter($row, $rKey, $keyParts[1], $value);
+            }
+        }
+ */
+    return $newRow;
+}
 
 switch (count($request)) {
 
@@ -195,31 +257,6 @@ switch (count($request)) {
     default:
         echo (json_encode(array('error' => 'Welcome on Uni-API!')));
         break;
-}
-function splitColsBySeparator($col) {
-    
-    $attribute = explode(':',$col, 2);
-    if (count($attribute) == 1) {
-        $subCols[$col] = 'value';
-    }
-    elseif (!strpos($attribute[1], ':')) {
-        $subCols[$attribute[0]][$attribute[1]] = 'value';
-    }
-    else {
-        $subCols[$attribute[0]] = splitColsBySeparator($col);
-    }
-    return $subCols;
-
-}
-
-function buildQueryResults($data, $rowid)
-{
-    $cols = array_keys($data[0]);
-    $subCols = [];
-    foreach ($cols as $col) {
-        $subCols[] = splitColsBySeparator($col);
-    }
-    return $subCols;
 }
 /*
 function buildQueryResults($data)
