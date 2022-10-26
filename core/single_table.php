@@ -17,8 +17,8 @@
 //print_r(buildQuery());
 if ($method != 'GET') {
   // escape the columns and values from the input object
-  //$columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
-  $columns = array_keys($input);
+  $columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
+  //$columns = array_keys($input);
   $values = array_map(function ($value) use ($link) {
     if ($value === null) {
       return null;

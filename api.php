@@ -107,7 +107,7 @@ function getColumns($table, $parent = null)
     $sql = "SHOW COLUMNS FROM `$table`";
     if ($result = $link->query($sql)) {
         while ($column = $result->fetch_assoc()) {
-            $cols->list[] = `$table` . `{$column['Field']}`;
+            $cols->list[] = "`$table`.`{$column['Field']}`";
             $cols->withAlias[] = "`$table`.`{$column['Field']}` AS `$alias{$column['Field']}`";
         }
     }
@@ -169,16 +169,15 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = 
     return $sql;
 }
 
-function splitColsBySeparator($col) {
-    
-    $attribute = explode(':',$col, 2);
+function splitColsBySeparator($col)
+{
+
+    $attribute = explode(':', $col, 2);
     if (count($attribute) == 1) {
         $subCols[$col] = 'value';
-    }
-    elseif (!strpos($attribute[1], ':')) {
+    } elseif (!strpos($attribute[1], ':')) {
         $subCols[$attribute[0]][$attribute[1]] = 'value';
-    }
-    else {
+    } else {
         $subCols[$attribute[0]] = splitColsBySeparator($col);
     }
     return $subCols;
@@ -188,48 +187,54 @@ function splitColsBySeparator($col) {
 function buildQueryResults($data)
 {
 /*     $cols = array_keys($data[0]);
-    $subCols = [];
-    foreach ($cols as $col) {
-        $subCols[] = splitColsBySeparator($col);
-    }
+$subCols = [];
+foreach ($cols as $col) {
+$subCols[] = splitColsBySeparator($col);
+}
  */
 
- $d = [];
+    $d = [];
 
-foreach ($data as $rowid => $dataRows) {
-    $d[$rowid] = [];
-    foreach ($dataRows as $row) {
-        foreach (array_keys($row) as $rKey) {
-            if ($rKey == 'id' || strpos($rKey, ':id')) {
-                foreach($row as $key => $value) {
-                $d[$rowid] += keySplitter($row, $rKey, $key, $value);
+    foreach ($data as $rowid => $dataRows) {
+        $d[$rowid] = [];
+        foreach ($dataRows as $row) {
+            foreach (array_keys($row) as $rKey) {
+                if ($rKey == 'id' || strpos($rKey, ':id')) {
+
+                    foreach ($row as $key => $value) {
+                        $d[$rowid] += keySplitter($row, $rKey, $key, $value);
+                    }
                 }
             }
         }
     }
-}
- return $d;
+    return $d;
 }
 
-function keySplitter($row, $rKey, $key, $value, $newRow = []) {
+function keySplitter($row, $rKey, $key, $value, $newRow = [], $join = [], $data = [])
+{
 
-        $keyParts = explode(':', $key);
-        $partsOFrKey = explode(':', $rKey);
-        if (count($keyParts) == 1) {
-            $newRow[$key] = $value;
-        }
-/*
+    $keyParts = explode(':', $key);
+    if (count($keyParts) == 1) {
+        $newRow[$key] = $value;
+    }
 // kuidas näidata seotud alamridu?
-        else {
-            $lastKeyPart = array_pop($keyParts);
-            $lastIdPart = array_pop($partsOFrKey);
-            if ($keyParts == $partsOFrKey){
-                array_push($keyParts, $lastKeyPart);
-                array_push($partsOFrKey, $lastIdPart);
-                $newRow['hasMany'][$keyParts[0]] = keySplitter($row, $rKey, $keyParts[1], $value);
+    else {
+        $newRow['hasMany'][$keyParts[0]] = [];
+        $lastIndex = count($keyParts) - 1;
+        if (count($keyParts) < 3) {
+            $newRow['hasMany'][$keyParts[0]][][$keyParts[$lastIndex]] = $value;
+        } else {
+            $newRow[$keyParts[$lastIndex]] = $value;
+            for ($i = $lastIndex - 1; $i > 0; $i--) {
+                $join[$keyParts[$i]][]['hasMany'][$keyParts[$i + 1]] = $join;
+                $i--;
             }
+                $newRow['hasMany'][$keyParts[0]][][$keyParts[1]] = $join;
         }
- */
+        //$newRow['hasMany'][$keyParts[0]] = keySplitter($row, $rKey, $keyParts[1], $value);
+    }
+
     return $newRow;
 }
 
@@ -239,17 +244,6 @@ switch (count($request)) {
     case 3:
         require_once './core/single_table.php';
         break;
-        // echo("NO RELAZIONE");
-        //$sql = buildQuery();
-       //echo "<pre>$sql</pre>";
-        //echo json_encode(getDataWithRelations());
-        //$result = mysqli_query($link, $sql);
-        //$rows = [];
-/*         while($row = $result->fetch_assoc()) {
-            $rows[$row['rowid']][] = $row;
-        }
-        echo json_encode($rows);
- */     
     case 4:
     case 5:
         require_once './core/multi_table.php';
@@ -258,94 +252,5 @@ switch (count($request)) {
         echo (json_encode(array('error' => 'Welcome on Uni-API!')));
         break;
 }
-/*
-function buildQueryResults($data)
-{
-    $d = [];
-    $newItem = [];
-    $table = getRequest()[1];
-
-    $structure = getDataWithRelations();
-    print_r($structure);
-     foreach ($data as $rowid => $rowData) {
-        foreach ($rowData as $key => $item) {
-            $recursive = [];
-            $itemRowId = [];
-            foreach ($item as $fieldKey => $fieldItem) {
-                if (strpos($fieldKey, ':id')) {
-                    $itemRowId[$fieldKey] = $fieldItem;
-                }
-
-            }
-            foreach ($item as $fieldKey => $fieldItem) {
-                if (!strpos($fieldKey, ':')) {
-                    $special = false;
-                    //unset($fieldItem);
-                    if ($fieldKey == $structure[$table]['pk']) {
-                        $d[$rowid]['id'][$fieldKey] = $fieldItem;
-                        $special = true;
-                    }
-                    if (isset($structure['belongsTo'])) {
-                        foreach ($structure[$table]['belongsTo'] as $belongsToTable => $belongsTo) {
-                            if ($fieldKey == $belongsTo['fk']) {
-                                $d[$rowid]['belongsTo'][$belongsToTable]['fk'][$fieldKey] = $fieldItem;
-                            }
-                        }
-                        $special = true;
-                    }
-                    if ($special === false) {
-                        $d[$rowid]['data'][$fieldKey] = $fieldItem;
-                    }
-                } else {
- */                    /*                     if (strpos($fieldKey, ':id')) {
-                    $id = $fieldItem;
-                    }
-                     */
-/*                     $fieldArr = explode(':', $fieldKey, 2);
-                    $d[$rowid]['hasMany'][$fieldArr[0]] = [];
-                    foreach ($rowData as $relKey => $relItem) {
-                        foreach ($relItem as $rKey => $rData) {
-                            if ($rKey == $fieldKey) {
-                                $d[$rowid]['hasMany'][$fieldArr[0]][$relKey][$fieldArr[1]] = get_recursive_var($fieldArr, $recursive, $rData, $itemRowId[$fieldKey]);
-                            } // $related = $recursive[$fieldArr[0]];
-                        }
- */                        /*                     if (!strpos($fieldArr[1], ':'))
-                        {
-                        if ($fieldArr[1] == 'id' && !empty($fieldItem)) $id = $fieldItem;
-                        $d[$rowid]['hasMany'][$fieldArr[0]][$id][$fieldArr[1]] = $fieldItem;
-                        //$d[$rowid]['hasMany'][$fieldArr[0]] = array_unique($d[$rowid]['hasMany'][$fieldArr[0]]);
-                        }
-                         *///$d[$rowid][$key][$fieldKey]['v'] = $fieldItem;                        //$d[$rowid][$key][$fieldKey]['fieldKeys'] = $fieldArr;
-/*                 }
-            }
-            // $d[$rowid]['hasMany'] = $recursive;
-        }
-        //$mainData = array_combine($mainData);
-    }
-    // foreach (getDataWithRelations() as $table => $tableData) {
-
-    // }
-    return $d;
-} 
-*/
-
-/*
-function get_recursive_var($keys, $arr, $value, $id = null)
-{
-    $finalArray = [];
-    if (strpos($keys[1], ':')) {
-        $nextKeys = explode(':', $keys[1]);
-        $newArr = array();
-        $newArr['hasMany'] = get_recursive_var($nextKeys, $newArr[$nextKeys[0]], $value, $id);
-        array_push($arr[$keys[0]], $newArr);
-    } else {
-        //$arr[$keys[0]][][$keys[1]] = $value;
-        $arr[$keys[1]] = $value;
-        array_push($finalArray, $arr);
-    }
-    return $finalArray[$keys[1]];
-
-}
-*/
 // close mysql connection
 mysqli_close($link);
