@@ -1,19 +1,49 @@
 {
   "beers": {
+    "pk": "id",
+    "data": {},
     "belongsTo": {
-      "producers": {
-        "pk": "id",
-        "label": "name",
-        "fk": "producers_id"
-      }
+      "producers": [
+        {
+          "parentKey": "id",
+          "label": "name",
+          "fk": "producers_id"
+        }
+      ]
     }
   },
   "instruments": {
+    "pk": "id",
+    "data": {},
     "belongsTo": {
-      "orchestras": {
-        "pk": "id",
-        "fk": "orchestraId"
-      }
+      "orchestras": [
+        {
+          "parentKey": "id",
+          "label": "name",
+          "fk": "orchestraId"
+        }
+      ]
+    }
+  },
+  "orchestras": {
+    "pk": "id",
+    "data": {}
+  },
+  "producers": {
+    "pk": "id",
+    "data": {}
+  },
+  "conductors": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "orchestras": [
+        {
+          "parentKey": "id",
+          "label": "name",
+          "fk": "orchestraId"
+        }
+      ]
     }
   }
 }
