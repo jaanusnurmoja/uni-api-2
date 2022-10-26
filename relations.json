@@ -20,7 +20,7 @@
         {
           "parentKey": "id",
           "label": "name",
-          "fk": "orchestraId"
+          "fk": "orchestras_id"
         }
       ]
     }
@@ -41,7 +41,20 @@
         {
           "parentKey": "id",
           "label": "name",
-          "fk": "orchestraId"
+          "fk": "orchestras_id"
+        }
+      ]
+    }
+  },
+  "players": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "instruments": [
+        {
+          "parentKey": "id",
+          "label": "type",
+          "fk": "instruments_id"
         }
       ]
     }
