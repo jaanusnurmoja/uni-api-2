@@ -200,9 +200,9 @@ $subCols[] = splitColsBySeparator($col);
         foreach ($dataRows as $row) {
             foreach (array_keys($row) as $rKey) {
                 if ($rKey == 'id' || strpos($rKey, ':id')) {
-
+                    $rKeyVal = $row[$rKey];
                     foreach ($row as $key => $value) {
-                        $d[$rowid] += keySplitter($row, $rKey, $key, $value);
+                        $d[$rowid] += keySplitter($row, $rKey, $row[$rKey], $key, $value);
                     }
                 }
             }
@@ -211,28 +211,25 @@ $subCols[] = splitColsBySeparator($col);
     return $d;
 }
 
-function keySplitter($row, $rKey, $key, $value, $newRow = [], $join = [], $data = [])
+function keySplitter($row, $rKey, $rKeyVal, $key, $value, $newRow = [], $join = [], $data = [])
 {
-
-    $keyParts = explode(':', $key);
+    $i = 0;
+    $keyParts = explode(':', $key, 2);
     if (count($keyParts) == 1) {
         $newRow[$key] = $value;
     }
 // kuidas näidata seotud alamridu?
     else {
-        $newRow['hasMany'][$keyParts[0]] = [];
-        $lastIndex = count($keyParts) - 1;
-        if (count($keyParts) < 3) {
-            $newRow['hasMany'][$keyParts[0]][][$keyParts[$lastIndex]] = $value;
-        } else {
-            $newRow[$keyParts[$lastIndex]] = $value;
-            for ($i = $lastIndex - 1; $i > 0; $i--) {
-                $join[$keyParts[$i]][]['hasMany'][$keyParts[$i + 1]] = $join;
-                $i--;
-            }
-                $newRow['hasMany'][$keyParts[0]][][$keyParts[1]] = $join;
+        $firstKey = $keyParts[0];
+        $newRow['hasMany'] = [];
+        keySplitter($row, $rKey, $row[$rKey], $keyParts[1], $value);
+        if (isset($newRow[$key])) {
+            $join[$firstKey][$rKeyVal][$key] = $newRow[$key];
         }
-        //$newRow['hasMany'][$keyParts[0]] = keySplitter($row, $rKey, $keyParts[1], $value);
+        $i++;
+    }
+    if (isset($newRow['hasMany'])) {
+        $newRow['hasMany'] = $join;
     }
 
     return $newRow;
