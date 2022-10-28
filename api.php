@@ -186,53 +186,61 @@ function splitColsBySeparator($col)
 
 function buildQueryResults($data)
 {
-/*     $cols = array_keys($data[0]);
-$subCols = [];
-foreach ($cols as $col) {
-$subCols[] = splitColsBySeparator($col);
-}
- */
-
     $d = [];
 
     foreach ($data as $rowid => $dataRows) {
         $d[$rowid] = [];
-        foreach ($dataRows as $row) {
-            foreach (array_keys($row) as $rKey) {
-                if ($rKey == 'id' || strpos($rKey, ':id')) {
-                    $rKeyVal = $row[$rKey];
-                    foreach ($row as $key => $value) {
-                        $d[$rowid] += keySplitter($row, $rKey, $row[$rKey], $key, $value);
+        $cols = [];
+        foreach (array_keys($dataRows[0]) as $idKey) {
+            if ($idKey == 'id' || str_ends_with($idKey, ':id')) {
+                $idColon = strrpos($idKey, ':');
+                foreach (array_keys($dataRows[0]) as $rKey) {
+                    $colColon = strrpos($rKey, ':');
+                    if (!$colColon) {
+                        $cols[$rKey] = $dataRows[0][$rKey];
+                    }
+                    else {
+                        $idKeyParts = explode(':',$idKey,2);
+                        $rKeyParts = explode(':',$idKey,2);
+                        if (substr($rKey, 0, $colColon) == substr($idKey, 0, $idColon)) {
+                            //$cols[$rKey] = array_column($dataRows, $rKey, $idKey);
+                            $arrayCols[$rKey] = array_column($dataRows, $rKey, $idKey);
+                            foreach ($arrayCols[$idKey] as $i) {
+                                    if (!strpos($rKeyParts[1],':')) {
+                                        $cols['hasMany'][$idKeyParts[0]][$i][$rKeyParts[1]] = $arrayCols[$rKey][$i];
+                                    } else {
+                                        foreach($arrayCols[$rKey] as $id => $value) {
+                                            $cols['hasMany'][$idKeyParts[0]][$i]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $id, $value, $arrayCols, $idKey);
+                                    }
+                                }
+                            }
+                       }
                     }
                 }
             }
         }
+        $d[$rowid] = $cols;
     }
+
     return $d;
 }
 
-function keySplitter($row, $rKey, $rKeyVal, $key, $value, $newRow = [], $join = [], $data = [])
+function keySplitter($idKey, $rKey, $i, $value, $arrayCols, $origIdKey, $newCol = [])
 {
-    $i = 0;
-    $keyParts = explode(':', $key, 2);
-    if (count($keyParts) == 1) {
-        $newRow[$key] = $value;
+    $rKeyParts = explode(':', $rKey, 2);
+    $idKeyParts = explode(':', $idKey, 2);
+    if (!strpos($rKeyParts[1],':')) {
+        $newCol[$idKeyParts[0]][$i][$rKeyParts[1]] = $value;
     }
-// kuidas näidata seotud alamridu?
     else {
-        $firstKey = $keyParts[0];
-        $newRow['hasMany'] = [];
-        keySplitter($row, $rKey, $row[$rKey], $keyParts[1], $value);
-        if (isset($newRow[$key])) {
-            $join[$firstKey][$rKeyVal][$key] = $newRow[$key];
-        }
-        $i++;
+        foreach ($arrayCols[$origIdKey] as $key => $origVal) {
+        $newCol[$idKeyParts[0]][$i]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $idKeyParts[0], $key, $origVal, $arrayCols, $origIdKey);
     }
-    if (isset($newRow['hasMany'])) {
-        $newRow['hasMany'] = $join;
     }
+    
+// kuidas näidata seotud alamridu?
 
-    return $newRow;
+    return $newCol;
 }
 
 switch (count($request)) {
