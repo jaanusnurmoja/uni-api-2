@@ -191,31 +191,12 @@ function buildQueryResults($data)
     foreach ($data as $rowid => $dataRows) {
         $d[$rowid] = [];
         $cols = [];
+        $c = [];
         foreach (array_keys($dataRows[0]) as $idKey) {
             if ($idKey == 'id' || str_ends_with($idKey, ':id')) {
-                $idColon = strrpos($idKey, ':');
                 foreach (array_keys($dataRows[0]) as $rKey) {
-                    $colColon = strrpos($rKey, ':');
-                    if (!$colColon) {
-                        $cols[$rKey] = $dataRows[0][$rKey];
-                    }
-                    else {
-                        $idKeyParts = explode(':',$idKey,2);
-                        $rKeyParts = explode(':',$idKey,2);
-                        if (substr($rKey, 0, $colColon) == substr($idKey, 0, $idColon)) {
-                            //$cols[$rKey] = array_column($dataRows, $rKey, $idKey);
-                            $arrayCols[$rKey] = array_column($dataRows, $rKey, $idKey);
-                            foreach ($arrayCols[$idKey] as $i) {
-                                    if (!strpos($rKeyParts[1],':')) {
-                                        $cols['hasMany'][$idKeyParts[0]][$i][$rKeyParts[1]] = $arrayCols[$rKey][$i];
-                                    } else {
-                                        foreach($arrayCols[$rKey] as $id => $value) {
-                                            $cols['hasMany'][$idKeyParts[0]][$i]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $id, $value, $arrayCols, $idKey);
-                                    }
-                                }
-                            }
-                       }
-                    }
+                    $c = cols($dataRows, $rKey, $idKey);
+                    if ($c[$rKey]) $cols[$rKey] = $c[$rKey];
                 }
             }
         }
@@ -225,17 +206,56 @@ function buildQueryResults($data)
     return $d;
 }
 
-function keySplitter($idKey, $rKey, $i, $value, $arrayCols, $origIdKey, $newCol = [])
-{
-    $rKeyParts = explode(':', $rKey, 2);
-    $idKeyParts = explode(':', $idKey, 2);
-    if (!strpos($rKeyParts[1],':')) {
-        $newCol[$idKeyParts[0]][$i][$rKeyParts[1]] = $value;
+function cols($dataRows, $rKey, $idKey, $oldRk = null, $cols=[], $arrayCols=[]){
+    $colColon = strrpos($rKey, ':');
+    if ($oldRk == null) {
+        $oldRk = $rKey;
+        if (!$colColon) {
+            $cols[$rKey] = $dataRows[0][$oldRk];
+        }
     }
     else {
-        foreach ($arrayCols[$origIdKey] as $key => $origVal) {
-        $newCol[$idKeyParts[0]][$i]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $idKeyParts[0], $key, $origVal, $arrayCols, $origIdKey);
+        $idColon = strrpos($idKey, ':');
+        $idKeyParts = explode(':',$idKey,2);
+        $rKeyParts = explode(':',$rKey,2);
+
+        if (substr($rKey, 0, $colColon) == substr($idKey, 0, $idColon)) {
+            //$cols[$rKey] = array_column($dataRows, $rKey, $idKey);
+            $arrayCols[$oldRk] = array_column($dataRows, $oldRk, $idKey);
+            $arrayCols[$idKey] = array_column($dataRows, $idKey);
+            foreach ($arrayCols[$idKey] as $i) {
+                if (!$colColon) {
+                    $cols[$i][$rKey] = $arrayCols[$oldRk][$i];
+                }
+            else {
+                $cols[$i]['hasMany'][$rKeyParts[0]][$i] = cols($dataRows, $rKeyParts[1], $idKey, $rKey, $cols, $arrayCols);
+                    //}
+                }
+            }
+            $cols['hasMany'][$rKeyParts[0]] = $cols;
+       }
     }
+    return $cols;
+
+}
+
+function keySplitter($arrayCols, $keyPart1, $keyPart2, $idPart2, $newCol = [], $row = [])
+{
+    $newKeyParts = explode(':', $keyPart2, 2);
+    $newIdParts = explode(':', $idPart2, 2);
+    foreach ($arrayCols[$keyPart1.':'.$idPart2] as $id) {
+        foreach ($arrayCols as $subKey => $subVals) {
+            $subKeyParts = explode(':', $subKey, 2);
+            if ($subKeyParts[1] == $newKeyParts[1]) {
+                if (!strpos($subKeyParts[1],':')) {
+                    $row[$id][$subKeyParts[1]] = 'debug 2 ' . $subVals[$id];
+                    $newCol[$newKeyParts[0]][$id][$subKeyParts[1]] = $row[$id][$subKeyParts[1]];
+                }
+                else {
+                    $newCol[$newKeyParts[0]][$id]['hasMany'] = keySplitter($arrayCols, $newKeyParts[0], $newKeyParts[1], $newIdParts[1]);
+                }
+            }
+        }
     }
     
 // kuidas näidata seotud alamridu?
