@@ -184,46 +184,66 @@ function splitColsBySeparator($col)
 
 }
 
+function getKeys($data) {
+    
+    $keys = [];
+    $keys['all'] = array_keys($data);
+    foreach ($keys['all'] as $key) {
+        if ($key == 'id' || str_ends_with($key, ':id')) {
+            $idKey = $key;
+            $keys['ids'][] = $key;
+        }
+    }
+    return $keys;
+}
+
+function getValues($keys, $dataRows) {
+    
+    $colsData = [];
+    foreach ($keys['ids'] as $idKey) {
+        $idColon = strrpos($idKey, ':');
+        $idParent = substr($idKey, 0, $idColon);
+        $colsData['ids'][$idKey] = array_column($dataRows, $idKey);
+        foreach ($keys['all'] as $rKey) {
+            $colColon = strrpos($rKey, ':');
+            $colParent = substr($rKey, 0, $colColon);
+            if ($colParent == $idParent) {
+                $colsData['all'][$rKey] = array_column($dataRows, $rKey, $idKey);
+            }
+        }
+    }
+    return $colsData;
+}
+
 function buildQueryResults($data)
 {
     $d = [];
-
+    $keys = getKeys($data[1][0]);
+ 
     foreach ($data as $rowid => $dataRows) {
         $d[$rowid] = [];
         $cols = [];
-        foreach (array_keys($dataRows[0]) as $idKey) {
-            if ($idKey == 'id' || str_ends_with($idKey, ':id')) {
-                $idColon = strrpos($idKey, ':');
-                foreach (array_keys($dataRows[0]) as $rKey) {
-                    $colColon = strrpos($rKey, ':');
-                    if (!$colColon) {
-                        $cols[$rKey] = $dataRows[0][$rKey];
+        $joinedCol = [];
+
+        $colValues = getValues($keys, $dataRows);
+
+        foreach ($colValues['all'] as $cKey => $cList) {
+            foreach($cList as $id => $cVal) {
+                if (!str_contains($cKey, ':')) {
+                    $cols[$cKey] = $cVal;
+                } else {
+                    $cKeyParts = explode(':', $cKey, 2);
+                    if (!str_contains($cKeyParts[1], ':')) {
+                        $joinedCol[$id][$cKeyParts[1]] = $cVal;
                     }
-                    else {
-                        $idKeyParts = explode(':',$idKey,2);
-                        $rKeyParts = explode(':',$rKey,2);
-                        if (substr($rKey, 0, $colColon) == substr($idKey, 0, $idColon)) {
-                            //$cols[$rKey] = array_column($dataRows, $rKey, $idKey);
-                            $arrayCols[$rKey] = array_column($dataRows, $rKey, $idKey);
-                            foreach ($arrayCols[$idKey] as $i) {
-                                //foreach ($arrayCols as $rKey => $origVal) {
-                                    if (!strpos($rKeyParts[1],':')) {
-                                        $cols['hasMany'][$rKeyParts[0]][$i][$rKeyParts[1]] = 'debug1 ' . $arrayCols[$rKey][$i];
-                                    } else {
-                                        foreach($arrayCols[$rKey] as $id => $value) {
-                                            $cols['hasMany'][$rKeyParts[0]][$i]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $id, $value, $arrayCols, $rKey);
-                                        }
-                                    //}
-                                }
-                            }
-                       }
-                    }
+                    $cols['hasMany'][$cKeyParts[0]][$id] = $joinedCol[$id];
                 }
             }
         }
+       
+
         $d[$rowid] = $cols;
     }
-
     return $d;
 }
 
