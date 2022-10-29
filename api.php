@@ -76,11 +76,11 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     $relations = getRelations();
     if (empty($table)) {
         $table = $request[1];
+    }
         if (isset($request[2])) {
             $pkValue = $request[2];
             $relations[$table]['rowid'] = $pkValue;
         }
-    }
 
     $thisTableData = $relations[$table];
 
@@ -95,6 +95,16 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     }
     $d[$table] = $thisTableData;
     return $d;
+}
+
+function getDataStructure($table = null) {
+    global $request;
+
+    if ($table == null) {
+        $table = $request[1];
+    }
+    
+    return getDataWithRelations($table)[$table];
 }
 
 function getColumns($table, $parent = null)
