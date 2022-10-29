@@ -119,7 +119,7 @@ function getJoinColumns($table, $tableData, $parent, $cols = '')
     $cols .= implode(', ', getColumns($table, $parent)->withAlias);
     if (isset($tableData['hasMany'])) {
         foreach ($tableData['hasMany'] as $t => $d) {
-            $newParent = "$parent:$t";
+            $newParent = $t;
             $cols .= ', ';
             $cols .= getJoinColumns($t, $d, $newParent);
         }
@@ -242,6 +242,7 @@ function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joine
 
 function buildQueryResults($data)
 {
+    global $request;
     $d = [];
     $keys = getKeys($data[1][0]);
  
@@ -254,25 +255,26 @@ function buildQueryResults($data)
         foreach ($colValues['ids'] as $key => $idList) {
             foreach ($colValues['all'] as $cKey => $cList) {
             $splitted = [];
-                $colColon = strrpos($cKey, ':');
-                $colParent = substr($cKey, 0, $colColon);
-                if ($colParent == $key) {
+                $colParts = explode(':', $cKey, 2);
+                $colField = $colParts[1];
                     foreach ($cList as $id => $cVal) {
                         if (!str_contains($cKey, ':')) {
                             $cols[$cKey] = $cVal;
                         } else {
+                        if ($colParts[0] == $key) {
                             $cKeyParts = explode(':', $cKey, 2);
-                            if (!str_contains($cKeyParts[1], ':')) {
-                                $cols['hasMany'][$cKeyParts[0]][$id][$cKeyParts[1]] = $cVal;
-                            } else {
-                                $splitted = splitKey($cKey, $cKeyParts[1], $colValues['all'], $idList);
-                                foreach($splitted as $sKey => $sVals) {
-                                    foreach ($sVals as $i => $v) {
-                                        $cols['hasMany'][$cKeyParts[0]][$id]['hasMany'][$sKey][$i] = $v;
-                                    }
+                            $cTable = $cKeyParts[0];
+                            $relations = getDataWithRelations();
+                            $prevId = $id;
+                            if (isset($relations[$request[1]]['hasMany'][$cTable])) {
+                                $cols['hasMany'][$key][$prevId][$cKeyParts[1]] = $cVal;
+                            } 
+/*                             else {
+                                if (isset($relations($cTable)[$cTable]['hasMany'][$keyParts[0]])) {
+                                    $cols['hasMany'][$cKeyParts[0]][$prevId]['hasMany'][$keyParts[0]] = [];
                                 }
                             }
-                        }
+ */                     }
                     }
                 }
             }
