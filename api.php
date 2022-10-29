@@ -203,7 +203,7 @@ function getValues($keys, $dataRows) {
     foreach ($keys['ids'] as $idKey) {
         $idColon = strrpos($idKey, ':');
         $idParent = substr($idKey, 0, $idColon);
-        $colsData['ids'][$idKey] = array_column($dataRows, $idKey);
+        $colsData['ids'][$idParent] = array_unique(array_column($dataRows, $idKey));
         foreach ($keys['all'] as $rKey) {
             $colColon = strrpos($rKey, ':');
             $colParent = substr($rKey, 0, $colColon);
@@ -215,6 +215,31 @@ function getValues($keys, $dataRows) {
     return $colsData;
 }
 
+function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joinedCol=[], $splitted = []) {
+
+    $cKeyParts = explode(':', $cKeyPart2, 2);
+    foreach ($allColValues as $cKey => $cList) {
+        if ($cKey == $currentKey) {
+            foreach ($cList as $id => $cVal) {
+                if (!str_contains($cKeyParts[1], ':')) {
+                    $joinedCol[$cKeyParts[0]][$id][$cKeyParts[1]] = $cVal;
+                } else {
+                    $splitted += splitKey($currentKey, $cKeyParts[1], $allColValues, $currentIdList);
+                    foreach($splitted as $sKey => $sVals) {
+                        foreach($sVals as $i => $v) {
+                            $joinedCol[$cKeyParts[0]][$id]['hasMany'][$sKey][$i] = $v;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    return $joinedCol;
+}
+
 function buildQueryResults($data)
 {
     $d = [];
@@ -223,20 +248,32 @@ function buildQueryResults($data)
     foreach ($data as $rowid => $dataRows) {
         $d[$rowid] = [];
         $cols = [];
-        $joinedCol = [];
 
         $colValues = getValues($keys, $dataRows);
 
-        foreach ($colValues['all'] as $cKey => $cList) {
-            foreach($cList as $id => $cVal) {
-                if (!str_contains($cKey, ':')) {
-                    $cols[$cKey] = $cVal;
-                } else {
-                    $cKeyParts = explode(':', $cKey, 2);
-                    if (!str_contains($cKeyParts[1], ':')) {
-                        $joinedCol[$id][$cKeyParts[1]] = $cVal;
+        foreach ($colValues['ids'] as $key => $idList) {
+            foreach ($colValues['all'] as $cKey => $cList) {
+            $splitted = [];
+                $colColon = strrpos($cKey, ':');
+                $colParent = substr($cKey, 0, $colColon);
+                if ($colParent == $key) {
+                    foreach ($cList as $id => $cVal) {
+                        if (!str_contains($cKey, ':')) {
+                            $cols[$cKey] = $cVal;
+                        } else {
+                            $cKeyParts = explode(':', $cKey, 2);
+                            if (!str_contains($cKeyParts[1], ':')) {
+                                $cols['hasMany'][$cKeyParts[0]][$id][$cKeyParts[1]] = $cVal;
+                            } else {
+                                $splitted = splitKey($cKey, $cKeyParts[1], $colValues['all'], $idList);
+                                foreach($splitted as $sKey => $sVals) {
+                                    foreach ($sVals as $i => $v) {
+                                        $cols['hasMany'][$cKeyParts[0]][$id]['hasMany'][$sKey][$i] = $v;
+                                    }
+                                }
+                            }
+                        }
                     }
-                    $cols['hasMany'][$cKeyParts[0]][$id] = $joinedCol[$id];
                 }
             }
         }
