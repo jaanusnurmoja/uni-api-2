@@ -196,32 +196,57 @@ function splitColsBySeparator($col)
 
 function getKeys($data) {
     
+    global $request;
     $keys = [];
+    $fklist = [];
     $keys['all'] = array_keys($data);
     foreach ($keys['all'] as $key) {
         if ($key == 'id' || str_ends_with($key, ':id')) {
             $idKey = $key;
             $keys['ids'][] = $key;
         }
-    }
+        $keyPair = explode(':', $key);
+        if (count($keyPair) == 2) {
+            $structure = getDataStructure($keyPair[0]);
+            if (isset($structure['belongsTo'])) {
+                foreach($structure['belongsTo'] as $table => $fks) {
+                    foreach ($fks as $props) {
+                        $fklist[] = $keyPair[0].':'.$props['fk'];
+                    }
+                }
+            }
+        }
+   }
+   $keys['fks'] = array_unique($fklist);
     return $keys;
 }
 
 function getValues($keys, $dataRows) {
     
     $colsData = [];
-    foreach ($keys['ids'] as $idKey) {
-        $idColon = strrpos($idKey, ':');
-        $idParent = substr($idKey, 0, $idColon);
-        $colsData['ids'][$idParent] = array_unique(array_column($dataRows, $idKey));
+foreach ($keys['ids'] as $idKey) {
+    $idColon = strrpos($idKey, ':');
+    $idParent = substr($idKey, 0, $idColon);
+    $colsData['ids'][$idParent] = array_unique(array_column($dataRows, $idKey));
+
+    foreach ($keys['fks'] as $fKey) {
         foreach ($keys['all'] as $rKey) {
             $colColon = strrpos($rKey, ':');
             $colParent = substr($rKey, 0, $colColon);
+            $keyValue = explode(':', $rKey);
+
             if ($colParent == $idParent) {
-                $colsData['all'][$rKey] = array_column($dataRows, $rKey, $idKey);
+                $ak = array_column($dataRows, $rKey, $fKey);
+                if (count($keyValue) == 1) {
+                    $colsData['all'][$keyValue[0]] = $ak;
+                } else {
+                    $colsData['all'][$keyValue[0]][$keyValue[1]] = $ak;
+                }
             }
         }
     }
+}
+    
     return $colsData;
 }
 
@@ -267,24 +292,19 @@ function buildQueryResults($data)
             $splitted = [];
                 $colParts = explode(':', $cKey, 2);
                 $colField = $colParts[1];
-                    foreach ($cList as $id => $cVal) {
-                        if (!str_contains($cKey, ':')) {
+                    foreach ($cList as $tKey => $cVal) {
+                       if (!is_array($cVal)) {
                             $cols[$cKey] = $cVal;
-                        } else {
-                        if ($colParts[0] == $key) {
-                            $cKeyParts = explode(':', $cKey, 2);
-                            $cTable = $cKeyParts[0];
-                            $relations = getDataWithRelations();
-                            $prevId = $id;
-                            if (isset($relations[$request[1]]['hasMany'][$cTable])) {
-                                $cols['hasMany'][$key][$prevId][$cKeyParts[1]] = $cVal;
-                            } 
-/*                             else {
-                                if (isset($relations($cTable)[$cTable]['hasMany'][$keyParts[0]])) {
-                                    $cols['hasMany'][$cKeyParts[0]][$prevId]['hasMany'][$keyParts[0]] = [];
+                        } 
+                         else {
+                            $relations = getDataStructure($request[1]);
+                            if (isset($relations['hasMany'][$tKey])) {
+                                foreach ($cVal as $field => $value) {
+                                    foreach($colValues['ids'][$tKey] as $id) {
+                                    $cols['hasMany'][$tKey][$id][$field] = $value;
+                                }
                                 }
                             }
- */                     }
                     }
                 }
             }
