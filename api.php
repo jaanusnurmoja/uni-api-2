@@ -250,6 +250,14 @@ function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joine
     return $joinedCol;
 }
 
+function isInHasManyOf($lookup, $table = null) {
+
+    $dataStructure = getDataStructure($table);
+    if (isset($dataStructure['hasMany'][$lookup])) {
+        return true;
+    }
+}
+
 function buildQueryResults($data)
 {
     global $request;
@@ -261,6 +269,7 @@ function buildQueryResults($data)
         $cols = [];
 
         $colValues = getValues($keys, $dataRows);
+                //print_r($colValues['all']);
 
         foreach ($colValues['ids'] as $key => $idList) {
             foreach ($colValues['all'] as $cKey => $cList) {
@@ -268,24 +277,25 @@ function buildQueryResults($data)
                 $colParts = explode(':', $cKey, 2);
                 $colField = $colParts[1];
                     foreach ($cList as $id => $cVal) {
+                        //$cVal = $cList[$id];
+                //print_r($colValues['all'][$colParts[0].':'.$colParts[1]][$id] . ' / ');
+                        $cKeyParts = explode(':', $cKey, 2);
                         if (!str_contains($cKey, ':')) {
                             $cols[$cKey] = $cVal;
                         } else {
-                        if ($colParts[0] == $key) {
-                            $cKeyParts = explode(':', $cKey, 2);
+                        if ($colParts[0] == $key || isInHasManyOf($cKeyParts[0], $key)) {
                             $cTable = $cKeyParts[0];
-                            $relations = getDataWithRelations();
+                            $relations = getDataStructure();
                             $prevId = $id;
-                            if (isset($relations[$request[1]]['hasMany'][$cTable])) {
-                                $cols['hasMany'][$key][$prevId][$cKeyParts[1]] = $cVal;
+                            if (isInHasManyOf($key, $request[1])) {
+                                $cols['hasMany'][$key][$id][$cKeyParts[1]] = $cVal;
                             } 
-/*                             else {
-                                if (isset($relations($cTable)[$cTable]['hasMany'][$keyParts[0]])) {
-                                    $cols['hasMany'][$cKeyParts[0]][$prevId]['hasMany'][$keyParts[0]] = [];
-                                }
+                            if (!empty($key) && !empty($cVal) && isInHasManyOf($cKeyParts[0], $key)) {
+                                $cols['hasMany'][$key][$id]['hasMany'][$cKeyParts[0]] = $request[1] . " alamtabelis $key on olemas alamtabel $cKeyParts[0]";
                             }
- */                     }
+                        } 
                     }
+                    
                 }
             }
         }
@@ -294,6 +304,10 @@ function buildQueryResults($data)
         $d[$rowid] = $cols;
     }
     return $d;
+}
+
+function buildJoinedDataOfResults() {
+    return;
 }
 
 function keySplitter($idKey, $rKey, $i, $value, $arrayCols, $origrKey, $newCol = [])
