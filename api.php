@@ -276,24 +276,22 @@ function buildQueryResults($data)
             $splitted = [];
                 $colParts = explode(':', $cKey, 2);
                 $colField = $colParts[1];
-                    foreach ($cList as $id => $cVal) {
-                        //$cVal = $cList[$id];
-                //print_r($colValues['all'][$colParts[0].':'.$colParts[1]][$id] . ' / ');
                         $cKeyParts = explode(':', $cKey, 2);
+                    foreach ($cList as $id => $cVal) {
                         if (!str_contains($cKey, ':')) {
                             $cols[$cKey] = $cVal;
                         } else {
-                        if ($colParts[0] == $key || isInHasManyOf($cKeyParts[0], $key)) {
-                            $cTable = $cKeyParts[0];
-                            $relations = getDataStructure();
-                            $prevId = $id;
+                        if ($colParts[0] == $key) {
                             if (isInHasManyOf($key, $request[1])) {
-                                $cols['hasMany'][$key][$id][$cKeyParts[1]] = $cVal;
+                                $cols['hasMany'][$key][$id][$cKeyParts[1]] = "$cVal $cKey";
                             } 
-                            if (!empty($key) && !empty($cVal) && isInHasManyOf($cKeyParts[0], $key)) {
-                                $cols['hasMany'][$key][$id]['hasMany'][$cKeyParts[0]] = $request[1] . " alamtabelis $key on olemas alamtabel $cKeyParts[0]";
-                            }
-                        } 
+                        }
+
+                        // vajab muud lahendust
+                        if (!empty($key) && !empty($cVal) && isInHasManyOf($cKeyParts[0], $key) && $cKey == "$cKeyParts[0]:$cKeyParts[1]") {
+                                //$cols['hasMany'][$key][$id]['hasMany'][$cKeyParts[0]][$idVal][$cKeyParts[1]] = $request[1] . " alamtabelis $key on olemas alamtabel $cKeyParts[0] ja väli $cKey";
+                                $cols['hasMany'][$key][$id]['hasMany'][$cKeyParts[0]][][$cKeyParts[1]] = $cVal;
+                        }
                     }
                     
                 }
