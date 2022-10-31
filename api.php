@@ -197,7 +197,7 @@ function splitColsBySeparator($col)
 
 function getKeys($data)
 {
-
+    global $request;
     $keys = [];
     $keys['all'] = array_keys($data);
     foreach ($keys['all'] as $key) {
@@ -205,6 +205,19 @@ function getKeys($data)
             $idKey = $key;
             $keys['ids'][] = $key;
         }
+        $tf = explode(':', $key);
+        $table = !empty($tf[1]) ? $tf[0] : $request[1];
+        $field = !empty($tf[1]) ? $tf[1] : $tf[0];
+        $structure = getDataStructure($table);
+        if (isset($structure['belongsTo'])) {
+            foreach ($structure['belongsTo'] as $parentTable => $paramList) {
+                foreach ($paramList as $params) {
+                if ($field == $params['fk']) {
+                    $keys['fks'][] = $key;
+                }}
+            }
+        }
+
     }
     return $keys;
 }
@@ -215,13 +228,15 @@ function getValues($keys, $dataRows)
     $colsData = [];
     foreach ($keys['ids'] as $idKey) {
         $idColon = strrpos($idKey, ':');
-        $idParent = substr($idKey, 0, $idColon);
-        $colsData['ids'][$idParent] = array_unique(array_column($dataRows, $idKey));
+        $idTable = substr($idKey, 0, $idColon);
+        $colsData['ids'][$idTable] = array_unique(array_column($dataRows, $idKey));
         foreach ($keys['all'] as $rKey) {
             $colColon = strrpos($rKey, ':');
-            $colParent = substr($rKey, 0, $colColon);
-            if ($colParent == $idParent) {
-                $colsData['all'][$rKey] = array_column($dataRows, $rKey, $idKey);
+            $colTable = substr($rKey, 0, $colColon);
+            $colField = substr($rKey, $colColon + 1);
+
+            if ($colTable == $idTable) {
+                $colsData['all'][$colTable][$colField] = array_column($dataRows, $rKey, $idKey);
             }
         }
     }
@@ -273,7 +288,7 @@ function buildQueryResults($data)
         $cols = [];
 
         $colValues = getValues($keys, $dataRows);
-        //print_r($colValues['all']);
+        print_r($keys);
 
         foreach ($colValues['ids'] as $key => $idList) {
             foreach ($colValues['all'] as $cKey => $cList) {
