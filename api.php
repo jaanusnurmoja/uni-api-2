@@ -77,10 +77,10 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     if (empty($table)) {
         $table = $request[1];
     }
-        if (isset($request[2])) {
-            $pkValue = $request[2];
-            $relations[$table]['rowid'] = $pkValue;
-        }
+    if (isset($request[2])) {
+        $pkValue = $request[2];
+        $relations[$table]['rowid'] = $pkValue;
+    }
 
     $thisTableData = $relations[$table];
 
@@ -97,13 +97,14 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     return $d;
 }
 
-function getDataStructure($table = null) {
+function getDataStructure($table = null)
+{
     global $request;
 
     if ($table == null) {
         $table = $request[1];
     }
-    
+
     return getDataWithRelations($table)[$table];
 }
 
@@ -194,12 +195,13 @@ function splitColsBySeparator($col)
 
 }
 
-function getKeys($data) {
-    
+function getKeys($data)
+{
+
     $keys = [];
     $keys['all'] = array_keys($data);
     foreach ($keys['all'] as $key) {
-        if ($key == 'id' || str_ends_with($key, ':id')) {
+        if ($key == 'id' || substr($key, -3) == ':id') {
             $idKey = $key;
             $keys['ids'][] = $key;
         }
@@ -207,8 +209,9 @@ function getKeys($data) {
     return $keys;
 }
 
-function getValues($keys, $dataRows) {
-    
+function getValues($keys, $dataRows)
+{
+
     $colsData = [];
     foreach ($keys['ids'] as $idKey) {
         $idColon = strrpos($idKey, ':');
@@ -225,18 +228,19 @@ function getValues($keys, $dataRows) {
     return $colsData;
 }
 
-function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joinedCol=[], $splitted = []) {
+function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joinedCol = [], $splitted = [])
+{
 
     $cKeyParts = explode(':', $cKeyPart2, 2);
     foreach ($allColValues as $cKey => $cList) {
         if ($cKey == $currentKey) {
             foreach ($cList as $id => $cVal) {
-                if (!str_contains($cKeyParts[1], ':')) {
+                if (!strpos($cKeyParts[1], ':')) {
                     $joinedCol[$cKeyParts[0]][$id][$cKeyParts[1]] = $cVal;
                 } else {
                     $splitted += splitKey($currentKey, $cKeyParts[1], $allColValues, $currentIdList);
-                    foreach($splitted as $sKey => $sVals) {
-                        foreach($sVals as $i => $v) {
+                    foreach ($splitted as $sKey => $sVals) {
+                        foreach ($sVals as $i => $v) {
                             $joinedCol[$cKeyParts[0]][$id]['hasMany'][$sKey][$i] = $v;
                         }
                     }
@@ -246,11 +250,11 @@ function splitKey($currentKey, $cKeyPart2, $allColValues, $currentIdList, $joine
         }
     }
 
-
     return $joinedCol;
 }
 
-function isInHasManyOf($lookup, $table = null) {
+function isInHasManyOf($lookup, $table = null)
+{
 
     $dataStructure = getDataStructure($table);
     if (isset($dataStructure['hasMany'][$lookup])) {
@@ -263,50 +267,50 @@ function buildQueryResults($data)
     global $request;
     $d = [];
     $keys = getKeys($data[1][0]);
- 
+
     foreach ($data as $rowid => $dataRows) {
         $d[$rowid] = [];
         $cols = [];
 
         $colValues = getValues($keys, $dataRows);
-                //print_r($colValues['all']);
+        //print_r($colValues['all']);
 
         foreach ($colValues['ids'] as $key => $idList) {
             foreach ($colValues['all'] as $cKey => $cList) {
-            $splitted = [];
+                $splitted = [];
                 $colParts = explode(':', $cKey, 2);
                 $colField = $colParts[1];
-                    foreach ($cList as $id => $cVal) {
-                        //$cVal = $cList[$id];
-                //print_r($colValues['all'][$colParts[0].':'.$colParts[1]][$id] . ' / ');
-                        $cKeyParts = explode(':', $cKey, 2);
-                        if (!str_contains($cKey, ':')) {
-                            $cols[$cKey] = $cVal;
-                        } else {
+                foreach ($cList as $id => $cVal) {
+                    //$cVal = $cList[$id];
+                    //print_r($colValues['all'][$colParts[0].':'.$colParts[1]][$id] . ' / ');
+                    $cKeyParts = explode(':', $cKey, 2);
+                    if (!strpos($cKey, ':')) {
+                        $cols[$cKey] = $cVal;
+                    } else {
                         if ($colParts[0] == $key || isInHasManyOf($cKeyParts[0], $key)) {
                             $cTable = $cKeyParts[0];
                             $relations = getDataStructure();
                             $prevId = $id;
                             if (isInHasManyOf($key, $request[1])) {
                                 $cols['hasMany'][$key][$id][$cKeyParts[1]] = $cVal;
-                            } 
+                            }
                             if (!empty($key) && !empty($cVal) && isInHasManyOf($cKeyParts[0], $key)) {
                                 $cols['hasMany'][$key][$id]['hasMany'][$cKeyParts[0]] = $request[1] . " alamtabelis $key on olemas alamtabel $cKeyParts[0]";
                             }
-                        } 
+                        }
                     }
-                    
+
                 }
             }
         }
-       
 
         $d[$rowid] = $cols;
     }
     return $d;
 }
 
-function buildJoinedDataOfResults() {
+function buildJoinedDataOfResults()
+{
     return;
 }
 
@@ -314,16 +318,15 @@ function keySplitter($idKey, $rKey, $i, $value, $arrayCols, $origrKey, $newCol =
 {
     $rKeyParts = explode(':', $rKey, 2);
     $idKeyParts = explode(':', $idKey, 2);
-        foreach ($arrayCols[$origrKey] as $origVal) {
-            foreach ($origVal as $key => $v) {
-    if (!strpos($rKeyParts[1],':')) {
-        $newCol[$rKeyParts[0]][$key][$rKeyParts[1]] = $value;
+    foreach ($arrayCols[$origrKey] as $origVal) {
+        foreach ($origVal as $key => $v) {
+            if (!strpos($rKeyParts[1], ':')) {
+                $newCol[$rKeyParts[0]][$key][$rKeyParts[1]] = $value;
+            } else {
+                $newCol[$rKeyParts[0]][$key]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $idKeyParts[0], $key, $origVal, $arrayCols, $origrKey);
+            }}
     }
-    else {
-        $newCol[$rKeyParts[0]][$key]['hasMany'] = keySplitter($idKeyParts[1], $rKeyParts[1], $idKeyParts[0], $key, $origVal, $arrayCols, $origrKey);
-    }}
-    }
-    
+
 // kuidas näidata seotud alamridu?
 
     return $newCol;
