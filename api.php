@@ -361,9 +361,8 @@ function buildQueryResults($data)
         }
         //print_r(array_merge_recursive(...$dataRows));
         foreach ($keys['fks'] as $fKey) {
-            $tfkeys = keySplitter($fKey);
-            $tbl = $tfkeys['table'];
-            $idKey = null;
+            $fkSubKeys = keySplitter($fKey);
+            $tbl = $fkSubKeys['table'];
             if (isInHasManyOf($tbl, $request[1])) {
                 foreach ($keys['ids'] as $idKeyFromArray) {
                     $idSubKeys = keySplitter($idKeyFromArray);
@@ -374,8 +373,6 @@ function buildQueryResults($data)
                                 if (!startsWith($initialKey, $tbl . ':')) {
                                     unset($row[$initialKey]);
                                 } else {
-                                    $fkValue = null;
-                                    $pkValue = null;
                                     $normalKey = str_replace($tbl . ':', '', $initialKey);
                                     $row['data'][$normalKey] = $value;
                                     if (in_array($initialKey, $keys['ids'])) {
@@ -409,75 +406,6 @@ function buildQueryResults($data)
         }
 
         $d[$rowid]['hasMany'] = $dataRows[$rowid]['hasMany'];
-/*         foreach ($dataRows as $row) {
-$newRow = array_filter(
-$row, function ($key) {
-return !strpos($key, ':');
-},
-ARRAY_FILTER_USE_KEY
-);
-$d[$rowid] = $newRow;
-
-$other[] = array_filter(
-$row, function ($key) {
-global $request;
-if (strpos($key, ':')) {
-$tf = explode(':', $key);
-return !isInHasManyOf($tf[0], $request[1]);
-}
-},
-ARRAY_FILTER_USE_KEY
-);
-foreach ($keys['fks'] as $fKey) {
-$tfkeys = keySplitter($fKey);
-$tbl = $tfkeys['table'];
-$relatedInitial = array_filter(
-$row, function ($key) {
-$tf = keySplitter($key);
-global $request;
-return isInHasManyOf($tf['table'], $request[1]);
-
-},
-ARRAY_FILTER_USE_KEY
-);
-foreach ($relatedInitial as $initialKey => $value) {
-if (!startsWith($initialKey, $tbl . ':')) {
-unset($relatedInitial[$initialKey]);
-} else {
-$fkValue = null;
-$pkValue = null;
-$normalKey = str_replace($tbl . ':', '', $initialKey);
-$relatedInitial['data'][$normalKey] = $value;
-if (in_array($initialKey, $keys['ids'])) {
-$relatedInitial['pk']['name'] = $normalKey;
-$relatedInitial['pk']['value'] = $value;
-}
-if (in_array($initialKey, $keys['fks'])) {
-$fkValue = $value;
-$belongsTo = getTablesThisBelongsTo($tbl);
-foreach ($belongsTo as $params) {
-if ($params['fkWithParams']['fk'] == $normalKey) {
-$fk['fk'] = $normalKey;
-$fk['value'] = $value;
-$relatedInitial['belongsTo'][$request[1]][] = $fk;
-
-}
-}
-}
-unset($relatedInitial[$initialKey]);
-//$d[$fkValue]['hasmany'][$tbl][$pkValue] = $relatedInitial;
-
-}
-}
-foreach ($relatedInitial['belongsTo'][$request[1]] as $fk) {
-if (isInHasManyOf($tbl, $request[1])) {
-//$d[$fk['value']]['hasMany'][$tbl][$relatedInitial['pk']['value']] = $relatedInitial;
-}
-}
-
-}
-}
- */
     }
 
     return $d;
