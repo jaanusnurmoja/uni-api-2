@@ -379,10 +379,10 @@ function buildQueryResults($data)
                         );
                     }
                 }
+                $d[$rowid]['hasMany'][$tbl] = $hasMany[$rowid]['hasMany'][$tbl];
             }
         }
 
-        $d[$rowid]['hasMany'] = $hasMany[$rowid]['hasMany'];
     }
 
     return $d;
@@ -394,14 +394,15 @@ function buildJoinedDataOfResults(
     $currentTable,
     $fKeyFromArray,
     $idKeyFromArray,
-    $keys
+    $keys,
+    $d = []
 ) {
     foreach ($dataRows as $row) {
         foreach ($row as $initialKey => $value) {
-            if (!startsWith($initialKey, $tbl . ':')) {
+            if (!startsWith($initialKey, $currentTable . ':')) {
                 unset($row[$initialKey]);
             } else {
-                $normalKey = str_replace($tbl . ':', '', $initialKey);
+                $normalKey = str_replace($currentTable . ':', '', $initialKey);
                 $row['data'][$normalKey] = $value;
                 if (in_array($initialKey, $keys['ids'])) {
                     $row['pk']['name'] = $normalKey;
@@ -409,12 +410,12 @@ function buildJoinedDataOfResults(
                 }
                 if (in_array($initialKey, $keys['fks'])) {
                     $fkValue = $value;
-                    $belongsTo = getTablesThisBelongsTo($tbl);
+                    $belongsTo = getTablesThisBelongsTo($currentTable);
                     foreach ($belongsTo as $params) {
                         if ($params['fkWithParams']['fk'] == $normalKey) {
                             $fk['fk'] = $normalKey;
                             $fk['value'] = $value;
-                            $row['belongsTo'][$request[1]][] = $fk;
+                            $row['belongsTo'][$parentTable][] = $fk;
 
                         }
                     }
@@ -426,8 +427,9 @@ function buildJoinedDataOfResults(
         $rowfiltered = array_filter($row, function ($key) {
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
-        $dataRows[$row[$fKey]]['hasMany'][$tbl][$row['pk']['value']] = $rowfiltered;
+        $d[$row[$fKeyFromArray]]['hasMany'][$currentTable][$row['pk']['value']] = $rowfiltered;
     }
+    return $d;
 }
 
 function keySplitter($key)
