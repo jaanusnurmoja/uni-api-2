@@ -348,6 +348,7 @@ function buildQueryResults($data)
     $d = [];
     $keys = getKeys($data[1][0]);
     $related = [];
+    $hasMany = [];
     foreach ($data as $rowid => $dataRows) {
         $newItem = [];
         foreach ($dataRows as $row) {
@@ -360,60 +361,73 @@ function buildQueryResults($data)
             $d[$rowid] = $newRow;
         }
         //print_r(array_merge_recursive(...$dataRows));
-        foreach ($keys['fks'] as $fKey) {
-            $fkSubKeys = keySplitter($fKey);
+        foreach ($keys['fks'] as $fKeyFromArray) {
+            $fkSubKeys = keySplitter($fKeyFromArray);
             $tbl = $fkSubKeys['table'];
             if (isInHasManyOf($tbl, $request[1])) {
                 foreach ($keys['ids'] as $idKeyFromArray) {
                     $idSubKeys = keySplitter($idKeyFromArray);
                     if ($idSubKeys['table'] == $tbl) {
                         $idKey = $idSubKeys['field'];
-                        foreach ($dataRows as $row) {
-                            foreach ($row as $initialKey => $value) {
-                                if (!startsWith($initialKey, $tbl . ':')) {
-                                    unset($row[$initialKey]);
-                                } else {
-                                    $normalKey = str_replace($tbl . ':', '', $initialKey);
-                                    $row['data'][$normalKey] = $value;
-                                    if (in_array($initialKey, $keys['ids'])) {
-                                        $row['pk']['name'] = $normalKey;
-                                        $row['pk']['value'] = $value;
-                                    }
-                                    if (in_array($initialKey, $keys['fks'])) {
-                                        $fkValue = $value;
-                                        $belongsTo = getTablesThisBelongsTo($tbl);
-                                        foreach ($belongsTo as $params) {
-                                            if ($params['fkWithParams']['fk'] == $normalKey) {
-                                                $fk['fk'] = $normalKey;
-                                                $fk['value'] = $value;
-                                                $row['belongsTo'][$request[1]][] = $fk;
-
-                                            }
-                                        }
-                                    }
-                                    //$d[$fkValue]['hasmany'][$tbl][$pkValue] = $relatedInitial;
-
-                                }
-                            }
-                            $rowfiltered = array_filter($row, function ($key) {
-                                return !strpos($key, ':');
-                            }, ARRAY_FILTER_USE_KEY);
-                            $dataRows[$row[$fKey]]['hasMany'][$tbl][$row['pk']['value']] = $rowfiltered;
-                        }
+                        $hasMany = buildJoinedDataOfResults(
+                            $dataRows,
+                            $request[1],
+                            $tbl,
+                            $fKeyFromArray,
+                            $idKeyFromArray,
+                            $keys
+                        );
                     }
                 }
             }
         }
 
-        $d[$rowid]['hasMany'] = $dataRows[$rowid]['hasMany'];
+        $d[$rowid]['hasMany'] = $hasMany[$rowid]['hasMany'];
     }
 
     return $d;
 }
 
-function buildJoinedDataOfResults()
-{
-    return;
+function buildJoinedDataOfResults(
+    $dataRows,
+    $parentTable,
+    $currentTable,
+    $fKeyFromArray,
+    $idKeyFromArray,
+    $keys
+) {
+    foreach ($dataRows as $row) {
+        foreach ($row as $initialKey => $value) {
+            if (!startsWith($initialKey, $tbl . ':')) {
+                unset($row[$initialKey]);
+            } else {
+                $normalKey = str_replace($tbl . ':', '', $initialKey);
+                $row['data'][$normalKey] = $value;
+                if (in_array($initialKey, $keys['ids'])) {
+                    $row['pk']['name'] = $normalKey;
+                    $row['pk']['value'] = $value;
+                }
+                if (in_array($initialKey, $keys['fks'])) {
+                    $fkValue = $value;
+                    $belongsTo = getTablesThisBelongsTo($tbl);
+                    foreach ($belongsTo as $params) {
+                        if ($params['fkWithParams']['fk'] == $normalKey) {
+                            $fk['fk'] = $normalKey;
+                            $fk['value'] = $value;
+                            $row['belongsTo'][$request[1]][] = $fk;
+
+                        }
+                    }
+                }
+                //$d[$fkValue]['hasmany'][$tbl][$pkValue] = $relatedInitial;
+
+            }
+        }
+        $rowfiltered = array_filter($row, function ($key) {
+            return !strpos($key, ':');
+        }, ARRAY_FILTER_USE_KEY);
+        $dataRows[$row[$fKey]]['hasMany'][$tbl][$row['pk']['value']] = $rowfiltered;
+    }
 }
 
 function keySplitter($key)
