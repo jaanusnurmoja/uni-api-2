@@ -239,14 +239,22 @@ function doesTableBelongsTo($lookup, $table = null)
     }
 }
 
-function getTablesThisBelongsTo($table = null)
+function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 {
     $dataStructure = getDataStructure($table);
     if (isset($dataStructure['belongsTo'])) {
         foreach ($dataStructure['belongsTo'] as $parentTable => $fks) {
             foreach ($fks as $i => $fkWithParams) {
-                $belongsTo[$i]['table'] = $parentTable;
-                $belongsTo[$i]['fkWithParams'] = $fkWithParams;
+                if ($check == 'check') {
+                    if ($fkWithParams['fk'] == $field) {
+                        $belongsTo[$field]['ppk'] = $fkWithParams['ppk'];
+                        $belongsTo[$field]['table'] = $parentTable;
+                    }
+                } else {
+                    $belongsTo[$i]['table'] = $parentTable;
+                    $belongsTo[$i]['fkWithParams'] = $fkWithParams;
+                }
+
             }
         }
         return $belongsTo;
@@ -268,7 +276,25 @@ function startsWith($haystack, $needle)
 
 function reorganize($table, $item)
 {
-
+    $newItem = array();
+    $structure = getDataStructure($table);
+    foreach ($item as $key => $value) {
+        if ($key == $structure['pk']) {
+            $newItem['pk']['name'] = $key;
+            $newItem['pk']['value'] = $value;
+        } elseif ($key == 'rowid') {
+            $newItem[$key] = $value;
+        } else {
+            $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
+            if (!empty($belongsTo)) {
+                $belongsTo[$key]['value'] = $value;
+                $newItem['belongsTo'][$key] = $belongsTo[$key];
+            } else {
+                $newItem[$key] = $value;
+            }
+        }
+    }
+    return $newItem;
 }
 function buildQueryResults($data)
 {
@@ -284,7 +310,7 @@ function buildQueryResults($data)
                 },
                 ARRAY_FILTER_USE_KEY
             );
-            $d[$rowid] = $newRow;
+            $d[$rowid] = reorganize($request[1], $newRow);
         }
         //print_r(array_merge_recursive(...$dataRows));
         foreach ($keys['fks'] as $fKeyFromArray) {
