@@ -3,11 +3,11 @@
     "pk": "id",
     "data": {},
     "belongsTo": {
-      "producers": [
+      "producers_id": [
         {
           "parentKey": "id",
           "label": "name",
-          "fk": "producers_id"
+          "table": "producers"
         }
       ]
     }
@@ -16,11 +16,11 @@
     "pk": "id",
     "data": {},
     "belongsTo": {
-      "orchestras": [
+      "orchestraId": [
         {
           "parentKey": "id",
           "label": "name",
-          "fk": "orchestraId"
+          "table": "orchestras"
         }
       ]
     }
@@ -37,11 +37,11 @@
     "pk": "id",
     "data": {},
     "belongsTo": {
-      "orchestras": [
+      "orchestraId": [
         {
           "parentKey": "id",
           "label": "name",
-          "fk": "orchestraId"
+          "table": "orchestras"
         }
       ]
     }
@@ -50,11 +50,11 @@
     "pk": "id",
     "data": {},
     "belongsTo": {
-      "instruments": [
+      "instruments_id": [
         {
           "parentKey": "id",
           "label": "type",
-          "fk": "instruments_id"
+          "table": "instruments"
         }
       ]
     }
