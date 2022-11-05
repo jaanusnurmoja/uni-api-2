@@ -122,6 +122,7 @@ function getColumns($table, $parent = null)
         while ($column = $result->fetch_assoc()) {
             $cols->list[] = "`$table`.`{$column['Field']}`";
             $cols->withAlias[] = "`$table`.`{$column['Field']}` AS `$alias{$column['Field']}`";
+            $cols->aliasOnly[] = "$alias{$column['Field']}";
         }
     }
     return $cols;
@@ -247,7 +248,7 @@ function getTablesThisBelongsTo($table = null, $field = null, $check = null)
             foreach ($fks as $i => $fkWithParams) {
                 if ($check == 'check') {
                     if ($fkWithParams['fk'] == $field) {
-                        $belongsTo[$field]['ppk'] = $fkWithParams['ppk'];
+                        $belongsTo[$field]['parentKey'] = $fkWithParams['parentKey'];
                         $belongsTo[$field]['table'] = $parentTable;
                     }
                 } else {
