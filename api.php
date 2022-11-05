@@ -89,10 +89,14 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     $r = [];
 
     foreach ($relations as $rtbl => $relation) {
-        if (isset($relation['belongsTo'][$table])) {
-            //$childTableData = $relations[$rtbl];
-            $r = getDataWithRelations($rtbl, null, $pkValue);
-            $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
+        if (isset($relation['belongsTo'])) {
+            foreach ($relation['belongsTo'] as $fkField => $params) {
+                //$childTableData = $relations[$rtbl];
+                if ($params['table'] == $table) {
+                    $r = getDataWithRelations($rtbl, null, $pkValue);
+                    $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
+                }
+            }
         }
     }
     $d[$table] = $thisTableData;
@@ -173,10 +177,13 @@ $sql .= "WHERE `$table`.`{$tableData['pk']}` = {$tableData['rowid']}";
 
 function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = null)
 {
-    foreach ($joinTableData['belongsTo'][$table] as $join) {
-        $sql .= "LEFT JOIN `$joinTable` ON
-        `$joinTable`.`{$join['fk']}` = `$table`.`{$tableData['pk']}`
+    if (isset($joinTableData['belongsTo'])) {
+        foreach ($joinTableData['belongsTo'] as $fkField => $params) {
+            $sql .= "LEFT JOIN `$joinTable` ON
+        `$joinTable`.`$fkField` = `$table`.`{$tableData['pk']}`
         ";
+        }
+
     }
     if (isset($joinTableData['hasMany'])) {
         foreach ($joinTableData['hasMany'] as $nextTable => $nextTableData) {
@@ -210,11 +217,9 @@ function getKeys($data)
         $field = !empty($tf[1]) ? $tf[1] : $tf[0];
         $structure = getDataStructure($table);
         if (isset($structure['belongsTo'])) {
-            foreach ($structure['belongsTo'] as $parentTable => $paramList) {
-                foreach ($paramList as $params) {
-                    if ($field == $params['fk']) {
-                        $keys['fks'][] = $key;
-                    }
+            foreach ($structure['belongsTo'] as $fkField => $paramList) {
+                if ($field == $fkField) {
+                    $keys['fks'][] = $key;
                 }
             }
         }
@@ -235,8 +240,14 @@ function isInHasManyOf($lookup, $table = null)
 function doesTableBelongsTo($lookup, $table = null)
 {
     $dataStructure = getDataStructure($table);
-    if (isset($dataStructure['belongsTo'][$lookup])) {
-        return true;
+    if (isset($dataStructure['belongsTo'])) {
+        foreach ($dataStructure['belongsTo'] as $fkField => $params) {
+            if ($params['table'] == $lookup) {
+                return true;
+            }
+
+        }
+
     }
 }
 
@@ -244,19 +255,16 @@ function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 {
     $dataStructure = getDataStructure($table);
     if (isset($dataStructure['belongsTo'])) {
-        foreach ($dataStructure['belongsTo'] as $parentTable => $fks) {
-            foreach ($fks as $i => $fkWithParams) {
-                if ($check == 'check') {
-                    if ($fkWithParams['fk'] == $field) {
-                        $belongsTo[$field]['parentKey'] = $fkWithParams['parentKey'];
-                        $belongsTo[$field]['table'] = $parentTable;
-                    }
-                } else {
-                    $belongsTo[$i]['table'] = $parentTable;
-                    $belongsTo[$i]['fkWithParams'] = $fkWithParams;
+        foreach ($dataStructure['belongsTo'] as $fkField => $params) {
+            if ($check == 'check') {
+                if ($fkField == $field) {
+                    $belongsTo[$field]['parentKey'] = $params['parentKey'];
+                    $belongsTo[$field]['table'] = $params['table'];
                 }
-
+            } else {
+                $belongsTo[] = $params['table'];
             }
+
         }
         return $belongsTo;
     }
