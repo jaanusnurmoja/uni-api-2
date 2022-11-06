@@ -145,6 +145,7 @@ function getJoinColumns($table, $tableData, $parent, $cols = '')
     }
     return $cols;
 }
+
 function buildQuery($rowid = null)
 {
     foreach (getDataWithRelations() as $table => $tableData) {
@@ -297,24 +298,28 @@ function startsWith($haystack, $needle)
     return substr($haystack, 0, $length) == $needle;
 }
 
-function reorganize($table, $item)
+function reorganize($table, $item, $forBelongsTo = false)
 {
     $newItem = array();
     $structure = getDataStructure($table);
     foreach ($item as $key => $value) {
-        if ($key == $structure['pk']) {
-            $newItem['pk']['name'] = $key;
-            $newItem['pk']['value'] = $value;
-        } elseif ($key == 'rowid') {
-            $newItem[$key] = $value;
+        if ($forBelongsTo === true) {
+             $newItem[$key] = $value;           
         } else {
-            $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
-            if (!empty($belongsTo)) {
-                $belongsTo[$key]['value'] = $value;
-                $belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item)['data'];
-                $newItem['belongsTo'][$key] = $belongsTo[$key];
+            if ($key == $structure['pk']) {
+                $newItem['pk']['name'] = $key;
+                $newItem['pk']['value'] = $value;
+            } elseif ($key == 'rowid') {
+                $newItem[$key] = $value;
             } else {
-                $newItem['data'][$key] = $value;
+                $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
+                if (!empty($belongsTo)) {
+                    $belongsTo[$key]['value'] = $value;
+                    $belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item, true);
+                    $newItem['belongsTo'][$key] = $belongsTo[$key];
+                } else {
+                    $newItem['data'][$key] = $value;
+                }
             }
         }
     }
