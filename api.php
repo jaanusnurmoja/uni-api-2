@@ -228,6 +228,16 @@ function getKeys($data)
     return $keys;
 }
 
+function getPk($table, $data)
+{
+    $keys = getKeys($data);
+    foreach ($keys['ids'] as $id) {
+        if (keySplitter($id)['table'] == $table) {
+            return $id;
+        }
+    }
+}
+
 function isInHasManyOf($lookup, $table = null)
 {
 
