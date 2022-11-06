@@ -127,6 +127,15 @@ function getColumns($table, $parent = null)
 function getJoinColumns($table, $tableData, $parent, $cols = '')
 {
     $cols .= implode(', ', getColumns($table, $parent)->withAlias);
+    // esialgu ei anna mingit nähtavat tulemust, kuigi lisab päringusse vajalikke välju
+    if (isset($tableData['belongsTo'])) {
+        foreach ($tableData['belongsTo'] as $fk => $d) {
+            $newParent = $d['table'];
+            $cols .= ', ';
+            $cols .= getJoinColumns($d['table'], $d['data'], $newParent);
+        }
+    }
+    // muudatuse lõpp
     if (isset($tableData['hasMany'])) {
         foreach ($tableData['hasMany'] as $t => $d) {
             $newParent = $t;
@@ -302,9 +311,10 @@ function reorganize($table, $item)
             $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
             if (!empty($belongsTo)) {
                 $belongsTo[$key]['value'] = $value;
+                $belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item)['data'];
                 $newItem['belongsTo'][$key] = $belongsTo[$key];
             } else {
-                $newItem[$key] = $value;
+                $newItem['data'][$key] = $value;
             }
         }
     }
