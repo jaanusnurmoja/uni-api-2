@@ -347,20 +347,16 @@ function buildQueryResults($data)
             $fkSubKeys = keySplitter($fKeyFromArray);
             $tbl = $fkSubKeys['table'];
             if (isInHasManyOf($tbl, $request[1])) {
-                foreach ($keys['ids'] as $idKeyFromArray) {
-                    $idSubKeys = keySplitter($idKeyFromArray);
-                    if ($idSubKeys['table'] == $tbl) {
-                        $idKey = $idSubKeys['field'];
-                        $hasMany = buildJoinedDataOfResults(
-                            $dataRows,
-                            $request[1],
-                            $tbl,
-                            $fKeyFromArray,
-                            $idKeyFromArray,
-                            $keys
-                        );
-                    }
-                }
+                $idKey = getPk($tbl);
+                $idKeyFromArray = $idKey['alias'];
+                $hasMany = buildJoinedDataOfResults(
+                    $dataRows,
+                    $request[1],
+                    $tbl,
+                    $fKeyFromArray,
+                    $idKeyFromArray,
+                    $keys
+                );
                 if (!empty($hasMany[$rowid]['hasMany'][$tbl])) {
                     $d[$rowid]['hasMany'][$tbl] = $hasMany[$rowid]['hasMany'][$tbl];
                 }
@@ -401,20 +397,16 @@ function buildJoinedDataOfResults(
             $fkSubKeys = keySplitter($newFKeyFromArray);
             $tbl = $fkSubKeys['table'];
             if (isInHasManyOf($tbl, $currentTable)) {
-                foreach ($keys['ids'] as $newIdKeyFromArray) {
-                    $idSubKeys = keySplitter($newIdKeyFromArray);
-                    if ($idSubKeys['table'] == $tbl) {
-                        $idKey = $idSubKeys['field'];
-                        $newHasMany = buildJoinedDataOfResults(
-                            $dataRows,
-                            $currentTable,
-                            $tbl,
-                            $newFKeyFromArray,
-                            $newIdKeyFromArray,
-                            $keys
-                        );
-                    }
-                }
+                $idKey = getPk($tbl);
+                $newIdKeyFromArray = $idKey['alias'];
+                $newHasMany = buildJoinedDataOfResults(
+                    $dataRows,
+                    $currentTable,
+                    $tbl,
+                    $newFKeyFromArray,
+                    $newIdKeyFromArray,
+                    $keys
+                );
                 $rowFiltered['hasMany'][$tbl] = $newHasMany[$row[$idKeyFromArray]]['hasMany'][$tbl];
             }
         }
