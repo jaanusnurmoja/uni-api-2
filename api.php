@@ -120,6 +120,7 @@ function getColumns($table, $parent = null)
     $cols = new stdClass();
     $cols->list = [];
     $cols->withAlias = [];
+    $cols->pk = [];
     $alias = $parent ? "$parent:" : '';
     $sql = "SHOW COLUMNS FROM `$table`";
     if ($result = $link->query($sql)) {
@@ -127,6 +128,11 @@ function getColumns($table, $parent = null)
             $cols->list[] = "`$table`.`{$column['Field']}`";
             $cols->withAlias[] = "`$table`.`{$column['Field']}` AS `$alias{$column['Field']}`";
             $cols->aliasOnly[] = "$alias{$column['Field']}";
+            if ($column['Key'] == 'PRI') {
+                $cols->pk['name'] = $column['Field'];
+                $cols->pk['fullName'] = "$table{$column['Field']}";
+                $cols->pk['alias'] = "$alias{$column['Field']}";
+            }
         }
     }
     return $cols;
@@ -228,13 +234,18 @@ function getKeys($data)
     return $keys;
 }
 
-function getPk($table, $data)
+function getPk($table, $data = null)
 {
-    $keys = getKeys($data);
-    foreach ($keys['ids'] as $id) {
-        if (keySplitter($id)['table'] == $table) {
-            return $id;
+    if ($data) {
+        $keys = getKeys($data);
+        foreach ($keys['ids'] as $id) {
+            if (keySplitter($id)['table'] == $table) {
+                return $id;
+            }
         }
+    } else {
+        $keys = getColumns($table);
+        return $keys->pk;
     }
 }
 
