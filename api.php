@@ -351,7 +351,6 @@ function buildQueryResults($data)
                 $idKeyFromArray = $idKey['alias'];
                 $hasMany = buildJoinedDataOfResults(
                     $dataRows,
-                    $request[1],
                     $tbl,
                     $fKeyFromArray,
                     $idKeyFromArray,
@@ -371,7 +370,6 @@ function buildQueryResults($data)
 
 function buildJoinedDataOfResults(
     $dataRows,
-    $parentTable,
     $currentTable,
     $fKeyFromArray,
     $idKeyFromArray,
@@ -401,7 +399,6 @@ function buildJoinedDataOfResults(
                 $newIdKeyFromArray = $idKey['alias'];
                 $newHasMany = buildJoinedDataOfResults(
                     $dataRows,
-                    $currentTable,
                     $tbl,
                     $newFKeyFromArray,
                     $newIdKeyFromArray,
