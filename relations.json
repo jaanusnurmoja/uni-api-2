@@ -10,6 +10,25 @@
       }
     }
   },
+  "events": {
+    "pk": "id",
+    "data": {}
+  },
+  "events_beers": {
+    "pk": "id",
+    "belongsTo": {
+      "events_id": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "events"
+      },
+      "beers_id": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "beers"
+      }
+    }
+  },
   "instruments": {
     "pk": "id",
     "data": {},

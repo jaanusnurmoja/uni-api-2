@@ -28,24 +28,73 @@
         "type": "String",
         "length": 32
       }
+    },
+    "orchestras": {
+      "name": {
+        "type": "String",
+        "length": 32
+      }
+    },
+    "instruments": {
+      "type": {
+        "type": "String",
+        "length": 32
+      }
+    },
+    "conductors": {
+      "name": {
+        "type": "String",
+        "length": 32
+      }
+    },
+    "players": {
+      "name": {
+        "type": "String",
+        "length": 32
+      }
     }
   },
   "relations": {
     "beers": {
-      "hasOne": ["producers"],
-      "hasMany": ["events"]
+      "hasOne": [
+        "producers"
+      ],
+      "hasMany": [
+        "events"
+      ]
     },
     "producers": {
       "hasOne": [],
-      "hasMany": ["beers"]
+      "hasMany": [
+        "beers"
+      ]
     },
     "events": {
       "hasOne": [],
-      "hasMany": ["beers"]
+      "hasMany": [
+        "beers"
+      ]
     },
     "orchestras": {
       "hasOne": [],
-      "hasMany": ["instruments"]
+      "hasMany": [
+        "instruments",
+        "conductors"
+      ]
+    },
+    "instruments": {
+      "hasOne": [
+        "orchestras"
+      ],
+      "hasMany": [
+        "players"
+      ]
+    },
+    "players": {
+      "hasOne": [
+        "instruments"
+      ],
+      "hasMany": []
     }
   }
 }

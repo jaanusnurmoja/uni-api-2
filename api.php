@@ -9,10 +9,6 @@ require_once 'config.php';
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
 $request = explode('/', $_SERVER['PATH_INFO']);
-function getRequest()
-{
-    return explode('/', $_SERVER['PATH_INFO']);
-}
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -67,7 +63,6 @@ function getRelations()
     return json_decode(file_get_contents('relations.json'), true);
 }
 
-// var_dump($request);
 function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
 {
     $d = [];
@@ -77,21 +72,12 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     if (empty($table)) {
         $table = $request[1];
     }
-    // vajadus on küsitav
-    /*
-    if (isset($request[2])) {
-    $pkValue = $request[2];
-    $relations[$table]['rowid'] = $pkValue;
-    }
-     */
     $thisTableData = $relations[$table];
-
     $r = [];
 
     foreach ($relations as $rtbl => $relation) {
         if (isset($relation['belongsTo'])) {
             foreach ($relation['belongsTo'] as $fkField => $params) {
-                //$childTableData = $relations[$rtbl];
                 if ($params['table'] == $table) {
                     $r = getDataWithRelations($rtbl, null, $pkValue);
                     $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
@@ -168,11 +154,6 @@ function buildQuery($rowid = null)
                 $sql .= buildQueryJoins($joinTable, $joinTableData, $table, $tableData);
             }
         }
-/*
-if (isset($tableData['rowid'])) {
-$sql .= "WHERE `$table`.`{$tableData['pk']}` = {$tableData['rowid']}";
-}
- */
         if (!empty($rowid)) {
             $sql .= "WHERE `$table`.`{$tableData['pk']}` = $rowid";
         }
@@ -185,9 +166,20 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = 
 {
     if (isset($joinTableData['belongsTo'])) {
         foreach ($joinTableData['belongsTo'] as $fkField => $params) {
-            $sql .= "LEFT JOIN `$joinTable` ON
-        `$joinTable`.`$fkField` = `$table`.`{$tableData['pk']}`
+            if ($params['table'] == $table) {
+                $sql .= "LEFT JOIN `$joinTable` ON
+                `$joinTable`.`$fkField` = `$table`.`{$tableData['pk']}`
         ";
+            }
+        }
+        foreach ($joinTableData['belongsTo'] as $fkField => $params) {
+            if ($params['table'] != $table) {
+                 $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
+                `{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
+                ";
+               
+            }
+
         }
 
     }
@@ -200,14 +192,6 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = 
     return $sql;
 }
 
-function setKeysByDataStructure($keys, $table = null)
-{
-    global $request;
-    if (!$table) {
-        $table = $request[1];
-    }
-
-}
 function getKeys($data)
 {
     global $request;
@@ -332,6 +316,7 @@ function buildQueryResults($data)
     $d = [];
     $keys = getKeys(min($data)[0]);
     $hasMany = [];
+
     foreach ($data as $rowid => $dataRows) {
         foreach ($dataRows as $row) {
             $newRow = array_filter(
