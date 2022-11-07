@@ -74,7 +74,37 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     }
     $thisTableData = $relations[$table];
     $r = [];
+    $hmabt = [];
 
+    if (isset($thisTableData['hasManyAndBelongsTo'])) {
+        foreach ($thisTableData['hasManyAndBelongsTo'] as $key => $hmabtTable) {
+            $hmabt['xref']['table'] = 'crossref';
+            $hmabt['xref']['field'] = 'table_value';
+            if (isset($relations[$hmabtTable]['hasManyAndBelongsTo'])) {
+                foreach ($relations[$hmabtTable]['hasManyAndBelongsTo'] as $hmabtElsewhere) {
+                    if ($hmabtElsewhere == $table) {
+                        foreach ($relations['crossref'] as $crossref) {
+                            if (isset($crossref[$table], $crossref[$hmabtTable])) {
+                                $hmabt['this']['table'] = $table;
+                                $hmabt['this']['pk'] = getPk($table);
+                                $hmabt['other']['table'] = $hmabtTable;
+                                $hmabt['other']['pk'] = getPk($hmabtTable);
+                                $thisTableData['hasManyAndBelongsTo'][$key] = $hmabt;
+                            }
+                        }
+
+                    }
+                }
+            } else {
+                $hmabt['xref']['alias'] = $hmabtTable['alias'];
+                foreach ($relations['crossref'] as $crossref) {
+                    $hmabt['xref']['values'] = $crossref[$table];
+                }
+                $thisTableData['hasManyAndBelongsTo'][$key] = $hmabt;
+
+            }
+        }
+    }
     foreach ($relations as $rtbl => $relation) {
         if (isset($relation['belongsTo'])) {
             foreach ($relation['belongsTo'] as $fkField => $params) {
@@ -84,6 +114,7 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
                 }
             }
         }
+
     }
     $d[$table] = $thisTableData;
     return $d;
@@ -116,7 +147,7 @@ function getColumns($table, $parent = null)
             $cols->aliasOnly[] = "$alias{$column['Field']}";
             if ($column['Key'] == 'PRI') {
                 $cols->pk['name'] = $column['Field'];
-                $cols->pk['fullName'] = "$table{$column['Field']}";
+                $cols->pk['fullName'] = "$table.{$column['Field']}";
                 $cols->pk['alias'] = "$alias{$column['Field']}";
             }
         }
@@ -355,7 +386,6 @@ function buildQueryResults($data)
     $d = [];
     $keys = getKeys(min($data)[0]);
     $hasMany = [];
-
     foreach ($data as $rowid => $dataRows) {
         foreach ($dataRows as $row) {
             $newRow = array_filter(

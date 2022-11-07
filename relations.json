@@ -79,10 +79,10 @@
       "beers": 0
     },
     {
-      "products": [
-        0,
-        0
-      ]
+      "products": {
+        "thisId": 0,
+        "otherId": 0
+      }
     }
   ]
 }
