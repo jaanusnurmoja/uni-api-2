@@ -96,11 +96,13 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
                         $xrefTables['xref']['refTables'][$i]['values'] = $tables;
                         $thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables['xref'];
 
-                    } elseif ($count == 1) {
+                    }
+                    if ($count == 1) {
                         foreach ($tables as $xRefTable => $params) {
-
-                            $tables['xref'][$xRefTable] = $params;
+                            $xrefTables['xref'] = $relations['hasManyAndBelongsTo']['xref'];
+                            $xrefTables['xref']['refTables'][$i][$xRefTable] = $params;
                         }
+                        $thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables['xref'];
                     }
                 }
             }
@@ -189,6 +191,12 @@ function buildQuery($rowid = null)
         }
         $sql = "SELECT $columns FROM `$table`
         ";
+
+        if (isset($tableData['hasManyAndBelongsTo'])) {
+            echo json_encode($tableData['hasManyAndBelongsTo']);
+            exit;
+            //foreach ($tableData['hasManyAndBelongsTo']['xref'])
+        }
         if (isset($tableData['hasMany'])) {
             foreach ($tableData['hasMany'] as $joinTable => $joinTableData) {
                 $sql .= buildQueryJoins($joinTable, $joinTableData, $table, $tableData);
