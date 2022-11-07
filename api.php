@@ -172,6 +172,30 @@ function buildQuery($rowid = null)
     }
 }
 
+/**
+ * Summary of buildQueryJoins
+ * @param mixed $joinTable
+ * @param mixed $joinTableData
+ * @param mixed $table
+ * @param mixed $tableData
+ * @param mixed $sql
+ * @return mixed
+ *
+ * meelespidamiseks ja spikriks tulevase many_to_many tarvis
+ * 1) ristviited ainsa tabeli raames
+ * SELECT * FROM `products`
+ * LEFT JOIN crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), products.id)
+ * LEFT JOIN products AS related_products
+ * ON (JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), related_products.
+ * id) AND related_products.id <> products.id)
+ *
+ * 2) kahe tabeliga ristviited
+ *
+ * SELECT * FROM `events`
+ * LEFT JOIN crossref ON JSON_CONTAINS_PATH(table_value, 'ALL','$.events','$.beers')
+ * AND  JSON_EXTRACT(table_value, '$.events') = events.id
+ * LEFT JOIN beers ON JSON_EXTRACT(table_value, '$.beers') = beers.id
+ */
 function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = null)
 {
     if (isset($joinTableData['belongsTo'])) {
@@ -184,10 +208,10 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $sql = 
         }
         foreach ($joinTableData['belongsTo'] as $fkField => $params) {
             if ($params['table'] != $table) {
-                 $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
+                $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
                 `{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
                 ";
-               
+
             }
 
         }
@@ -304,7 +328,7 @@ function reorganize($table, $item, $forBelongsTo = false)
     $structure = getDataStructure($table);
     foreach ($item as $key => $value) {
         if ($forBelongsTo === true) {
-             $newItem[$key] = $value;           
+            $newItem[$key] = $value;
         } else {
             if ($key == $structure['pk']) {
                 $newItem['pk']['name'] = $key;

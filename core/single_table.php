@@ -13,7 +13,7 @@ if (!empty($request[2])) {
     $key = $request[2] ? $request[2] : "";
 }
 
-print_r(buildQuery());
+//print_r(buildQuery());
 if ($method != 'GET') {
     // escape the columns and values from the input object
     $columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
