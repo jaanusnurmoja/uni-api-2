@@ -76,45 +76,44 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     $r = [];
     $hmabt = [];
 
-    if (isset($thisTableData['hasManyAndBelongsTo'])) {
-        foreach ($thisTableData['hasManyAndBelongsTo'] as $key => $hmabtTable) {
-            $hmabt['xref']['table'] = 'crossref';
-            $hmabt['xref']['field'] = 'table_value';
-            if (isset($relations[$hmabtTable]['hasManyAndBelongsTo'])) {
-                foreach ($relations[$hmabtTable]['hasManyAndBelongsTo'] as $hmabtElsewhere) {
-                    if ($hmabtElsewhere == $table) {
-                        foreach ($relations['crossref'] as $crossref) {
-                            if (isset($crossref[$table], $crossref[$hmabtTable])) {
-                                $hmabt['this']['table'] = $table;
-                                $hmabt['this']['pk'] = getPk($table);
-                                $hmabt['other']['table'] = $hmabtTable;
-                                $hmabt['other']['pk'] = getPk($hmabtTable);
-                                $thisTableData['hasManyAndBelongsTo'][$key] = $hmabt;
+    foreach ($relations as $rtbl => $relation) {
+        if ($rtbl == 'hasManyAndBelongsTo') {
+            foreach ($relation['tables'] as $i => $tables) {
+                $count = count($tables);
+                if (isset($tables[$table])) {
+                    $xrefTables['xref'] = $relation['xref'];
+                    if ($count == 2) {
+                        foreach ($tables as $xRefTable => $params) {
+                            if ($xRefTable == $table) {
+                                $tableValues['thisTable'] = $table;
+                            }
+                            if ($xRefTable != $table) {
+                                $tableValues['otherTable'] = $xRefTable;
+
                             }
                         }
+                        $xrefTables['xref']['refTables'][$i] = $tableValues;
+                        $xrefTables['xref']['refTables'][$i]['values'] = $tables;
+                        $thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables['xref'];
 
+                    } elseif ($count == 1) {
+                        foreach ($tables as $xRefTable => $params) {
+
+                            $tables['xref'][$xRefTable] = $params;
+                        }
                     }
                 }
-            } else {
-                $hmabt['xref']['alias'] = $hmabtTable['alias'];
-                foreach ($relations['crossref'] as $crossref) {
-                    $hmabt['xref']['values'] = $crossref[$table];
-                }
-                $thisTableData['hasManyAndBelongsTo'][$key] = $hmabt;
-
             }
-        }
-    }
-    foreach ($relations as $rtbl => $relation) {
-        if (isset($relation['belongsTo'])) {
-            foreach ($relation['belongsTo'] as $fkField => $params) {
-                if ($params['table'] == $table) {
-                    $r = getDataWithRelations($rtbl, null, $pkValue);
-                    $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
+            if (isset($relation['belongsTo'])) {
+                foreach ($relation['belongsTo'] as $fkField => $params) {
+                    if ($params['table'] == $table) {
+                        $r = getDataWithRelations($rtbl, null, $pkValue);
+                        $thisTableData['hasMany'][$rtbl] = $r[$rtbl];
+                    }
                 }
             }
-        }
 
+        }
     }
     $d[$table] = $thisTableData;
     return $d;

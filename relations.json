@@ -8,17 +8,11 @@
         "label": "name",
         "table": "producers"
       }
-    },
-    "hasManyAndBelongsTo": [
-      "events"
-    ]
+    }
   },
   "events": {
     "pk": "id",
-    "data": {},
-    "hasManyAndBelongsTo": [
-      "beers"
-    ]
+    "data": {}
   },
   "instruments": {
     "pk": "id",
@@ -63,26 +57,27 @@
   },
   "products": {
     "pk": "id",
-    "data": {},
-    "hasManyAndBelongsTo": {
-      "products": {
-        "alias": "related_products",
-        "crossref": {
-          "products": []
+    "data": {}
+  },
+  "hasManyAndBelongsTo": {
+    "xref": {
+      "table": "crossref",
+      "field": "table_value"
+    },
+    "tables": [
+      {
+        "events": 0,
+        "beers": 0
+      },
+      {
+        "products": {
+          "values": {
+            "thisId": 0,
+            "otherId": 0
+          },
+          "alias": "related_products"
         }
       }
-    }
-  },
-  "crossref": [
-    {
-      "events": 0,
-      "beers": 0
-    },
-    {
-      "products": {
-        "thisId": 0,
-        "otherId": 0
-      }
-    }
-  ]
+    ]
+  }
 }
