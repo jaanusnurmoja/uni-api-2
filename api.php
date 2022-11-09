@@ -104,7 +104,7 @@ function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
     return $xrefTables;
 
 }
-function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
+function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 {
     $d = [];
     $thisTableData = [];
@@ -113,11 +113,11 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
     if (empty($table)) {
         $table = $request[1];
     }
-    $thisTableData = $relations[$table];
+    $thisTableData = $origTable ? $relations[$origTable] : $relations[$table];
     $r = [];
 
     foreach ($relations as $rtbl => $relation) {
-        if ($rtbl == 'hasManyAndBelongsTo') {
+        if ($rtbl == 'hasManyAndBelongsTo' && empty($origTable)) {
             $xref = hasManyAndBelongsTo($relation, $relations, $table, $thisTableData);
             if (!empty($xref)) {
                 $thisTableData['hasManyAndBelongsTo']['xref'] = $xref;
@@ -126,9 +126,9 @@ function getDataWithRelations($table = null, $pkValue = null, $fkValue = null)
                     $referred = $ref['otherTable'];
                     $refAlias = $ref['alias'];
 
-                    $refContent = getDataStructure($refAlias, null, $pkValue);
+                    $refContent = getDataWithRelations($refAlias, null, $referred);
                     unset($refContent['hasManyAndBelongsTo']);
-                    $thisTableData['hasManyAndBelongsTo']['tables'][$referred] = $refContent;
+                    $thisTableData['hasManyAndBelongsTo']['tables'][$referred] = $refContent[$referred];
                     //print_r($thisTableData);
                 }
             }
@@ -307,7 +307,7 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         foreach ($xref['refTables'] as $refData) {
             if ($refData['inner']) {
                 $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), `$table`.`{$tableData['pk']}`)
-             LEFT JOIN `{$refData['asAlias']}` ON
+             LEFT JOIN {$refData['asAlias']} ON
              (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), `{$refData['alias']}`.`{$tableData['pk']}`)
              AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
             } else {
