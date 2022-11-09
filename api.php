@@ -83,6 +83,8 @@ function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
                 $xrefTables['refTables'][$i]['values'] = $tables;
                 $xrefTables['refTables'][$i]['alias'] = 'related_' . $tableValues['otherTable'];
                 $xrefTables['refTables'][$i]['asAlias'] = "`{$tableValues['otherTable']}` AS `related_{$tableValues['otherTable']}`";
+                $xrefTables['refTables'][$i]['thisPk'] = getPk($tableValues['thisTable']);
+                $xrefTables['refTables'][$i]['otherPk'] = getPk($tableValues['otherTable']);
                 //$thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables;
 
             }
@@ -305,13 +307,13 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         foreach ($xref['refTables'] as $refData) {
             if ($refData['inner']) {
                 $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), `$table`.`{$tableData['pk']}`)
-             LEFT JOIN {$refData['asAlias']} ON
-             (JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['otherTable']}'), {$refData['alias']}.id)
-             AND {$refData['alias']}.id <> {$refData['thisTable']}.id)";
+             LEFT JOIN `{$refData['asAlias']}` ON
+             (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), `{$refData['alias']}`.`{$tableData['pk']}`)
+             AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
             } else {
-                $sql .= "JSON_CONTAINS_PATH({$xref['field']}, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
-            AND JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}') = {$refData['thisTable']}.id
-            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT({$xref['field']}, '$.{$refData['otherTable']}') = {$refData['alias']}.id";
+                $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
+            AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
+            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`";
             }
         }
     }
@@ -453,7 +455,6 @@ function buildQueryResults($data)
     global $request;
     $d = [];
     $keys = getKeys(min($data)[0]);
-//print_r(getPk('events'));
     $hasMany = [];
     foreach ($data as $rowid => $dataRows) {
         foreach ($dataRows as $row) {
