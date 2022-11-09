@@ -13,7 +13,6 @@ if (!empty($request[2])) {
     $key = $request[2] ? $request[2] : "";
 }
 
-//print_r(buildQuery());
 if ($method != 'GET') {
     // escape the columns and values from the input object
     $columns = preg_replace('/[^a-z0-9_]+/i', '', array_keys($input));
@@ -73,14 +72,6 @@ switch ($table) {
             case 'GET':
 
                 $sql = buildQuery($request[2]);
-
-/*
-originaal:
-$sql = "SELECT *
-FROM `$table`"
-.($key ? " WHERE `id`='$key'" : '');
- */
-
                 break;
 
             case 'PUT':
@@ -111,7 +102,6 @@ FROM `$table`"
         }
         break;
 }
-// print_r($sql);
 // excecute SQL statement
 $result = mysqli_query($link, $sql);
 
@@ -160,22 +150,12 @@ switch ($table) {
                     } elseif (mysqli_affected_rows($link) == 1 && $key) {
                         echo (json_encode(mysqli_fetch_object($result), 128));
                     } else {
-/* originaal
-if (!$key) echo '[';
-for ($i = 0; $i < mysqli_num_rows($result); $i++) {
-echo ($i > 0 ? ',' : '').json_encode(mysqli_fetch_object($result));
-}
-if (!$key) echo ']';
- */
                         $dataRows = [];
                         while ($row = mysqli_fetch_assoc($result)) {
                             $dataRows[$row['rowid']][] = $row;
                         }
 
                         echo json_encode(buildQueryResults($dataRows));
-                        //echo json_encode($dataRows);
-                        //print_r(buildQueryResults($dataRows));
-                        //print_r($dataRows);
                     }
                     break;
 

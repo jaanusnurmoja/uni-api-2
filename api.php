@@ -121,7 +121,7 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
             $xref = hasManyAndBelongsTo($relation, $relations, $table, $thisTableData);
             if (!empty($xref)) {
                 $thisTableData['hasManyAndBelongsTo']['xref'] = $xref;
-                //print_r($xref);
+                
                 foreach ($xref['refTables'] as $ref) {
                     $referred = $ref['otherTable'];
                     $refAlias = $ref['alias'];
@@ -129,7 +129,6 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
                     $refContent = getDataWithRelations($refAlias, null, $referred);
                     unset($refContent['hasManyAndBelongsTo']);
                     $thisTableData['hasManyAndBelongsTo']['tables'][$referred] = $refContent[$referred];
-                    //print_r($thisTableData);
                 }
             }
         }
@@ -218,20 +217,16 @@ function buildQuery($rowid = null)
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
         if (isset($tableData['hasManyAndBelongsTo'])) {
-            // foreach ($tableData['hasManyAndBelongsTo']['xref'] as $xref) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($xref['refTables'] as $ref) {
-                //print_r(getColumns($ref['otherTable'], null, $ref['alias']));
                 $columns .= ', ' . getJoinColumns($ref['otherTable'], $xref, null, $ref['alias']);
             }
-            // }
         }
         if (isset($tableData['hasMany'])) {
             foreach ($tableData['hasMany'] as $jt => $jtData) {
                 $columns .= ', ' . getJoinColumns($jt, $jtData, $jt);
             }
         }
-        //print_r($columns);
 
         $sql = "SELECT $columns FROM `$table`
         ";
@@ -577,10 +572,11 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
-        //print_r($rowFiltered);
+        
         foreach ($keys['fks'] as $newFKeyFromArray) {
             $fkSubKeys = keySplitter($newFKeyFromArray);
             $tbl = $fkSubKeys['table'];
+            
             if (isInHasManyOf($tbl, $currentTable)) {
                 $idKey = getPk($tbl);
                 $newIdKeyFromArray = $idKey['alias'];
@@ -606,14 +602,12 @@ function keySplitter($key)
     $result = [];
     if (strpos($key, ':')) {
         $keyParts = explode(':', $key);
-        // $result[$keyParts[0]][$id][$keyParts[1]] = $value;
         $result['table'] = $keyParts[0];
         $result['field'] = $keyParts[1];
 
     }
     return $result;
 
-// kuidas näidata seotud alamridu?
 }
 
 switch (count($request)) {
