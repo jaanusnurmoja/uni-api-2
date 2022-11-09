@@ -1,0 +1,70 @@
+[
+    {
+        "rowid": "1",
+        "id": "1",
+        "name": "Jalisco Philharmonic",
+        "instruments:id": "8",
+        "instruments:type": "trumpet",
+        "instruments:orchestraId": "1",
+        "conductors:name": "Aadu Vahtkumm",
+        "conductors:nationality": "Eesti",
+        "conductors:id": "1",
+        "conductors:orchestraId": "1",
+        "conductors:students:id": "1",
+        "conductors:students:name": "XX",
+        "conductors:students:conductorId": "1"
+    },
+    {
+        "rowid": "1",
+        "id": "1",
+        "name": "Jalisco Philharmonic",
+        "instruments:id": "9",
+        "instruments:type": "pipe organ",
+        "instruments:orchestraId": "1",
+        "conductors:name": "Aadu Vahtkumm",
+        "conductors:nationality": "XX",
+        "conductors:id": "1",
+        "conductors:orchestraId": "1",
+        "conductors:students:id": "1",
+        "conductors:students:name": "XX",
+        "conductors:students:conductorId": "1"
+    }
+]
+[
+    {
+        "rowid": "1",
+        "id": "1",
+        "name": "Jalisco Philharmonic",
+        "hasMany": [
+            "instruments": [
+                {
+                    "id": "8",
+                    "type": "trumpet",
+                    "orchestraId": "1",
+                },
+                {
+                    "id": "9",
+                    "type": "pipe organ",
+                    "orchestraId": "1",
+                }
+            ],
+            "conductors": [
+                {
+                    "id": "1",
+                    "name": "Aadu Vahtkumm",
+                    "nationality": "XX",
+                    "orchestraId": "1",
+                    "hasMany": [
+                        "students": [
+                            {
+                                "id": 1,
+                                "name": "XX",
+                                "conductorId": "1"
+                            }
+                        ]
+                    ]
+                }
+            ]
+        ]
+    }
+]
