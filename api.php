@@ -377,6 +377,23 @@ function isInHasManyOf($lookup, $table = null)
     }
 }
 
+function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
+{
+
+    $dataStructure = getDataStructure($table);
+    if (isset($dataStructure['hasManyAndBelongsTo'])) {
+        foreach ($dataStructure['hasManyAndBelongsTo']['xref']['refTables'] as $ref)
+        if ($ref['alias'] == $lookupAlias) {
+            if ($realName) {
+                return $ref['otherTable'];
+            } else {
+                return true;
+            }
+        }
+    }
+}
+
+
 function doesTableBelongsTo($lookup, $table = null)
 {
     $dataStructure = getDataStructure($table);
@@ -466,7 +483,25 @@ function buildQueryResults($data)
             );
             $d[$rowid] = reorganize($request[1], $newRow);
         }
-        //print_r(array_merge_recursive(...$dataRows));
+        foreach ($keys['ids'] as $idKeyFromArray) {
+            $idSubKeys = keySplitter($idKeyFromArray);
+            $tblAlias = $idSubKeys['table'];
+           
+            if (isInHasManyAndBelongsTo($tblAlias, $request[1])) {
+                $tbl = isInHasManyAndBelongsTo($tblAlias, $request[1], true);
+                $idKey = getPk($tbl);
+                $hasManyAndBelongsTo = buildResultsOfHMABT(
+                    $dataRows,
+                    $tbl,
+                    $tblAlias,
+                    $idKeyFromArray
+                );
+                if (!empty($hasManyAndBelongsTo)) {
+                    $d[$rowid]['hasManyAndBelongsTo'][$tbl] = $hasManyAndBelongsTo;
+                }
+            }
+        }
+
         foreach ($keys['fks'] as $fKeyFromArray) {
             $fkSubKeys = keySplitter($fKeyFromArray);
             $tbl = $fkSubKeys['table'];
@@ -487,6 +522,34 @@ function buildQueryResults($data)
             }
         }
 
+    }
+
+    return $d;
+}
+function buildResultsOfHMABT(
+    $dataRows,
+    $tbl,
+    $tblAlias,
+    $idKeyFromArray,
+    $d = []
+
+) {
+    foreach ($dataRows as $row) {
+        foreach ($row as $initialKey => $value) {
+            if (!startsWith($initialKey, $tblAlias . ':') || empty($value)) {
+                unset($row[$initialKey]);
+            } else {
+                $normalKey = str_replace($tblAlias . ':', '', $initialKey);
+                $row[$normalKey] = $value;
+            }
+        }
+        $rowFiltered = array_filter($row, function ($key) {
+            return !strpos($key, ':');
+        }, ARRAY_FILTER_USE_KEY);
+        $rowFiltered = reorganize($tbl, $rowFiltered);
+        if (!empty($rowFiltered)) {
+            $d[$rowFiltered['pk']['value']] = $rowFiltered;
+        }
     }
 
     return $d;
