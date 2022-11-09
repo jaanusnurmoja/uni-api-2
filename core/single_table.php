@@ -111,7 +111,7 @@ FROM `$table`"
         }
         break;
 }
-
+//print_r($sql);
 // excecute SQL statement
 $result = mysqli_query($link, $sql);
 
