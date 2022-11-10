@@ -1,3 +1,13 @@
 <?php
-echo 'Uuri asja lähemalt siit: <a href="api">UNI-API RAKENDUS</a>'
+echo 'Uuri asja lähemalt siit: <a href="README.md">UNI-API RAKENDUS</a>';
+$rel = file_get_contents('api/relations.json');?>
+<ul>
+    <?php
+foreach(json_decode($rel) as $table => $params) {
+    if ($table != 'hasManyAndBelongsTo') {
+
+    echo "<li><a href='api/$table'>$table</a></li>";
+    }
+}
 ?>
+</ul>
