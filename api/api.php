@@ -121,7 +121,7 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
             $xref = hasManyAndBelongsTo($relation, $relations, $table, $thisTableData);
             if (!empty($xref)) {
                 $thisTableData['hasManyAndBelongsTo']['xref'] = $xref;
-                
+
                 foreach ($xref['refTables'] as $ref) {
                     $referred = $ref['otherTable'];
                     $refAlias = $ref['alias'];
@@ -191,13 +191,15 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
 {
     $cols .= implode(', ', getColumns($table, $parent, $tableAlias)->withAlias);
     // esialgu ei anna mingit nähtavat tulemust, kuigi lisab päringusse vajalikke välju
+    /*
     if (isset($tableData['belongsTo'])) {
-        foreach ($tableData['belongsTo'] as $fk => $d) {
-            $newParent = $d['table'];
-            $cols .= ', ';
-            $cols .= getJoinColumns($d['table'], $d['data'], $newParent);
-        }
+    foreach ($tableData['belongsTo'] as $fk => $d) {
+    $newParent = $d['table'];
+    $cols .= ', ';
+    $cols .= getJoinColumns($d['table'], $d['data'], $newParent);
     }
+    }
+     */
     // muudatuse lõpp
 
     if (isset($tableData['hasMany'])) {
@@ -214,14 +216,24 @@ function buildQuery($rowid = null)
 {
     foreach (getDataWithRelations() as $table => $tableData) {
 
+        global $request;
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
+
+        if (isset($tableData['belongsTo']) && $table == $request[1]) {
+            foreach ($tableData['belongsTo'] as $fk => $d) {
+                $newParent = $d['table'];
+                $columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
+            }
+        }
+// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($xref['refTables'] as $ref) {
                 $columns .= ', ' . getJoinColumns($ref['otherTable'], $xref, null, $ref['alias']);
             }
         }
+
         if (isset($tableData['hasMany'])) {
             foreach ($tableData['hasMany'] as $jt => $jtData) {
                 $columns .= ', ' . getJoinColumns($jt, $jtData, $jt);
@@ -230,6 +242,12 @@ function buildQuery($rowid = null)
 
         $sql = "SELECT $columns FROM `$table`
         ";
+
+        if (isset($tableData['belongsTo']) && $table == $request[1]) {
+            foreach ($tableData['belongsTo'] as $fk => $d) {
+                $sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
+            }
+        }
 
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
@@ -276,8 +294,13 @@ function buildQuery($rowid = null)
  * AND  JSON_EXTRACT(table_value, '$.events') = events.id
  * LEFT JOIN beers ON JSON_EXTRACT(table_value, '$.beers') = beers.id
  */
-function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null)
+function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref = null, $fk = null, $sql = null)
 {
+    if (!empty($fk)) {
+        $sql .= "LEFT JOIN `$joinTable`
+        ON `$joinTable`.`{$joinTableData['parentKey']}` = `$table`.`$fk`
+        ";
+    }
     if (isset($joinTableData['belongsTo'])) {
         foreach ($joinTableData['belongsTo'] as $fkField => $params) {
             if ($params['table'] == $table) {
@@ -308,7 +331,8 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
             } else {
                 $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
             AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
-            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`";
+            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
+            ";
             }
         }
     }
@@ -377,17 +401,18 @@ function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
 
     $dataStructure = getDataStructure($table);
     if (isset($dataStructure['hasManyAndBelongsTo'])) {
-        foreach ($dataStructure['hasManyAndBelongsTo']['xref']['refTables'] as $ref)
-        if ($ref['alias'] == $lookupAlias) {
-            if ($realName) {
-                return $ref['otherTable'];
-            } else {
-                return true;
+        foreach ($dataStructure['hasManyAndBelongsTo']['xref']['refTables'] as $ref) {
+            if ($ref['alias'] == $lookupAlias) {
+                if ($realName) {
+                    return $ref['otherTable'];
+                } else {
+                    return true;
+                }
             }
         }
+
     }
 }
-
 
 function doesTableBelongsTo($lookup, $table = null)
 {
@@ -465,6 +490,7 @@ function reorganize($table, $item, $forBelongsTo = false)
 function buildQueryResults($data)
 {
     global $request;
+    $structure = getDataStructure($request[1]);
     $d = [];
     $keys = getKeys(min($data)[0]);
     $hasMany = [];
@@ -476,12 +502,19 @@ function buildQueryResults($data)
                 },
                 ARRAY_FILTER_USE_KEY
             );
-            $d[$rowid] = reorganize($request[1], $newRow);
-        }
+             $d[$rowid] = reorganize($request[1], $newRow);
+            if (isset($newRow['belongsTo'])) {
+                foreach ($newRow['belongsTo'] as $fk => $params) {
+                    $rk =  keySplitter($row);
+                    $d[$rowid]['belongsTo'][$fk]['data'][$rk['field']] = $newRow["{$rk['table']}:{$rk['field']}"];
+                }
+            }
+       }
+        
         foreach ($keys['ids'] as $idKeyFromArray) {
             $idSubKeys = keySplitter($idKeyFromArray);
             $tblAlias = $idSubKeys['table'];
-           
+
             if (isInHasManyAndBelongsTo($tblAlias, $request[1])) {
                 $tbl = isInHasManyAndBelongsTo($tblAlias, $request[1], true);
                 $idKey = getPk($tbl);
@@ -572,11 +605,11 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
-        
+
         foreach ($keys['fks'] as $newFKeyFromArray) {
             $fkSubKeys = keySplitter($newFKeyFromArray);
             $tbl = $fkSubKeys['table'];
-            
+
             if (isInHasManyOf($tbl, $currentTable)) {
                 $idKey = getPk($tbl);
                 $newIdKeyFromArray = $idKey['alias'];

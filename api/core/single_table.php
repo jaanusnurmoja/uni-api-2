@@ -103,6 +103,8 @@ switch ($table) {
         break;
 }
 // excecute SQL statement
+
+// print_r($sql);
 $result = mysqli_query($link, $sql);
 
 // print results, insert id or affected row count
