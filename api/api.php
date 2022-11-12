@@ -477,7 +477,7 @@ function reorganize($table, $item, $forBelongsTo = false)
                 $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
                 if (!empty($belongsTo)) {
                     $belongsTo[$key]['value'] = $value;
-                    $belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item, true);
+                    //$belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item, true);
                     $newItem['belongsTo'][$key] = $belongsTo[$key];
                 } else {
                     $newItem['data'][$key] = $value;
@@ -503,10 +503,15 @@ function buildQueryResults($data)
                 ARRAY_FILTER_USE_KEY
             );
              $d[$rowid] = reorganize($request[1], $newRow);
-            if (isset($newRow['belongsTo'])) {
-                foreach ($newRow['belongsTo'] as $fk => $params) {
-                    $rk =  keySplitter($row);
-                    $d[$rowid]['belongsTo'][$fk]['data'][$rk['field']] = $newRow["{$rk['table']}:{$rk['field']}"];
+            if (isset($d[$rowid]['belongsTo'])) {
+
+                foreach ($d[$rowid]['belongsTo'] as $fk => $fkData) {
+                    $tbl = $fkData['table'];
+                    $cols = getColumns($tbl);
+                        foreach ($cols->aliasOnly as $i => $field) {
+                            $fkRow[$field] = $row["$tbl:$field"];
+                        }
+                        $d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
                 }
             }
        }
@@ -605,6 +610,20 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
+/* 
+        if (isset($rowFiltered['belongsTo'])) {
+            foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
+                $tbl = $fkData['table'];
+                $cols = getColumns($tbl);
+                foreach ($cols->aliasOnly as $i => $field) {
+                    $fkRow[$field] = $row["$tbl:$field"];
+                }
+
+                //$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
+                $d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
+            }
+        }
+ */
 
         foreach ($keys['fks'] as $newFKeyFromArray) {
             $fkSubKeys = keySplitter($newFKeyFromArray);
