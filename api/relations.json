@@ -22,8 +22,17 @@
         "parentKey": "id",
         "label": "name",
         "table": "orchestras"
+      },
+      "manufacturers_id": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "manufacturers"
       }
     }
+  },
+  "manufacturers": {
+    "pk": "id",
+    "data": {}
   },
   "orchestras": {
     "pk": "id",
