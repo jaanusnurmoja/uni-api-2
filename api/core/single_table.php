@@ -105,6 +105,7 @@ switch ($table) {
 // excecute SQL statement
 
 // print_r($sql);
+$starttime = microtime(true);
 $result = mysqli_query($link, $sql);
 
 // print results, insert id or affected row count
@@ -156,8 +157,10 @@ switch ($table) {
                         while ($row = mysqli_fetch_assoc($result)) {
                             $dataRows[$row['rowid']][] = $row;
                         }
+                        $end = microtime(true);
+                        $mySQLtime = $end - $starttime;
 
-                        echo json_encode(buildQueryResults($dataRows));
+                        echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
                     }
                     break;
 
