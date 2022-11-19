@@ -8,11 +8,13 @@
         "label": "name",
         "table": "producers"
       }
-    }
+    },
+    "description": "Kahepoolsed (many_to_many) seosed tabeliga events, ülem: producers"
   },
   "events": {
     "pk": "id",
-    "data": {}
+    "data": {},
+    "description": "Kahepoolsed (many_to_many) seosed tabeliga beers"
   },
   "instruments": {
     "pk": "id",
@@ -28,19 +30,23 @@
         "label": "name",
         "table": "manufacturers"
       }
-    }
+    },
+    "description": "Ülemad: orchestras, manufacturers; alam: players"
   },
   "manufacturers": {
     "pk": "id",
-    "data": {}
+    "data": {},
+    "description": "Alam: instruments"
   },
   "orchestras": {
     "pk": "id",
-    "data": {}
+    "data": {},
+    "description": "Alamad: instruments, conductors"
   },
   "producers": {
     "pk": "id",
-    "data": {}
+    "data": {},
+    "description": "Alam: beers"
   },
   "conductors": {
     "pk": "id",
@@ -51,7 +57,8 @@
         "label": "name",
         "table": "orchestras"
       }
-    }
+    },
+    "description": "Ülem: orchestras"
   },
   "players": {
     "pk": "id",
@@ -62,11 +69,13 @@
         "label": "type",
         "table": "instruments"
       }
-    }
+    },
+    "description": "Ülem: instruments"
   },
   "products": {
     "pk": "id",
-    "data": {}
+    "data": {},
+    "description": "Kahepoolsed (many_to_many) seosed iseendaga"
   },
   "hasManyAndBelongsTo": {
     "xref": {

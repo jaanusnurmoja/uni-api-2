@@ -487,7 +487,7 @@ function reorganize($table, $item, $forBelongsTo = false)
     }
     return $newItem;
 }
-function buildQueryResults($data)
+function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 {
     global $request;
     $structure = getDataStructure($request[1]);
@@ -502,20 +502,20 @@ function buildQueryResults($data)
                 },
                 ARRAY_FILTER_USE_KEY
             );
-             $d[$rowid] = reorganize($request[1], $newRow);
+            $d[$rowid] = reorganize($request[1], $newRow);
             if (isset($d[$rowid]['belongsTo'])) {
 
                 foreach ($d[$rowid]['belongsTo'] as $fk => $fkData) {
                     $tbl = $fkData['table'];
                     $cols = getColumns($tbl);
-                        foreach ($cols->aliasOnly as $i => $field) {
-                            $fkRow[$field] = $row["$tbl:$field"];
-                        }
-                        $d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
+                    foreach ($cols->aliasOnly as $i => $field) {
+                        $fkRow[$field] = $row["$tbl:$field"];
+                    }
+                    $d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
                 }
             }
-       }
-        
+        }
+
         foreach ($keys['ids'] as $idKeyFromArray) {
             $idSubKeys = keySplitter($idKeyFromArray);
             $tblAlias = $idSubKeys['table'];
@@ -556,8 +556,13 @@ function buildQueryResults($data)
         }
 
     }
-
-    return $d;
+    $end = microtime(true);
+    $phpTime = $end - $starttime;
+    $results = array();
+    $results['loadTime']['MySQL'] = $mySQLtime;
+    $results['loadTime']['php'] = $phpTime;
+    $results['data'] = $d;
+    return $results;
 }
 function buildResultsOfHMABT(
     $dataRows,
@@ -610,19 +615,19 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
-/* 
-        if (isset($rowFiltered['belongsTo'])) {
-            foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
-                $tbl = $fkData['table'];
-                $cols = getColumns($tbl);
-                foreach ($cols->aliasOnly as $i => $field) {
-                    $fkRow[$field] = $row["$tbl:$field"];
-                }
+/*
+if (isset($rowFiltered['belongsTo'])) {
+foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
+$tbl = $fkData['table'];
+$cols = getColumns($tbl);
+foreach ($cols->aliasOnly as $i => $field) {
+$fkRow[$field] = $row["$tbl:$field"];
+}
 
-                //$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
-                $d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
-            }
-        }
+//$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
+$d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
+}
+}
  */
 
         foreach ($keys['fks'] as $newFKeyFromArray) {
