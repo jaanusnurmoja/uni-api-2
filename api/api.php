@@ -635,20 +635,16 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
-/*
-if (isset($rowFiltered['belongsTo'])) {
-foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
-$tbl = $fkData['table'];
-$cols = getColumns($tbl);
-foreach ($cols->aliasOnly as $i => $field) {
-$fkRow[$field] = $row["$tbl:$field"];
-}
+
+        if (isset($rowFiltered['belongsTo'])) {
+            foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
+                $tbl = $fkData['table'];
+                $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
 
 //$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
-$d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
-}
-}
- */
+                $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
+            }
+        }
 
         foreach ($keys['fks'] as $newFKeyFromArray) {
             $fkSubKeys = keySplitter($newFKeyFromArray);
