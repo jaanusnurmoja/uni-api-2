@@ -309,16 +309,17 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         ";
             }
         }
-        foreach ($joinTableData['belongsTo'] as $fkField => $params) {
-            if ($params['table'] != $table) {
-                $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
-                `{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
-                ";
+/*
+foreach ($joinTableData['belongsTo'] as $fkField => $params) {
+if ($params['table'] != $table) {
+$sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
+`{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
+";
 
-            }
+}
 
-        }
-
+}
+ */
     }
     if ($xref != null) {
         $sql .= "LEFT JOIN {$xref['table']} ON ";
