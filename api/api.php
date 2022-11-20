@@ -347,6 +347,26 @@ $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
     return $sql;
 }
 
+function getValueOrListFromSubQuery($table, $where = null, $value = null)
+{
+    global $link;
+    $sql = "SELECT * FROM $table";
+    if (!empty($where) && !empty($value)) {
+        $sql .= "
+        WHERE $where = $value";
+    }
+    $result = mysqli_query($link, $sql);
+    $count = mysqli_num_rows($result);
+    $row = [];
+    $data = [];
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+
+    return $count == 1 ? $data[0] : $data;
+}
+
 function getKeys($data)
 {
     global $request;
@@ -508,10 +528,9 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 
                 foreach ($d[$rowid]['belongsTo'] as $fk => $fkData) {
                     $tbl = $fkData['table'];
-                    $cols = getColumns($tbl);
-                    foreach ($cols->aliasOnly as $i => $field) {
-                        $fkRow[$field] = $row["$tbl:$field"];
-                    }
+
+                    $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
+
                     $d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
                 }
             }
