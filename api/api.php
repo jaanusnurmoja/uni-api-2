@@ -219,14 +219,14 @@ function buildQuery($rowid = null)
         global $request;
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
-
-        if (isset($tableData['belongsTo']) && $table == $request[1]) {
-            foreach ($tableData['belongsTo'] as $fk => $d) {
-                $newParent = $d['table'];
-                $columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
-            }
-        }
-// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
+/*
+if (isset($tableData['belongsTo']) && $table == $request[1]) {
+foreach ($tableData['belongsTo'] as $fk => $d) {
+$newParent = $d['table'];
+$columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
+}
+}
+ */// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($xref['refTables'] as $ref) {
@@ -242,13 +242,13 @@ function buildQuery($rowid = null)
 
         $sql = "SELECT $columns FROM `$table`
         ";
-
-        if (isset($tableData['belongsTo']) && $table == $request[1]) {
-            foreach ($tableData['belongsTo'] as $fk => $d) {
-                $sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
-            }
-        }
-
+/*
+if (isset($tableData['belongsTo']) && $table == $request[1]) {
+foreach ($tableData['belongsTo'] as $fk => $d) {
+$sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
+}
+}
+ */
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($tableData['hasManyAndBelongsTo']['tables'] as $refTable => $refTableData) {
