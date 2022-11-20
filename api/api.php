@@ -566,7 +566,8 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
                     $tbl,
                     $fKeyFromArray,
                     $idKeyFromArray,
-                    $keys
+                    $keys,
+                    $request[1]
                 );
                 if (!empty($hasMany[$rowid]['hasMany'][$tbl])) {
                     $d[$rowid]['hasMany'][$tbl] = $hasMany[$rowid]['hasMany'][$tbl];
@@ -619,6 +620,7 @@ function buildJoinedDataOfResults(
     $fKeyFromArray,
     $idKeyFromArray,
     $keys,
+    $parentTable,
     $d = []
 ) {
     foreach ($dataRows as $row) {
@@ -639,10 +641,13 @@ function buildJoinedDataOfResults(
         if (isset($rowFiltered['belongsTo'])) {
             foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
                 $tbl = $fkData['table'];
-                $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
+                if ($tbl != $parentTable) {
+                    $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
 
 //$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
-                $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
+                    $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
+
+                }
             }
         }
 
@@ -658,7 +663,8 @@ function buildJoinedDataOfResults(
                     $tbl,
                     $newFKeyFromArray,
                     $newIdKeyFromArray,
-                    $keys
+                    $keys,
+                    $currentTable
                 );
                 $rowFiltered['hasMany'][$tbl] = $newHasMany[$row[$idKeyFromArray]]['hasMany'][$tbl];
             }
