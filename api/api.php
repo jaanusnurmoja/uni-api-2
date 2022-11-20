@@ -219,14 +219,14 @@ function buildQuery($rowid = null)
         global $request;
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
-
-        if (isset($tableData['belongsTo']) && $table == $request[1]) {
-            foreach ($tableData['belongsTo'] as $fk => $d) {
-                $newParent = $d['table'];
-                $columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
-            }
-        }
-// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
+/*
+if (isset($tableData['belongsTo']) && $table == $request[1]) {
+foreach ($tableData['belongsTo'] as $fk => $d) {
+$newParent = $d['table'];
+$columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
+}
+}
+ */// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($xref['refTables'] as $ref) {
@@ -242,13 +242,13 @@ function buildQuery($rowid = null)
 
         $sql = "SELECT $columns FROM `$table`
         ";
-
-        if (isset($tableData['belongsTo']) && $table == $request[1]) {
-            foreach ($tableData['belongsTo'] as $fk => $d) {
-                $sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
-            }
-        }
-
+/*
+if (isset($tableData['belongsTo']) && $table == $request[1]) {
+foreach ($tableData['belongsTo'] as $fk => $d) {
+$sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
+}
+}
+ */
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($tableData['hasManyAndBelongsTo']['tables'] as $refTable => $refTableData) {
@@ -309,16 +309,17 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         ";
             }
         }
-        foreach ($joinTableData['belongsTo'] as $fkField => $params) {
-            if ($params['table'] != $table) {
-                $sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
-                `{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
-                ";
+/*
+foreach ($joinTableData['belongsTo'] as $fkField => $params) {
+if ($params['table'] != $table) {
+$sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
+`{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
+";
 
-            }
+}
 
-        }
-
+}
+ */
     }
     if ($xref != null) {
         $sql .= "LEFT JOIN {$xref['table']} ON ";
@@ -344,6 +345,26 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
 
     }
     return $sql;
+}
+
+function getValueOrListFromSubQuery($table, $where = null, $value = null)
+{
+    global $link;
+    $sql = "SELECT * FROM $table";
+    if (!empty($where) && !empty($value)) {
+        $sql .= "
+        WHERE $where = $value";
+    }
+    $result = mysqli_query($link, $sql);
+    $count = mysqli_num_rows($result);
+    $row = [];
+    $data = [];
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+
+    return $count == 1 ? $data[0] : $data;
 }
 
 function getKeys($data)
@@ -507,10 +528,9 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 
                 foreach ($d[$rowid]['belongsTo'] as $fk => $fkData) {
                     $tbl = $fkData['table'];
-                    $cols = getColumns($tbl);
-                    foreach ($cols->aliasOnly as $i => $field) {
-                        $fkRow[$field] = $row["$tbl:$field"];
-                    }
+
+                    $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
+
                     $d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
                 }
             }
@@ -546,7 +566,8 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
                     $tbl,
                     $fKeyFromArray,
                     $idKeyFromArray,
-                    $keys
+                    $keys,
+                    $request[1]
                 );
                 if (!empty($hasMany[$rowid]['hasMany'][$tbl])) {
                     $d[$rowid]['hasMany'][$tbl] = $hasMany[$rowid]['hasMany'][$tbl];
@@ -599,6 +620,7 @@ function buildJoinedDataOfResults(
     $fKeyFromArray,
     $idKeyFromArray,
     $keys,
+    $parentTable,
     $d = []
 ) {
     foreach ($dataRows as $row) {
@@ -615,20 +637,19 @@ function buildJoinedDataOfResults(
             return !strpos($key, ':');
         }, ARRAY_FILTER_USE_KEY);
         $rowFiltered = reorganize($currentTable, $rowFiltered);
-/*
-if (isset($rowFiltered['belongsTo'])) {
-foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
-$tbl = $fkData['table'];
-$cols = getColumns($tbl);
-foreach ($cols->aliasOnly as $i => $field) {
-$fkRow[$field] = $row["$tbl:$field"];
-}
+
+        if (isset($rowFiltered['belongsTo'])) {
+            foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
+                $tbl = $fkData['table'];
+                if ($tbl != $parentTable) {
+                    $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
 
 //$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
-$d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
-}
-}
- */
+                    $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
+
+                }
+            }
+        }
 
         foreach ($keys['fks'] as $newFKeyFromArray) {
             $fkSubKeys = keySplitter($newFKeyFromArray);
@@ -642,7 +663,8 @@ $d[$rowid]['belongsTo'][$fk]['data'] = "on olemas";
                     $tbl,
                     $newFKeyFromArray,
                     $newIdKeyFromArray,
-                    $keys
+                    $keys,
+                    $currentTable
                 );
                 $rowFiltered['hasMany'][$tbl] = $newHasMany[$row[$idKeyFromArray]]['hasMany'][$tbl];
             }
