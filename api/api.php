@@ -85,7 +85,6 @@ function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
                 $xrefTables['refTables'][$i]['asAlias'] = "`{$tableValues['otherTable']}` AS `related_{$tableValues['otherTable']}`";
                 $xrefTables['refTables'][$i]['thisPk'] = getPk($tableValues['thisTable']);
                 $xrefTables['refTables'][$i]['otherPk'] = getPk($tableValues['otherTable']);
-                //$thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables;
 
             }
             if ($count == 1) {
@@ -97,7 +96,6 @@ function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
                     $params['otherTable'] = $xRefTable;
                     $xrefTables['refTables'][$i] = $params;
                 }
-                // $thisTableData['hasManyAndBelongsTo']['xref'] = $xrefTables['xref'];
             }
         }
     }
@@ -190,17 +188,6 @@ function getColumns($table, $parent = null, $tableAlias = null)
 function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols = '')
 {
     $cols .= implode(', ', getColumns($table, $parent, $tableAlias)->withAlias);
-    // esialgu ei anna mingit nähtavat tulemust, kuigi lisab päringusse vajalikke välju
-    /*
-    if (isset($tableData['belongsTo'])) {
-    foreach ($tableData['belongsTo'] as $fk => $d) {
-    $newParent = $d['table'];
-    $cols .= ', ';
-    $cols .= getJoinColumns($d['table'], $d['data'], $newParent);
-    }
-    }
-     */
-    // muudatuse lõpp
 
     if (isset($tableData['hasMany'])) {
         foreach ($tableData['hasMany'] as $t => $d) {
@@ -219,14 +206,6 @@ function buildQuery($rowid = null)
         global $request;
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
-/*
-if (isset($tableData['belongsTo']) && $table == $request[1]) {
-foreach ($tableData['belongsTo'] as $fk => $d) {
-$newParent = $d['table'];
-$columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
-}
-}
- */// $joinTable, $joinTableData, $table, $tableData, $xref = null, $sql = null
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($xref['refTables'] as $ref) {
@@ -242,13 +221,6 @@ $columns .= ', ' . getJoinColumns($d['table'], $d['data'], $newParent);
 
         $sql = "SELECT $columns FROM `$table`
         ";
-/*
-if (isset($tableData['belongsTo']) && $table == $request[1]) {
-foreach ($tableData['belongsTo'] as $fk => $d) {
-$sql .= buildQueryJoins($d['table'], $d, $table, $tableData, null, $fk);
-}
-}
- */
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($tableData['hasManyAndBelongsTo']['tables'] as $refTable => $refTableData) {
@@ -309,17 +281,6 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         ";
             }
         }
-/*
-foreach ($joinTableData['belongsTo'] as $fkField => $params) {
-if ($params['table'] != $table) {
-$sql .= "LEFT JOIN `{$params['table']}` AS `{$params['table']}` ON
-`{$params['table']}`.`{$params['parentKey']}` = `$joinTable`.`$fkField`
-";
-
-}
-
-}
- */
     }
     if ($xref != null) {
         $sql .= "LEFT JOIN {$xref['table']} ON ";
@@ -435,20 +396,6 @@ function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
     }
 }
 
-function doesTableBelongsTo($lookup, $table = null)
-{
-    $dataStructure = getDataStructure($table);
-    if (isset($dataStructure['belongsTo'])) {
-        foreach ($dataStructure['belongsTo'] as $fkField => $params) {
-            if ($params['table'] == $lookup) {
-                return true;
-            }
-
-        }
-
-    }
-}
-
 function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 {
     $dataStructure = getDataStructure($table);
@@ -498,7 +445,6 @@ function reorganize($table, $item, $forBelongsTo = false)
                 $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
                 if (!empty($belongsTo)) {
                     $belongsTo[$key]['value'] = $value;
-                    //$belongsTo[$key]['data'] = reorganize($belongsTo[$key]['table'], $item, true);
                     $newItem['belongsTo'][$key] = $belongsTo[$key];
                 } else {
                     $newItem['data'][$key] = $value;
