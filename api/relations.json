@@ -9,12 +9,12 @@
         "table": "producers"
       }
     },
-    "description": "Kahepoolsed (many_to_many) seosed tabeliga events, ülem: producers"
+    "description": "Kahepoolsed (many-to-many) seosed tabeliga events, ülem: producers"
   },
   "events": {
     "pk": "id",
     "data": {},
-    "description": "Kahepoolsed (many_to_many) seosed tabeliga beers"
+    "description": "Kahepoolsed (many-to-many) seosed tabeliga beers"
   },
   "instruments": {
     "pk": "id",
@@ -41,7 +41,7 @@
   "orchestras": {
     "pk": "id",
     "data": {},
-    "description": "Alamad: instruments, conductors"
+    "description": "Alamad: instruments, conductors, kaudne alam: players"
   },
   "producers": {
     "pk": "id",
@@ -75,7 +75,7 @@
   "products": {
     "pk": "id",
     "data": {},
-    "description": "Kahepoolsed (many_to_many) seosed iseendaga"
+    "description": "Kahepoolsed (many-to-many) seosed iseendaga"
   },
   "hasManyAndBelongsTo": {
     "xref": {
