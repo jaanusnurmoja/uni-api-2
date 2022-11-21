@@ -42,23 +42,17 @@ buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi üt
  
 Päringuga tagastatud read saadetakse sellele meetodile nii, et ühtaegu mõõdetakse nii mysql kui ka php laadimise aega:
 
+```
 $starttime = microtime(true);
-
 $result = mysqli_query($link, $sql);
 
-.....
-
 $dataRows = [];
-
 while ($row = mysqli_fetch_assoc($result)) {
-
 	$dataRows[$row['rowid']][] = $row;
-
 }
 
 $end = microtime(true);
-
 $mySQLtime = $end - $starttime;
 
 echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
- 
+```
