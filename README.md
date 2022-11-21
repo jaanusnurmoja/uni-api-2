@@ -203,7 +203,36 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
 
 ```
 
-reorganize($table, $item, $forBelongsTo = false) paigutab kirje andmed soovitud viisil (alajaotustesse pk, belongsTo, hasManyAndBelongsTo ja data). 
+reorganize paigutab ja lahterdab kirje andmed soovitud viisil 
+```
+function reorganize($table, $item, $forBelongsTo = false)
+{
+    $newItem = array();
+    $structure = getDataStructure($table);
+    foreach ($item as $key => $value) {
+        if ($forBelongsTo === true) {
+            $newItem[$key] = $value;
+        } else {
+            if ($key == $structure['pk']) {
+                $newItem['pk']['name'] = $key;
+                $newItem['pk']['value'] = $value;
+            } elseif ($key == 'rowid') {
+                $newItem[$key] = $value;
+            } else {
+                $belongsTo = getTablesThisBelongsTo($table, $key, 'check');
+                if (!empty($belongsTo)) {
+                    $belongsTo[$key]['value'] = $value;
+                    $newItem['belongsTo'][$key] = $belongsTo[$key];
+                } else {
+                    $newItem['data'][$key] = $value;
+                }
+            }
+        }
+    }
+    return $newItem;
+}
+
+```
 
 buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi ütleb, töötleb see andmebaasist saadud ridu. Alammeetodid - buildResultsOfHMABT($dataRows, $tbl, $tblAlias) ja buildJoinedDataOfResults(
  $dataRows, $currentTable, $fKeyFromArray, $idKeyFromArray, $keys, $parentTable,$d = []), lisaks on tarvitusel mitmed abifunktsioonid. 
