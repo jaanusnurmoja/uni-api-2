@@ -58,12 +58,25 @@ function check_token()
     }
 }
 
+/**
+ * Summary of getRelations
+ * @return mixed
+ * Seadistus imporditakse
+ */
 function getRelations()
 {
     return json_decode(file_get_contents('relations.json'), true);
 }
-
-function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
+/**
+ * Summary of hasManyAndBelongsTo
+ * @param mixed $relation
+ * @param mixed $relations
+ * @param mixed $table
+ * @return mixed
+ *
+ * Ristviidete mall
+ */
+function hasManyAndBelongsTo($relation, $relations, $table)
 {
     $xrefTables = $relation['xref'];
     foreach ($relation['tables'] as $i => $tables) {
@@ -102,6 +115,16 @@ function hasManyAndBelongsTo($relation, $relations, $table, $thisTableData)
     return $xrefTables;
 
 }
+
+/**
+ * Summary of getDataWithRelations
+ * @param mixed $table
+ * @param mixed $pkValue
+ * @param mixed $origTable
+ * @return array
+ *
+ * Andmestruktuuri moodustaja seadistusfaili põhjal
+ */
 function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 {
     $d = [];
@@ -144,6 +167,13 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
     return $d;
 }
 
+/**
+ * Summary of getDataStructure
+ * @param mixed $table
+ * @return mixed
+ *
+ * Hiljem loodud abifunktsioon, mis tagastab getDataWithRelations andmed ilma peatabeli nimega indeksita
+ */
 function getDataStructure($table = null)
 {
     global $request;
@@ -155,6 +185,24 @@ function getDataStructure($table = null)
     return getDataWithRelations($table)[$table];
 }
 
+/**
+ * Summary of getColumns
+ * @param mixed $table
+ * @param mixed $parent
+ * @param mixed $tableAlias
+ * @return stdClass
+ *
+ * Tagastab päringus kasutatavate väljade ja ka primaarvõtmete nimed kolmel erineval moel:
+ * table.field
+ * table.field AS alias
+ * alias
+ *
+ * pk
+ * table.pk
+ * pkAlias
+ *
+ * alias võib olla kas field või table:field
+ */
 function getColumns($table, $parent = null, $tableAlias = null)
 {
     global $link;
@@ -185,6 +233,17 @@ function getColumns($table, $parent = null, $tableAlias = null)
     return $cols;
 }
 
+/**
+ * Summary of getJoinColumns
+ * @param mixed $table
+ * @param mixed $tableData
+ * @param mixed $parent
+ * @param mixed $tableAlias
+ * @param mixed $cols
+ * @return string
+ *
+ * Rekursiivne funktsioon ühendatud tabelite väljanimede kogumiseks
+ */
 function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols = '')
 {
     $cols .= implode(', ', getColumns($table, $parent, $tableAlias)->withAlias);
@@ -199,11 +258,18 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
     return $cols;
 }
 
+/**
+ * Summary of buildQuery
+ * @param mixed $rowid
+ * @return string
+ *
+ * Andmebaasipäringu keskne moodustaja. Siin kutsutakse esile ka ühendatud andmete päringuosa, v.a. many-to-one
+ */
 function buildQuery($rowid = null)
 {
     foreach (getDataWithRelations() as $table => $tableData) {
 
-        global $request;
+        //global $request;
         $columns = "$table.{$tableData['pk']} AS `rowid`, ";
         $columns .= implode(', ', getColumns($table)->withAlias);
         if (isset($tableData['hasManyAndBelongsTo'])) {
@@ -251,7 +317,7 @@ function buildQuery($rowid = null)
  * @param mixed $sql
  * @return mixed
  *
- * meelespidamiseks ja spikriks tulevase many_to_many tarvis
+ * Päringute join osa (v.a. many-to-one) moodustub siin, sh many-to-many päringud
  * 1) ristviited ainsa tabeli raames
  * SELECT * FROM `products`
  * LEFT JOIN crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), products.id)
@@ -308,6 +374,17 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
     return $sql;
 }
 
+/**
+ * Summary of getValueOrListFromSubQuery
+ * @param mixed $table
+ * @param mixed $where
+ * @param mixed $value
+ * @return mixed
+ *
+ * Moodustab üksikpäringuid many-to-one väljade jaoks.
+ * Arvestatud on võimalusega, et sama funktsiooni saaks kasutada ka
+ * nt html vormis rippmenüü täitmiseks, seetõttu tagastatakse kas üksik rida või loetelu
+ */
 function getValueOrListFromSubQuery($table, $where = null, $value = null)
 {
     global $link;
@@ -327,7 +404,14 @@ function getValueOrListFromSubQuery($table, $where = null, $value = null)
 
     return $count == 1 ? $data[0] : $data;
 }
-
+/**
+ * Summary of getKeys
+ * @param mixed $data
+ * @return array<array>
+ *
+ * Abifunktsioon primaar- või võõrvõtmete saamiseks
+ * @todo Siin on primaarvõtme nimi "hardcoded". Tavaliselt on selle nimi id, kuid alati ei pruugi olla
+ */
 function getKeys($data)
 {
     global $request;
@@ -335,7 +419,6 @@ function getKeys($data)
     $keys['all'] = array_keys($data);
     foreach ($keys['all'] as $key) {
         if ($key == 'id' || substr($key, -3) == ':id') {
-            $idKey = $key;
             $keys['ids'][] = $key;
         }
         $tf = explode(':', $key);
@@ -354,6 +437,14 @@ function getKeys($data)
     return $keys;
 }
 
+/**
+ * Summary of getPk
+ * @param mixed $table
+ * @param mixed $data
+ * @return mixed
+ *
+ * Abifunktsioon: leia primaarvõti andmete hulgast või lihtsalt küsi, mis on selle tabeli primaarvõti
+ */
 function getPk($table, $data = null)
 {
     if ($data) {
@@ -369,6 +460,14 @@ function getPk($table, $data = null)
     }
 }
 
+/**
+ * Summary of isInHasManyOf
+ * @param mixed $lookup
+ * @param mixed $table
+ * @return bool
+ *
+ * Abifunktsioon: kas $lookup tabel on $table alam. Kui $table on null, siis mõeldakse ülemtabelina peamist tabelit
+ */
 function isInHasManyOf($lookup, $table = null)
 {
 
@@ -378,6 +477,15 @@ function isInHasManyOf($lookup, $table = null)
     }
 }
 
+/**
+ * Summary of isInHasManyAndBelongsTo
+ * @param mixed $lookupAlias
+ * @param mixed $table
+ * @param mixed $realName
+ * @return mixed
+ *
+ * Abifunktsioon: kas see tabel või selle aliasega tabel on ristviidete loetelus (vt seadistusfaili)
+ */
 function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
 {
 
@@ -396,6 +504,15 @@ function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
     }
 }
 
+/**
+ * Summary of getTablesThisBelongsTo
+ * @param mixed $table
+ * @param mixed $field
+ * @param mixed $check
+ * @return array
+ *
+ * Abifunktsioon: leia tabelid, mille alam see tabel (või fk väli) on
+ */
 function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 {
     $dataStructure = getDataStructure($table);
@@ -415,6 +532,13 @@ function getTablesThisBelongsTo($table = null, $field = null, $check = null)
     }
 }
 
+/**
+ * Summary of hasMany
+ * @param mixed $table
+ * @return mixed
+ *
+ * Abifunktsioon: tabeli alamtabelite loetelu.
+ */
 function hasMany($table = null)
 {
     $structure = getDataStructure($table);
@@ -422,12 +546,30 @@ function hasMany($table = null)
         return $structure['hasMany'];
     }
 }
+
+/**
+ * Summary of startsWith
+ * @param mixed $haystack
+ * @param mixed $needle
+ * @return bool
+ *
+ * Abifunktsioon: string algab sellega. Vajalik juhul, kui tuleb eristada teatud tabeli väljad ülejäänutest.
+ */
 function startsWith($haystack, $needle)
 {
     $length = strlen($needle);
     return substr($haystack, 0, $length) == $needle;
 }
 
+/**
+ * Summary of reorganize
+ * @param mixed $table
+ * @param mixed $item
+ * @param mixed $forBelongsTo
+ * @return array
+ *
+ * Abifunktsioon: mall andmete ümberpaigutamiseks
+ */
 function reorganize($table, $item, $forBelongsTo = false)
 {
     $newItem = array();
@@ -454,6 +596,17 @@ function reorganize($table, $item, $forBelongsTo = false)
     }
     return $newItem;
 }
+
+/**
+ * Summary of buildQueryResults
+ * @param mixed $data
+ * @param mixed $starttime
+ * @param mixed $mySQLtime
+ * @return array
+ * Andmebaasist päritud andmete kuvamiseks pöördutakse selle funktsiooni poole.
+ * Esialgne andmevoog on $data. Teised parameetrid - andmete laadimise algus
+ * ning mysql päringu tagastamise kiirus sekundites.
+ */
 function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 {
     global $request;
@@ -492,8 +645,7 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
                 $hasManyAndBelongsTo = buildResultsOfHMABT(
                     $dataRows,
                     $tbl,
-                    $tblAlias,
-                    $idKeyFromArray
+                    $tblAlias
                 );
                 if (!empty($hasManyAndBelongsTo)) {
                     $d[$rowid]['hasManyAndBelongsTo'][$tbl] = $hasManyAndBelongsTo;
@@ -531,11 +683,20 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
     $results['data'] = $d;
     return $results;
 }
+/**
+ * Summary of buildResultsOfHMABT
+ * @param mixed $dataRows
+ * @param mixed $tbl
+ * @param mixed $tblAlias
+ * @param mixed $d
+ * @return mixed
+ *
+ * Kahepoolsete many-to-many seoste andmete näitamise funktsioons
+ */
 function buildResultsOfHMABT(
     $dataRows,
     $tbl,
     $tblAlias,
-    $idKeyFromArray,
     $d = []
 
 ) {
@@ -560,6 +721,19 @@ function buildResultsOfHMABT(
     return $d;
 }
 
+/**
+ * Summary of buildJoinedDataOfResults
+ * @param mixed $dataRows
+ * @param mixed $currentTable
+ * @param mixed $fKeyFromArray
+ * @param mixed $idKeyFromArray
+ * @param mixed $keys
+ * @param mixed $parentTable
+ * @param mixed $d
+ * @return mixed
+ *
+ * Korduvate alamandmete näitamise funktsioon.
+ */
 function buildJoinedDataOfResults(
     $dataRows,
     $currentTable,
@@ -590,7 +764,6 @@ function buildJoinedDataOfResults(
                 if ($tbl != $parentTable) {
                     $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
 
-//$d[$rowid]['belongsTo'][$fk]['data'] = reorganize($tbl, $fkRow, true);
                     $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
 
                 }
@@ -622,6 +795,13 @@ function buildJoinedDataOfResults(
     return $d;
 }
 
+/**
+ * Summary of keySplitter
+ * @param mixed $key
+ * @return array<string>
+ *
+ * Väljanimede pooleks jagaja
+ */
 function keySplitter($key)
 {
     $result = [];
@@ -635,6 +815,19 @@ function keySplitter($key)
 
 }
 
+/**
+ * @OA\Get(
+ *   tags={"Tag"},
+ *   path="Path",
+ *   summary="Summary",
+ *   @OA\Parameter(ref="#/components/parameters/id"),
+ *   @OA\Response(response=200, description="OK"),
+ *   @OA\Response(response=401, description="Unauthorized"),
+ *   @OA\Response(response=404, description="Not Found")
+ * )
+ *
+ * Pärineb originaalist
+ */
 switch (count($request)) {
 
     case 2:

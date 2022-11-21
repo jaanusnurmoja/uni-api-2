@@ -10,9 +10,9 @@
         "conductors:nationality": "Eesti",
         "conductors:id": "1",
         "conductors:orchestraId": "1",
-        "conductors:students:id": "1",
-        "conductors:students:name": "XX",
-        "conductors:students:conductorId": "1"
+        "students:id": "1",
+        "students:name": "XX",
+        "students:conductorId": "1"
     },
     {
         "rowid": "1",
@@ -25,9 +25,9 @@
         "conductors:nationality": "XX",
         "conductors:id": "1",
         "conductors:orchestraId": "1",
-        "conductors:students:id": "1",
-        "conductors:students:name": "XX",
-        "conductors:students:conductorId": "1"
+        "students:id": "1",
+        "students:name": "XX",
+        "students:conductorId": "1"
     }
 ]
 [

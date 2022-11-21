@@ -1,249 +1,64 @@
-# uni-api
-This PHP script allow you to create a simple and universal **REST API**. Based on the
-original idea of Maurits van der Schee, 
-[Creating a simple REST API in PHP](https://www.leaseweb.com/labs/2015/10/creating-a-simple-rest-api-in-php/ "Creating a simple REST API in PHP").
+﻿# uni-api
 
-It use a MySQL Database.
+Nagu öeldud, toetub valmiv projekt samanimelisele lihtsa **REST API** php kriptile, mis kasutab MySQL andmebaasi.
 
-uni-api support HTTP verbs **GET**, **POST**, **PATCH**, **PUT** and **DELETE**.
+Oodatava lõpptulemusena on võimalik kasutada kõiki http meetodeid  **GET**, **POST**, **PATCH**, **PUT** and **DELETE**, kuid hetkel keskendun ainult GETile.
 
-It have an authentication module.
+# Paigaldamine
 
-# Table Of Contents
-- [Install](#install)
-- [Configure the models](#configure-the-models)
-- [Usage](#usage--api)
-	- [user](#user)
-	- [other tables](#other-tables)
-        - [no relations](#hasone)
-        - [relations](#hasmany)
-- [WIP](#wip)
+- Tõsta kõik failid saidi juurkausta
 
-# Install
+- seadista `config.php` suhtlema andmebaasiga
 
-- Save the file *api.php* and */core* folder in your server document root
+- Jäta `models.json` nagu ta on (see on originaal) - meil on vaja hoopis relations.json faili
+
+- mine oma andmebaasi ja täida see uni-api.sql sisuga (tabelid koos andmetega)
+
+# API
+
+põhifail api.php asub kaustas api, mis impordib kaustast core ka crud toimingute skriptid.
+
+Meid huvitab neist hetkel ainult üks - veidi uues kuues SELECT.
+
+Päringute skeem on järgmine: <https://sinusait/juurkaust/api/tabelinimi> näitab peatabeli ja alamate loetelu.
+
+Number urli lõpus (tabelinimi/1) näitab konkreetse id-ga kirjet.
+
+# Olulisemad meetodid
+
+getRelations() tõlgib seadistuse jsoni php keelde`, 
+
+getDataWithRelations($table = null, $pkValue = null, $origTable = null) 
+töötleb seadistust edasi, lisades ka hasMany, 
+
+getColumns($table, $parent = null, $tableAlias = null) + getJoinColumns() koostavad väljade loetelu,
+
+buildQuery() ja buildQueryJoin() koostavad SELECT päringu
+
+reorganize($table, $item, $forBelongsTo = false) paigutab kirje andmed soovitud viisil (alajaotustesse pk, belongsTo, hasManyAndBelongsTo ja data). 
+
+buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi ütleb, töötleb see andmebaasist saadud ridu. Alammeetodid - buildResultsOfHMABT($dataRows, $tbl, $tblAlias) ja buildJoinedDataOfResults(
+ $dataRows, $currentTable, $fKeyFromArray, $idKeyFromArray, $keys, $parentTable,$d = []), lisaks on tarvitusel mitmed abifunktsioonid. 
  
-- configure the `config.php` file with the requested parameters
+Päringuga tagastatud read saadetakse sellele meetodile nii, et ühtaegu mõõdetakse nii mysql kui ka php laadimise aega:
 
-- Configure the database's models in `models.json`
-    - the main use it will be automatically created with *admin* as username and password 
+$starttime = microtime(true);
 
-- launch `install.php` from the browser
+$result = mysqli_query($link, $sql);
 
-- Check if there is any errors while the installation
+.....
 
-# Configure the models
-There is a models already written by me in the project folder.
+$dataRows = [];
 
-# Usage & API
-The usage is realy simple:
+while ($row = mysqli_fetch_assoc($result)) {
 
-## user
+	$dataRows[$row['rowid']][] = $row;
 
-### Basic API
-
-> **POST** api.php```/user``` <br>
-Logs user into the system <br>
-
-request: 
-```json
-{ 
-    "username": "foo",
-    "password": "foopass"
 }
-```
-response:
-```json
-{ 
-    "username": "foo",
-    "id": "foo_id",
-    "token": "access_token"
-}
-```
 
+$end = microtime(true);
 
-> **PATCH** api.php```/user/:id``` <br>
-Update user <br>
+$mySQLtime = $end - $starttime;
 
-request: (you can send just username, password or both)
-```json
-{ 
-    "username": "new_foo_username",
-    "password": "new_foo_pass"
-}
-```
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-## other tables
-
-### no relations
-
-> **GET** api.php```/table``` <br>
-Get all the rows <br>
-
-response:
-```json
-[
-  { 
-    //row_one
-  },
-  { 
-    //row_two
-  }
-]
-```
-
-
-
-> **GET** api.php```/table/:id``` <br>
-Find row by ID <br>
-
-response:
-```json
-{
-    //all table's fields
-}
-```
-
-
-
-> **PUT** api.php```/table/:id``` <br>
-Update a row in the database <br>
-**Need to send the access_token in the Authorization header** <br>
-
-request: 
-```json
-{ 
-    //row's fields i want to update
-}
-```
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-
-
-> **POST** api.php```/table``` <br>
-Create a new row <br>
-**Need to send the access_token in the Authorization header** <br>
-
-request: 
-```json
-{ 
-    //table's field without id and update_date
-}
-```
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-
-> **DELETE** api.php```/table/:id``` <br>
-Create a new row <br>
-**Need to send the access_token in the Authorization header** <br>
-
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-### relations
-
-#### hasOne
-
-> **GET** api.php```/table/:id/relatedTable``` <br>
-Delete <br>
-
-- Make a **GET** request to the table;
-- Get the relatedTable_id from the body;
-- Make a **GET** request to the relatedTeble with the obtained id.
-
-> **PUT** api.php```/table/:id/relatedTable``` <br>
-Create a new relation <br>
-**Need to send the access_token in the Authorization header** <br>
-
-- Just update the relatedTable_id field with the related element's id.
-
-> **DELETE** api.php```/table/:id/relatedTable``` <br>
-Create a new row <br>
-**Need to send the access_token in the Authorization header** <br>
-
-- Just set to **NULL** the relatedTable_id field
-
-#### hasMany
-
-> **GET** api.php```/table/:id/relatedTable``` <br>
-Get the realted elements of a determinate table <br>
-**Need to send the access_token in the Authorization header** <br>
-
-response:
-```json
-{ 
-    [
-      { 
-        //row_one
-      },
-      { 
-        //row_two
-      }
-    ]
-}
-```
-
-
-> **POST** api.php```/table/:id/relatedTable``` <br>
-Relate an existent element to the table <br>
-**Need to send the access_token in the Authorization header** <br>
-
-request: 
-```json
-{ 
-    // an existent element to relate
-}
-```
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-
-> **DELETE** api.php```/table/:id/relatedTable/:relatedId``` <br>
-Delete a relation between two elements <br>
-**Need to send the access_token in the Authorization header** <br>
-
-response:
-```json
-{ 
-    "count": "# of the rows affected"
-}
-```
-
-# WIP
-
-- **User**
-    - [ ] User permission
-    - [ ] Custom user
-    - [ ] Better Multi User support
-- **Files**
-    - [ ] Files support
-- **Models**
-    - [ ] At State of Art you can't delete models or update it after. I want to make that
-    possible.
-    - [ ] Better configuration of the models. (I.E.: Required/Not Required fields)
-- **Example**
-    - [ ] Write a complete example.
+echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
+ 

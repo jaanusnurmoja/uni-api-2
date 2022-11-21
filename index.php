@@ -28,24 +28,40 @@ foreach (json_decode($rel) as $table => $params) {
 }
 ?>
                 </table>
+                <h4>uni-api algsete funktsionaalsuste näide</h4>
+                <table class="table table-striped">
+                    <tr>
+                        <td>Õllele id-ga 1 vastavad sündmused</td>
+                        <td><a href="api/beers/1/events">/api/beers/1/events</a></td>
+                    </tr>
+                    <tr>
+                        <td>Sündmusele id-ga 1 vastavad õlled</td>
+                        <td><a href="api/events/1/beers">/api/events/1/beers</a></td>
+                    </tr>
+                </table>
             </div>
             <div class="col-md">
                 <p>Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
                     keerukate ja mitmekihiliste seostega, võimalikult väheste päringute hulgaga ning võimalikult
-                    lihtsama ja napima seadistusega.
+                    lihtsama ja napima seadistusega (sh nt ilma võõrvõtmete määramiseta andmebaasis).
                     Aluseks on võetud üks "lihtsa crud api" <a
                         href="https://github.com/darioTecchia/uni-api">projekt</a> ,
                     mida
                     paraku pole mitu aastat edasi arendatud. Osa funktsionaalsusi võtan kindlasti sealt üle.
                 </p>
+                <p>
+                    Mõistagi oleksin tänulik heade vihjete eest. Usun, et sama eesmärgi täitmiseks on olemas ka
+                    lihtsamaid vahendeid ning ka vajalikke php-teeke.
+                </p>
                 <div>
-                    <h3>Tähtsamad erisused:</h3>
+                    <h4>Tähtsamad erisused:</h4>
                     <ol>
                         <li>
                             json seadistusfailis <a href='api/relations.json'>relations.json</a> on defineeritud vaid
                             tabelite nimed ning iga
                             tabeli many-to-one või many-to-many seosed. Väljade nimedest on ära toodud vaid primaar- ja
-                            võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed. </li>
+                            võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed. PLAANIS:
+                            andmebaasipõhine haldus json faili asemel.</li>
                         <li>
                             päringu väljade loetelud genereeritakse üldise seadistuse põhjal dünaamiliselt, kasutades
                             päringut
@@ -53,7 +69,8 @@ foreach (json_decode($rel) as $table => $params) {
                             COLUMNS FROM tabeli_nimi. Peamise kirje alamtabelite väljanimed on aliasega `tabel:väli`
                         </li>
                         <li>
-                            Üks universaalne vahendustabel kõigi many-to-many seoste tarvis (orignaalis nt beers_events
+                            Üks universaalne vahendustabel kõigi many-to-many seoste tarvis (orignaalis on kummalgi
+                            suunal oma tabel, nt beers_events
                             ja
                             events_beers)
                         </li>
