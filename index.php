@@ -42,7 +42,7 @@ foreach (json_decode($rel) as $table => $params) {
             </div>
             <div class="col-md">
                 <p>Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
-                    keerukate ja mitmekihiliste seostega, võimalikult väheste päringute hulgaga ning võimalikult
+                    keerukate ja mitmekihiliste seostega (nagu mu <a href="https://test.nurmoja.net.ee/repeat/">varasemas näidisrakenduses</a>), võimalikult väheste päringute hulgaga ning võimalikult
                     lihtsama ja napima seadistusega (sh nt ilma võõrvõtmete määramiseta andmebaasis).
                     Aluseks on võetud üks "lihtsa crud api" <a
                         href="https://github.com/darioTecchia/uni-api">projekt</a> ,
@@ -85,7 +85,7 @@ foreach (json_decode($rel) as $table => $params) {
                             tulemuste tagastamise ja töödeldud andmete laadimise kiiruse vahel minu koduarvutis: MySQL:
                             0.007775068283081055,
                             php: 5.6625449657440186 sekundit (orchestras, 4(!) andmerida koos kõigi alamate ja alamate
-                            alamatega)
+                            alamatega). Veebimajutaja juures olid näitajad  siiski paremad - 0.0010159015655517578 vs 1.9478819370269775 
                         </p>
                 </div>
 
