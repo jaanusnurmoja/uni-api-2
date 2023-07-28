@@ -1,36 +1,121 @@
-﻿# uni-api
+<?php
+ini_set('always_populate_raw_post_data', -1);
+ini_set('display_errors', 0);
 
-Nagu öeldud, toetub valmiv projekt samanimelisele lihtsa **REST API** php kriptile, mis kasutab MySQL andmebaasi.
+error_reporting(0);
 
-Oodatava lõpptulemusena on võimalik kasutada kõiki http meetodeid  **GET**, **POST**, **PATCH**, **PUT** and **DELETE**, kuid hetkel keskendun ainult GETile.
+require_once 'config.php';
 
-# Paigaldamine
+// get the HTTP method, path and body of the request
+$method = $_SERVER['REQUEST_METHOD'];
+$request = explode('/', $_SERVER['PATH_INFO']);
 
-- Tõsta kõik failid saidi juurkausta
+$input = json_decode(file_get_contents('php://input'), true);
 
-- seadista `config.php` suhtlema andmebaasiga
+// connect to the mysql database
+$link = mysqli_connect($host, $user, $pass, $dbname);
+mysqli_set_charset($link, 'utf8');
 
-- Jäta `models.json` nagu ta on (see on originaal) - meil on vaja hoopis relations.json faili
+/**
+ * Set response status code and print an JS Object with error's info
+ *
+ * @param Integer $status_code  Status code
+ * @param String  $message      Error's info
+ */
+function error_response($status_code, $message)
+{
+    echo (json_encode(array('error' => $message)));
+    http_response_code($status_code);
+    exit();
+}
 
-- mine oma andmebaasi ja täida see <https://test.nurmoja.net.ee/uni-api/uni-api.sql.txt> sisuga (tabelid koos andmetega)
+/**
+ * Token validation
+ *
+ * @param String  $token Token to validate
+ * @return Boolean Return true if there is a user with this token
+ *
+ */
+function check_token()
+{
+    global $link;
+    if (isset(getallheaders()["Authorization"])) {
+        $token_check = mysqli_query(
+            $link,
+            "SELECT COUNT(username) as res
+          FROM user
+          WHERE token = '" . getallheaders()["Authorization"] . "'"
+        );
+        if (mysqli_fetch_object($token_check)->res == 1) {
+            return true;
+        } else {
+            error_response(403, 'Invalid Token!');
+            return false;
+        }
+    } else {
+        error_response(403, 'Unauthorized!');
+        return false;
+    }
+}
 
-# API
+/**
+ * Summary of getRelations
+ * @return mixed
+ * Seadistus imporditakse
+ */
+function getRelations()
+{
+    return json_decode(file_get_contents('relations.json'), true);
+}
+/**
+ * Summary of hasManyAndBelongsTo
+ * @param mixed $relation
+ * @param mixed $relations
+ * @param mixed $table
+ * @return mixed
+ *
+ * Ristviidete mall
+ */
+function hasManyAndBelongsTo($relation, $relations, $table)
+{
+    $xrefTables = $relation['xref'];
+    foreach ($relation['tables'] as $i => $tables) {
+        $count = count($tables);
+        if (isset($tables[$table])) {
+            if ($count == 2) {
+                foreach ($tables as $xRefTable => $params) {
+                    if ($xRefTable == $table) {
+                        $tableValues['thisTable'] = $table;
+                    }
+                    if ($xRefTable != $table) {
+                        $tableValues['otherTable'] = $xRefTable;
 
-põhifail api.php asub kaustas api, mis impordib kaustast core ka crud toimingute skriptid.
+                    }
+                }
+                $xrefTables['refTables'][$i] = $tableValues;
+                $xrefTables['refTables'][$i]['values'] = $tables;
+                $xrefTables['refTables'][$i]['alias'] = 'related_' . $tableValues['otherTable'];
+                $xrefTables['refTables'][$i]['asAlias'] = "`{$tableValues['otherTable']}` AS `related_{$tableValues['otherTable']}`";
+                $xrefTables['refTables'][$i]['thisPk'] = getPk($tableValues['thisTable']);
+                $xrefTables['refTables'][$i]['otherPk'] = getPk($tableValues['otherTable']);
 
-Meid huvitab neist hetkel ainult üks - veidi uues kuues SELECT.
+            }
+            if ($count == 1) {
+                foreach ($tables as $xRefTable => $params) {
+                    $xrefTables = $relations['hasManyAndBelongsTo']['xref'];
+                    $params['inner'] = true;
+                    $params['thisTable'] = $xRefTable;
+                    $params['asAlias'] = "`$xRefTable` AS `{$params['alias']}`";
+                    $params['otherTable'] = $xRefTable;
+                    $xrefTables['refTables'][$i] = $params;
+                }
+            }
+        }
+    }
+    return $xrefTables;
 
-Päringute skeem on järgmine: <https://sinusait/juurkaust/api/tabelinimi> näitab peatabeli ja alamate loetelu.
+}
 
-Number urli lõpus (tabelinimi/1) näitab konkreetse id-ga kirjet.
-
-# Olulisemad meetodid
-
-getRelations() tõlgib seadistuse jsoni php keelde`, 
-
-getDataWithRelations 
-töötleb seadistust edasi, lisades ka hasMany,
-```
 /**
  * Summary of getDataWithRelations
  * @param mixed $table
@@ -99,10 +184,7 @@ function getDataStructure($table = null)
 
     return getDataWithRelations($table)[$table];
 }
-``` 
 
-getColumns + getJoinColumns koostavad väljade loetelu,
-```
 /**
  * Summary of getColumns
  * @param mixed $table
@@ -121,7 +203,6 @@ getColumns + getJoinColumns koostavad väljade loetelu,
  *
  * alias võib olla kas field või table:field
  */
-
 function getColumns($table, $parent = null, $tableAlias = null)
 {
     global $link;
@@ -176,10 +257,7 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
     }
     return $cols;
 }
-```
-buildQuery() ja buildQueryJoin() koostavad SELECT päringu
 
-```
 /**
  * Summary of buildQuery
  * @param mixed $rowid
@@ -189,6 +267,8 @@ buildQuery() ja buildQueryJoin() koostavad SELECT päringu
  */
 function buildQuery($rowid = null)
 {
+    $xref = null;
+
     foreach (getDataWithRelations() as $table => $tableData) {
 
         //global $request;
@@ -210,7 +290,7 @@ function buildQuery($rowid = null)
         $sql = "SELECT $columns FROM `$table`
         ";
         if (isset($tableData['hasManyAndBelongsTo'])) {
-            $xref = $tableData['hasManyAndBelongsTo']['xref'];
+            // $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($tableData['hasManyAndBelongsTo']['tables'] as $refTable => $refTableData) {
                 $sql .= buildQueryJoins($refTable, $refTableData, $table, $tableData, $xref);
             }
@@ -274,20 +354,14 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         $sql .= "LEFT JOIN {$xref['table']} ON ";
         foreach ($xref['refTables'] as $refData) {
             if ($refData['inner']) {
-                $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), 
-				`$table`.`{$tableData['pk']}`)
+                $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), `$table`.`{$tableData['pk']}`)
              LEFT JOIN {$refData['asAlias']} ON
-             (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), 
-			 `{$refData['alias']}`.`{$tableData['pk']}`)
+             (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), `{$refData['alias']}`.`{$tableData['pk']}`)
              AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
             } else {
-                $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}',
-				'$.{$refData['otherTable']}')
-            AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = 
-			`{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
-            LEFT JOIN {$refData['asAlias']} ON 
-			JSON_EXTRACT(`{$xref['field']}`, 
-			'$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
+                $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
+            AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
+            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
             ";
             }
         }
@@ -332,11 +406,163 @@ function getValueOrListFromSubQuery($table, $where = null, $value = null)
 
     return $count == 1 ? $data[0] : $data;
 }
+/**
+ * Summary of getKeys
+ * @param mixed $data
+ * @return array<array>
+ *
+ * Abifunktsioon primaar- või võõrvõtmete saamiseks
+ * @todo Siin on primaarvõtme nimi "hardcoded". Tavaliselt on selle nimi id, kuid alati ei pruugi olla
+ */
+function getKeys($data)
+{
+    global $request;
+    $keys = [];
+    $keys['all'] = array_keys($data);
+    foreach ($keys['all'] as $key) {
+        if ($key == 'id' || substr($key, -3) == ':id') {
+            $keys['ids'][] = $key;
+        }
+        $tf = explode(':', $key);
+        $table = !empty($tf[1]) ? $tf[0] : $request[1];
+        $field = !empty($tf[1]) ? $tf[1] : $tf[0];
+        $structure = getDataStructure($table);
+        if (isset($structure['belongsTo'])) {
+            foreach ($structure['belongsTo'] as $fkField => $paramList) {
+                if ($field == $fkField) {
+                    $keys['fks'][] = $key;
+                }
+            }
+        }
 
-```
+    }
+    return $keys;
+}
 
-reorganize paigutab ja lahterdab kirje andmed soovitud viisil 
-```
+/**
+ * Summary of getPk
+ * @param mixed $table
+ * @param mixed $data
+ * @return mixed
+ *
+ * Abifunktsioon: leia primaarvõti andmete hulgast või lihtsalt küsi, mis on selle tabeli primaarvõti
+ */
+function getPk($table, $data = null)
+{
+    if ($data) {
+        $keys = getKeys($data);
+        foreach ($keys['ids'] as $id) {
+            if (keySplitter($id)['table'] == $table) {
+                return $id;
+            }
+        }
+    } else {
+        $keys = getColumns($table);
+        return $keys->pk;
+    }
+}
+
+/**
+ * Summary of isInHasManyOf
+ * @param mixed $lookup
+ * @param mixed $table
+ * @return bool
+ *
+ * Abifunktsioon: kas $lookup tabel on $table alam. Kui $table on null, siis mõeldakse ülemtabelina peamist tabelit
+ */
+function isInHasManyOf($lookup, $table = null)
+{
+
+    $dataStructure = getDataStructure($table);
+    if (isset($dataStructure['hasMany'][$lookup])) {
+        return true;
+    }
+}
+
+/**
+ * Summary of isInHasManyAndBelongsTo
+ * @param mixed $lookupAlias
+ * @param mixed $table
+ * @param mixed $realName
+ * @return mixed
+ *
+ * Abifunktsioon: kas see tabel või selle aliasega tabel on ristviidete loetelus (vt seadistusfaili)
+ */
+function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
+{
+
+    $dataStructure = getDataStructure($table);
+    if (isset($dataStructure['hasManyAndBelongsTo'])) {
+        foreach ($dataStructure['hasManyAndBelongsTo']['xref']['refTables'] as $ref) {
+            if ($ref['alias'] == $lookupAlias) {
+                if ($realName) {
+                    return $ref['otherTable'];
+                } else {
+                    return true;
+                }
+            }
+        }
+
+    }
+}
+
+/**
+ * Summary of getTablesThisBelongsTo
+ * @param mixed $table
+ * @param mixed $field
+ * @param mixed $check
+ * @return array
+ *
+ * Abifunktsioon: leia tabelid, mille alam see tabel (või fk väli) on
+ */
+function getTablesThisBelongsTo($table = null, $field = null, $check = null)
+{
+    $dataStructure = getDataStructure($table);
+    if (isset($dataStructure['belongsTo'])) {
+        foreach ($dataStructure['belongsTo'] as $fkField => $params) {
+            if ($check == 'check') {
+                if ($fkField == $field) {
+                    $belongsTo[$field]['parentKey'] = $params['parentKey'];
+                    $belongsTo[$field]['table'] = $params['table'];
+                }
+            } else {
+                $belongsTo[] = $params['table'];
+            }
+
+        }
+        return $belongsTo;
+    }
+}
+
+/**
+ * Summary of hasMany
+ * @param mixed $table
+ * @return mixed
+ *
+ * Abifunktsioon: tabeli alamtabelite loetelu.
+ */
+function hasMany($table = null)
+{
+    $structure = getDataStructure($table);
+    if (isset($structure['hasMany']) && !empty($structure['hasMany'])) {
+        return $structure['hasMany'];
+    }
+}
+
+/**
+ * Summary of startsWith
+ * @param mixed $haystack
+ * @param mixed $needle
+ * @return bool
+ *
+ * Abifunktsioon: string algab sellega. Vajalik juhul, kui tuleb eristada teatud tabeli väljad ülejäänutest.
+ */
+function startsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    return substr($haystack, 0, $length) == $needle;
+}
+
 /**
  * Summary of reorganize
  * @param mixed $table
@@ -373,10 +599,6 @@ function reorganize($table, $item, $forBelongsTo = false)
     return $newItem;
 }
 
-```
-
-buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi ütleb, töötleb see andmebaasist saadud ridu. 
-```
 /**
  * Summary of buildQueryResults
  * @param mixed $data
@@ -463,24 +685,164 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
     $results['data'] = $d;
     return $results;
 }
+/**
+ * Summary of buildResultsOfHMABT
+ * @param mixed $dataRows
+ * @param mixed $tbl
+ * @param mixed $tblAlias
+ * @param mixed $d
+ * @return mixed
+ *
+ * Kahepoolsete many-to-many seoste andmete näitamise funktsioons
+ */
+function buildResultsOfHMABT(
+    $dataRows,
+    $tbl,
+    $tblAlias,
+    $d = []
 
-```
-Alammeetodid - buildResultsOfHMABT($dataRows, $tbl, $tblAlias) ja buildJoinedDataOfResults(
- $dataRows, $currentTable, $fKeyFromArray, $idKeyFromArray, $keys, $parentTable,$d = []), lisaks on tarvitusel mitmed abifunktsioonid. 
- 
-Päringuga tagastatud read saadetakse sellele meetodile nii, et ühtaegu mõõdetakse nii mysql kui ka php laadimise aega:
+) {
+    foreach ($dataRows as $row) {
+        foreach ($row as $initialKey => $value) {
+            if (!startsWith($initialKey, $tblAlias . ':') || empty($value)) {
+                unset($row[$initialKey]);
+            } else {
+                $normalKey = str_replace($tblAlias . ':', '', $initialKey);
+                $row[$normalKey] = $value;
+            }
+        }
+        $rowFiltered = array_filter($row, function ($key) {
+            return !strpos($key, ':');
+        }, ARRAY_FILTER_USE_KEY);
+        $rowFiltered = reorganize($tbl, $rowFiltered);
+        if (!empty($rowFiltered)) {
+            $d[$rowFiltered['pk']['value']] = $rowFiltered;
+        }
+    }
 
-```
-$starttime = microtime(true);
-$result = mysqli_query($link, $sql);
-
-$dataRows = [];
-while ($row = mysqli_fetch_assoc($result)) {
-	$dataRows[$row['rowid']][] = $row;
+    return $d;
 }
 
-$end = microtime(true);
-$mySQLtime = $end - $starttime;
+/**
+ * Summary of buildJoinedDataOfResults
+ * @param mixed $dataRows
+ * @param mixed $currentTable
+ * @param mixed $fKeyFromArray
+ * @param mixed $idKeyFromArray
+ * @param mixed $keys
+ * @param mixed $parentTable
+ * @param mixed $d
+ * @return mixed
+ *
+ * Korduvate alamandmete näitamise funktsioon.
+ */
+function buildJoinedDataOfResults(
+    $dataRows,
+    $currentTable,
+    $fKeyFromArray,
+    $idKeyFromArray,
+    $keys,
+    $parentTable,
+    $d = []
+) {
+    foreach ($dataRows as $row) {
+        foreach ($row as $initialKey => $value) {
+            if (!startsWith($initialKey, $currentTable . ':') || empty($value)) {
+                unset($row[$initialKey]);
+            } else {
+                $normalKey = str_replace($currentTable . ':', '', $initialKey);
+                $row[$normalKey] = $value;
+            }
+        }
 
-echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
-```
+        $rowFiltered = array_filter($row, function ($key) {
+            return !strpos($key, ':');
+        }, ARRAY_FILTER_USE_KEY);
+        $rowFiltered = reorganize($currentTable, $rowFiltered);
+
+        if (isset($rowFiltered['belongsTo'])) {
+            foreach ($rowFiltered['belongsTo'] as $fk => $fkData) {
+                $tbl = $fkData['table'];
+                if ($tbl != $parentTable) {
+                    $fkRow = getValueOrListFromSubQuery($tbl, $fkData['parentKey'], $fkData['value']);
+
+                    $rowFiltered['belongsTo'][$fk]['data'] = $fkRow;
+
+                }
+            }
+        }
+
+        foreach ($keys['fks'] as $newFKeyFromArray) {
+            $fkSubKeys = keySplitter($newFKeyFromArray);
+            $tbl = $fkSubKeys['table'];
+
+            if (isInHasManyOf($tbl, $currentTable)) {
+                $idKey = getPk($tbl);
+                $newIdKeyFromArray = $idKey['alias'];
+                $newHasMany = buildJoinedDataOfResults(
+                    $dataRows,
+                    $tbl,
+                    $newFKeyFromArray,
+                    $newIdKeyFromArray,
+                    $keys,
+                    $currentTable
+                );
+                $rowFiltered['hasMany'][$tbl] = $newHasMany[$row[$idKeyFromArray]]['hasMany'][$tbl];
+            }
+        }
+
+        $d[$row[$fKeyFromArray]]['hasMany'][$currentTable][$rowFiltered['pk']['value']] = $rowFiltered;
+
+    }
+    return $d;
+}
+
+/**
+ * Summary of keySplitter
+ * @param mixed $key
+ * @return array<string>
+ *
+ * Väljanimede pooleks jagaja
+ */
+function keySplitter($key)
+{
+    $result = [];
+    if (strpos($key, ':')) {
+        $keyParts = explode(':', $key);
+        $result['table'] = $keyParts[0];
+        $result['field'] = $keyParts[1];
+
+    }
+    return $result;
+
+}
+
+/**
+ * @OA\Get(
+ *   tags={"Tag"},
+ *   path="Path",
+ *   summary="Summary",
+ *   @OA\Parameter(ref="#/components/parameters/id"),
+ *   @OA\Response(response=200, description="OK"),
+ *   @OA\Response(response=401, description="Unauthorized"),
+ *   @OA\Response(response=404, description="Not Found")
+ * )
+ *
+ * Pärineb originaalist
+ */
+switch (count($request)) {
+
+    case 2:
+    case 3:
+        require_once './core/single_table.php';
+        break;
+    case 4:
+    case 5:
+        require_once './core/multi_table.php';
+        break;
+    default:
+        echo (json_encode(array('error' => 'Welcome on Uni-API!')));
+        break;
+}
+// close mysql connection
+mysqli_close($link);

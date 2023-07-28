@@ -2,21 +2,21 @@
 
 <?php
 
-  require_once('config.php');
-  require_once('core/data_type.php');
+  require_once('api/config.php');
+  require_once('api/core/data_type.php');
 
-  $error_flag = FALSE;
+  $error_flag = false;
 
   $link = mysqli_connect($host, $user, $pass);
 
   $models = file_get_contents('models.json');
   $encoded_models = json_decode($models, true);
 
-  if(!$link) {
+  if(empty($link)) {
     die('Connection failed: ' . $link->connect_error);
   }
 
-  echo('<ul>');
+  echo '<ul>';
 
   // create DB
   $sql = 'CREATE DATABASE IF NOT EXISTS `' . $dbname .'`';
