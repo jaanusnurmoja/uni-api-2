@@ -350,21 +350,9 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
             }
         }
     }
+    
     if ($xref != null) {
-        $sql .= "LEFT JOIN {$xref['table']} ON ";
-        foreach ($xref['refTables'] as $refData) {
-            if ($refData['inner']) {
-                $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), `$table`.`{$tableData['pk']}`)
-             LEFT JOIN {$refData['asAlias']} ON
-             (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), `{$refData['alias']}`.`{$tableData['pk']}`)
-             AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
-            } else {
-                $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
-            AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
-            LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
-            ";
-            }
-        }
+        $sql .= buildQueryJoinsXref($xref, $table, $tableData);
     }
 
     if (isset($joinTableData['hasMany'])) {
@@ -372,6 +360,24 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
             $sql .= buildQueryJoins($nextTable, $nextTableData, $joinTable, $joinTableData);
         }
 
+    }
+    return $sql;
+}
+
+function buildQueryJoinsXref($xref, $table, $tableData) {
+    $sql = "LEFT JOIN {$xref['table']} ON ";
+    foreach ($xref['refTables'] as $refData) {
+        if ($refData['inner']) {
+            $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), `$table`.`{$tableData['pk']}`)
+         LEFT JOIN {$refData['asAlias']} ON
+         (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), `{$refData['alias']}`.`{$tableData['pk']}`)
+         AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
+        } else {
+            $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}','$.{$refData['otherTable']}')
+        AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
+        LEFT JOIN {$refData['asAlias']} ON JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
+        ";
+        }
     }
     return $sql;
 }
