@@ -19,7 +19,7 @@ mysqli_set_charset($link, 'utf8');
 /**
  * Set response status code and print an JS Object with error's info
  *
- * @param Integer $status_code  Status code
+ * @param int $status_code  Status code
  * @param String  $message      Error's info
  */
 function error_response($status_code, $message)
@@ -139,7 +139,7 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 
     foreach ($relations as $rtbl => $relation) {
         if ($rtbl == 'hasManyAndBelongsTo' && empty($origTable)) {
-            $xref = hasManyAndBelongsTo($relation, $relations, $table, $thisTableData);
+            $xref = hasManyAndBelongsTo($relation, $relations, $table);
             if (!empty($xref)) {
                 $thisTableData['hasManyAndBelongsTo']['xref'] = $xref;
 
