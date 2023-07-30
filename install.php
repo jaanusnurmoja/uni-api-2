@@ -20,12 +20,12 @@
 
   // create DB
   $sql = 'CREATE DATABASE IF NOT EXISTS `' . $dbname .'`';
-  if($link->query($sql) === TRUE) {
+  if($link->query($sql) === true) {
     echo("<li>Database <b>$dbname</b> created successfully!</li>");
   } else {
     echo('Error creating database: ' . $link -> error);
     echo($sql);
-    $error_flag = TRUE;
+    $error_flag = true;
     return;
   }
   $sql = "";
@@ -34,21 +34,21 @@
   foreach ($encoded_models['models'] as $model_name => $value) {
     echo("Creating $model_name ...");
     $sql .= " CREATE TABLE IF NOT EXISTS `$dbname`.`$model_name` ( ";
-    foreach($value as $data => $data_type) {
-      $sql .= "`$data`" . ($MYSQL_DATA_TYPE[$data_type["type"]]) . (isset($data_type["length"]) ? "(".$data_type["length"].")" : "") . " NOT NULL, ";
-    }
     $sql .= " `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `update_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP )
       ENGINE = InnoDB AUTO_INCREMENT = 1;";
-    if($link->query($sql) === TRUE) {
+    foreach($value as $data => $data_type) {
+      $sql .= "`$data`" . ($MYSQL_DATA_TYPE[$data_type["type"]]) . (isset($data_type["length"]) ? "(".$data_type["length"].")" : "") . " NOT NULL, ";
+    }
+    if($link->query($sql) === true) {
       echo("<li>Table <b>$model_name</b> created successfully" . '</li>');
       $sql = "";
     } else {
-      echo("Error creating table <b>$model_name</b>: "  . $link -> error);
+      echo("Error creating table <b>$model_name</b>: "  . $link->error);
       echo $sql;
       $sql = "";
       echo('<br>');
-      $error_flag = TRUE;
+      $error_flag = true;
     }
   }
 
@@ -61,14 +61,14 @@
     `token_expiring_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ENGINE = InnoDB AUTO_INCREMENT = 1;";
-  if($link->query($sql) === TRUE) {
+  if($link->query($sql) === true) {
     echo("<li>Table <b>user</b> created successfully" . '</li>');
     $sql = "";
   } else {
     echo("Error creating table <b>user</b>: "  . $link -> error);
     $sql = "";
     echo('<br>');
-    $error_flag = TRUE;
+    $error_flag = true;
   }
 
   // create RELATIONS
@@ -76,11 +76,11 @@
     if($relations['hasOne'] != []) {
       foreach ($relations['hasOne'] as $table_to_relate) {
         $sql = "ALTER TABLE `$dbname`.`$table` ADD `". $table_to_relate ."_id` INT";
-        if($link->query($sql) === TRUE) {
+        if($link->query($sql) === true) {
           echo("Field <b>" . $table_to_relate."_id</b> added");
           echo('<br>');
           $sql = "ALTER TABLE `$dbname`.`$table` ADD FOREIGN KEY (" . $table_to_relate . "_id) REFERENCES $dbname.$table_to_relate(id) ON UPDATE CASCADE ON DELETE SET NULL";
-          if($link->query($sql) === TRUE) {
+          if($link->query($sql) === true) {
             echo("<li>Relation between <b>$table</b> and <b>$table_to_relate</b> created successfully".'</li>');
             echo('<br>');
           }
@@ -92,7 +92,7 @@
           echo("Error creating relations between <b>$table</b> and <b>$table_to_relate</b> : "  . $link -> error);
           $sql = "";
           echo('<br>');
-          $error_flag = TRUE;
+          $error_flag = true;
         }
       }
     }
@@ -105,7 +105,7 @@
           FOREIGN KEY (" . $table_to_relate . "_id) REFERENCES $dbname.$table_to_relate(id) ON UPDATE CASCADE ON DELETE CASCADE
         )
         ENGINE = InnoDB;";
-        if($link->query($sql) === TRUE) {
+        if($link->query($sql) === true) {
           echo("<li>Table <b>$table _ $table_to_relate</b> created successfully" . '</li>');
           $sql = "";
         } else {
@@ -113,7 +113,7 @@
           echo($sql);
           $sql = "";
           echo('<br>');
-          $error_flag = TRUE;
+          $error_flag = true;
         }
         echo($sql);
       }
@@ -129,14 +129,14 @@
             SELECT username FROM `$dbname`.`user` WHERE `username` = 'admin'
           ) LIMIT 1;";
 
-  if($link->query($sql) === TRUE) {
+  if($link->query($sql) === true) {
     echo("<li><b>Main user</b> created successfully: <li>username: <i>admin</i></li><li>password: <i>admin</i></li>" . '</li>');
     $sql = "";
   } else {
     echo("Error creating <b>user</b>: "  . $link -> error);
     $sql = "";
     echo('<br>');
-    $error_flag = TRUE;
+    $error_flag = true;
   }
 
   echo('</ul>');

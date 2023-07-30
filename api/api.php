@@ -439,14 +439,16 @@ function getKeys($data)
         if ($key == 'id' || substr($key, -3) == ':id') {
             $keys['ids'][] = $key;
         }
-        $tf = explode(':', $key);
-        $table = !empty($tf[1]) ? $tf[0] : $request[1];
-        $field = !empty($tf[1]) ? $tf[1] : $tf[0];
-        $structure = getDataStructure($table);
-        if (isset($structure['belongsTo'])) {
-            foreach ($structure['belongsTo'] as $fkField => $paramList) {
-                if ($field == $fkField) {
-                    $keys['fks'][] = $key;
+        else {
+            $tf = explode(':', $key);
+            $table = !empty($tf[1]) ? $tf[0] : $request[1];
+            $field = !empty($tf[1]) ? $tf[1] : $tf[0];
+            $structure = getDataStructure($table);
+            if (isset($structure['belongsTo'])) {
+                foreach ($structure['belongsTo'] as $fkField => $paramList) {
+                    if ($field == $fkField) {
+                        $keys['fks'][] = $key;
+                    }
                 }
             }
         }
@@ -659,7 +661,6 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 
             if (isInHasManyAndBelongsTo($tblAlias, $request[1])) {
                 $tbl = isInHasManyAndBelongsTo($tblAlias, $request[1], true);
-                $idKey = getPk($tbl);
                 $hasManyAndBelongsTo = buildResultsOfHMABT(
                     $dataRows,
                     $tbl,
