@@ -271,21 +271,11 @@ function buildQuery($rowid = null)
 
     foreach (getDataWithRelations() as $table => $tableData) {
 
-        //global $request;
-        $columns = "$table.{$tableData['pk']} AS `rowid`, ";
-        $columns .= implode(', ', getColumns($table)->withAlias);
         if (isset($tableData['hasManyAndBelongsTo'])) {
             $xref = $tableData['hasManyAndBelongsTo']['xref'];
-            foreach ($xref['refTables'] as $ref) {
-                $columns .= ', ' . getJoinColumns($ref['otherTable'], $xref, null, $ref['alias']);
-            }
         }
-
-        if (isset($tableData['hasMany'])) {
-            foreach ($tableData['hasMany'] as $jt => $jtData) {
-                $columns .= ', ' . getJoinColumns($jt, $jtData, $jt);
-            }
-        }
+        
+        $columns = buildQueryColumns($table, $tableData, $xref);
 
         $sql = "SELECT $columns FROM `$table`
         ";
@@ -308,6 +298,25 @@ function buildQuery($rowid = null)
         return $sql;
 
     }
+}
+
+function buildQueryColumns($table, $tableData, $xref = null) {
+    
+    $columns = "$table.{$tableData['pk']} AS `rowid`, ";
+    $columns .= implode(', ', getColumns($table)->withAlias);
+    if (!empty($xref)) {
+        foreach ($xref['refTables'] as $ref) {
+            $columns .= ', ' . getJoinColumns($ref['otherTable'], $xref, null, $ref['alias']);
+        }
+    }
+
+    if (isset($tableData['hasMany'])) {
+        foreach ($tableData['hasMany'] as $jt => $jtData) {
+            $columns .= ', ' . getJoinColumns($jt, $jtData, $jt);
+        }
+    }
+
+    return $columns;
 }
 
 /**
@@ -341,6 +350,7 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         ON `$joinTable`.`{$joinTableData['parentKey']}` = `$table`.`$fk`
         ";
     }
+
     if (isset($joinTableData['belongsTo'])) {
         foreach ($joinTableData['belongsTo'] as $fkField => $params) {
             if ($params['table'] == $table) {
@@ -350,7 +360,7 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
             }
         }
     }
-    
+
     if ($xref != null) {
         $sql .= buildQueryJoinsXref($xref, $table, $tableData);
     }
