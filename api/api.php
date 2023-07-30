@@ -440,26 +440,21 @@ function getKeys($data)
             $keys['ids'][] = $key;
         }
         else {
-            $keys['fks'][] = findFksForGetKeys($key, $request);
+            $tf = explode(':', $key);
+            $table = !empty($tf[1]) ? $tf[0] : $request[1];
+            $field = !empty($tf[1]) ? $tf[1] : $tf[0];
+            $structure = getDataStructure($table);
+            if (isset($structure['belongsTo'])) {
+                foreach ($structure['belongsTo'] as $fkField => $paramList) {
+                    if ($field == $fkField) {
+                        $keys['fks'][] = $key;
+                    }
+                }
+            }
         }
 
     }
     return $keys;
-}
-
-function findFksForGetKeys($key, $request) {
-    $tf = keySplitter($key);
-    if (!isset($tf['table']) )  {
-        $tf['table'] = $request[1];
-    }
-    $structure = getDataStructure($tf['table']);
-    if (isset($structure['belongsTo'])) {
-        foreach ($structure['belongsTo'] as $fkField => $paramList) {
-            if ($tf['table'] == $fkField) {
-                return $key;
-            }
-        }
-    }
 }
 
 /**
@@ -833,9 +828,7 @@ function keySplitter($key)
         $keyParts = explode(':', $key);
         $result['table'] = $keyParts[0];
         $result['field'] = $keyParts[1];
-    }
-    else {
-        $result['field'] =  $key;
+
     }
     return $result;
 
