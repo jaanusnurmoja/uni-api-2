@@ -30,6 +30,34 @@ function error_response($status_code, $message)
 }
 
 /**
+ * @OA\Get(
+ *   tags={"Tag"},
+ *   path="Path",
+ *   summary="Summary",
+ *   @OA\Parameter(ref="#/components/parameters/id"),
+ *   @OA\Response(response=200, description="OK"),
+ *   @OA\Response(response=401, description="Unauthorized"),
+ *   @OA\Response(response=404, description="Not Found")
+ * )
+ *
+ * Pärineb originaalist
+ */
+switch (count($request)) {
+
+    case 2:
+    case 3:
+        require_once './core/single_table.php';
+        break;
+    case 4:
+    case 5:
+        require_once './core/multi_table.php';
+        break;
+    default:
+        echo (json_encode(array('error' => 'Welcome on Uni-API!')));
+        break;
+}
+
+/**
  * Token validation
  *
  * @param String  $token Token to validate
@@ -92,22 +120,13 @@ function hasManyAndBelongsTo($relation, $relations, $table)
 
                     }
                 }
-                $xrefTables['refTables'][$i] = $tableValues;
-                $xrefTables['refTables'][$i]['values'] = $tables;
-                $xrefTables['refTables'][$i]['alias'] = 'related_' . $tableValues['otherTable'];
-                $xrefTables['refTables'][$i]['asAlias'] = "`{$tableValues['otherTable']}` AS `related_{$tableValues['otherTable']}`";
-                $xrefTables['refTables'][$i]['thisPk'] = getPk($tableValues['thisTable']);
-                $xrefTables['refTables'][$i]['otherPk'] = getPk($tableValues['otherTable']);
+                $xrefTables['refTables'][$i] = xRefTableParams($tableValues, $tables, 2);
 
             }
             if ($count == 1) {
                 foreach ($tables as $xRefTable => $params) {
                     $xrefTables = $relations['hasManyAndBelongsTo']['xref'];
-                    $params['inner'] = true;
-                    $params['thisTable'] = $xRefTable;
-                    $params['asAlias'] = "`$xRefTable` AS `{$params['alias']}`";
-                    $params['otherTable'] = $xRefTable;
-                    $xrefTables['refTables'][$i] = $params;
+                    $xrefTables['refTables'][$i] = xRefTableParams($params, $xRefTable, 1);
                 }
             }
         }
@@ -116,6 +135,23 @@ function hasManyAndBelongsTo($relation, $relations, $table)
 
 }
 
+function xRefTableParams($params, $tbl, $count) {
+    if ($count == 2) {
+        $params['values'] = $tbl;
+        $params['alias'] = 'related_' . $params['otherTable'];
+        $params['asAlias'] = "`{$params['otherTable']}` AS `related_{$params['otherTable']}`";
+        $params['thisPk'] = getPk($params['thisTable']);
+        $params['otherPk'] = getPk($params['otherTable']);
+    }
+    if ($count == 1) {
+        $params['inner'] = true;
+        $params['thisTable'] = $tbl;
+        $params['asAlias'] = "`$tbl` AS `{$params['alias']}`";
+        $params['otherTable'] = $tbl;
+    }
+
+    return $params;
+}
 /**
  * Summary of getDataWithRelations
  * @param mixed $table
@@ -699,6 +735,7 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
     $results = array();
     $results['loadTime']['MySQL'] = $mySQLtime;
     $results['loadTime']['php'] = $phpTime;
+    $results['requestcount'] = count($request);
     $results['data'] = $d;
     return $results;
 }
@@ -834,32 +871,5 @@ function keySplitter($key)
 
 }
 
-/**
- * @OA\Get(
- *   tags={"Tag"},
- *   path="Path",
- *   summary="Summary",
- *   @OA\Parameter(ref="#/components/parameters/id"),
- *   @OA\Response(response=200, description="OK"),
- *   @OA\Response(response=401, description="Unauthorized"),
- *   @OA\Response(response=404, description="Not Found")
- * )
- *
- * Pärineb originaalist
- */
-switch (count($request)) {
-
-    case 2:
-    case 3:
-        require_once './core/single_table.php';
-        break;
-    case 4:
-    case 5:
-        require_once './core/multi_table.php';
-        break;
-    default:
-        echo (json_encode(array('error' => 'Welcome on Uni-API!')));
-        break;
-}
 // close mysql connection
 mysqli_close($link);
