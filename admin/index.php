@@ -6,9 +6,6 @@ spl_autoload_register(function ($class) {
 
 use \Model\Relation;
 use \Model\RelationDetails;
-use \Model\Relations;
-
-$relations = new Relations;
 
 echo 'Hello world!';
 echo '<hr>';
@@ -32,7 +29,10 @@ $belongsTo = [];
 $hasMany = [];
 $hasManyAndBelongsTo = [];
 $bt = [];
+$relations = [];
+
 for ($i = 0; $i < 3; $i++) {
+    $relations[$i] = new \Model\Relations;
     for ($d = 0; $d < 5; $d++) {
         $bt[$d] = new RelationDetails;
         $rel = new Relation;
@@ -42,7 +42,7 @@ for ($i = 0; $i < 3; $i++) {
         $bt[$d]->setRelation($rel);
         $bt[$d]->setRole('roll' . $d);
     }
-    $relations->setRelationDetails($bt);
+    $relations[$i]->setRelationDetails($bt);
 
 }
 
@@ -50,7 +50,9 @@ $cleanModel = $model->clean();
 $data->setTable($cleanModel);
 $data->setFields($fields);
 $model->setData($data);
-$model->setBelongsTo($relations);
+$model->setBelongsTo($relations[0]);
+$model->setHasMany($relations[1]);
+$model->setHasManyAndBelongsTo($relations[2]);
 echo '<hr>';
 echo '<pre>';
 print_r($model);
