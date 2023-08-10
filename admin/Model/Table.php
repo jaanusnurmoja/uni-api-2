@@ -1,6 +1,7 @@
 <?php namespace Model;
 
-class Table {
+class Table
+{
     public $hello;
 
     private $id;
@@ -10,101 +11,121 @@ class Table {
     private Relations $belongsTo;
     private Relations $hasMany;
     private Relations $hasManyAndBelongsTo;
-    
-    public function __construct($table = null)
+
+    public function __construct($hello = false)
     {
-        $this->hello = 'I am an admin.';
-        if ($table && $table == $this->name) {
+        if ($hello === true) {
+            $this->hello = 'I am an admin.';
             return $this;
         }
     }
 
-    public function getId() {
-    	return $this->id;
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
-    * @param $id
-    */
-    public function setId($id) {
-    	$this->id = $id;
+     * @param $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
-    public function getName() {
-    	return $this->name;
-    }
-
-    /**
-    * @param $name
-    */
-    public function setName($name) {
-    	$this->name = $name;
-    }
-
-    public function getPk() {
-    	return $this->pk;
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
-    * @param $pk
-    */
-    public function setPk($pk) {
-    	$this->pk = $pk;
+     * @param $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    public function getPk()
+    {
+        return $this->pk;
     }
 
     /**
-    * @return Data
-    */
-    public function getData(): Data {
-    	return $this->data;
+     * @param $pk
+     */
+    public function setPk($pk)
+    {
+        $this->pk = $pk;
     }
 
     /**
-    * @param Data $data
-    */
-    public function setData(Data $data): void {
-    	$this->data = $data;
+     * @return Data
+     */
+    public function getData(): Data
+    {
+        return $this->data;
     }
 
     /**
-    * @return Relations
-    */
-    public function getBelongsTo(): Relations {
-    	return $this->belongsTo;
+     * @param Data $data
+     */
+    public function setData(Data $data): void
+    {
+        $this->data = $data;
     }
 
     /**
-    * @param Relations $belongsTo
-    */
-    public function setBelongsTo(Relations $belongsTo): void {
-    	$this->belongsTo = $belongsTo;
+     * @return Relations
+     */
+    public function getBelongsTo(): Relations
+    {
+        return $this->belongsTo;
     }
 
     /**
-    * @return Relations
-    */
-    public function getHasMany(): Relations {
-    	return $this->hasMany;
+     * @param Relations $belongsTo
+     */
+    public function setBelongsTo(Relations $belongsTo): void
+    {
+        $this->belongsTo = $belongsTo;
     }
 
     /**
-    * @param Relations $hasMany
-    */
-    public function setHasMany(Relations $hasMany): void {
-    	$this->hasMany = $hasMany;
+     * @return Relations
+     */
+    public function getHasMany(): Relations
+    {
+        return $this->hasMany;
     }
 
     /**
-    * @return Relations
-    */
-    public function getHasManyAndBelongsTo(): Relations {
-    	return $this->hasManyAndBelongsTo;
+     * @param Relations $hasMany
+     */
+    public function setHasMany(Relations $hasMany): void
+    {
+        $this->hasMany = $hasMany;
     }
 
     /**
-    * @param Relations $hasManyAndBelongsTo
-    */
-    public function setHasManyAndBelongsTo(Relations $hasManyAndBelongsTo): void {
-    	$this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
+     * @return Relations
+     */
+    public function getHasManyAndBelongsTo(): Relations
+    {
+        return $this->hasManyAndBelongsTo;
+    }
+
+    /**
+     * @param Relations $hasManyAndBelongsTo
+     */
+    public function setHasManyAndBelongsTo(Relations $hasManyAndBelongsTo): void
+    {
+        $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
+    }
+
+    public function clean()
+    {
+        unset($this->data, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo);
+        return $this;
     }
 }

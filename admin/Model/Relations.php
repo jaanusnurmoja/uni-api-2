@@ -1,43 +1,37 @@
 <?php namespace Model;
 
-use \Ds\Collection;
 class Relations
 {
     private Table $table;
-    private $relations = [];
+    private $relationDetails = [];
 
-
-    public function getRelations() {
-    	return $this->relations;
+    /* @return Table
+     */
+    public function getTable(): Table
+    {
+        return $this->table;
     }
 
     /**
-    * @param $relations
-    */
-    public function setRelations($relations, $params) {
+     * @param Table $table
+     */
+    public function setTable(Table $table): void
+    {
+        $this->table = $table;
+    }
+
+    public function getRelationDetails()
+    {
+        return $this->relationDetails;
+    }
+
+    /**
+     * @param $relations
+     */
+    public function setRelationDetails($relations)
+    {
         foreach ($relations as $key => $relation) {
-            $r = new Relation($params);
-            $r->setId($relation->id);
-            $r->setTable($this->table);
-            $r->setFk($relation->fk);
-            $r->setBelongsTo($relation->belongsTo);
-            $r->setPk($relation->pk);
-            
-            $this->relations[] = $relation;
+            $this->relationDetails[$key] = $relation;
         }
-    }
-
-    /**
-    * @return Table
-    */
-    public function getTable(): Table {
-    	return $this->table;
-    }
-
-    /**
-    * @param Table $table
-    */
-    public function setTable(Table $table): void {
-    	$this->table = $table;
     }
 }

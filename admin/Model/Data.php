@@ -1,67 +1,43 @@
 <?php namespace Model;
 
-class Data {
-    private $id;
+class Data
+{
     private Table $table;
-    private $name;
-    private $type;
-    private $htmlDefaults;
+    private $fields;
 
-    public function getId() {
-    	return $this->id;
+    /**
+     * Get the value of table
+     */
+    public function getTable(): Table
+    {
+        return $this->table;
     }
 
     /**
-    * @param $id
-    */
-    public function setId($id) {
-    	$this->id = $id;
-    }
+     * Set the value of table
+     */
+    public function setTable(Table $table): self
+    {
+        $this->table = $table;
 
-    public function getName() {
-    	return $this->name;
-    }
-
-    /**
-    * @return Table
-    */
-    public function getTable(): Table {
-    	return $this->table;
+        return $this;
     }
 
     /**
-    * @param Table $table
-    */
-    public function setTable(Table $table): void {
-    	$this->table = $table;
+     * Get the value of fields
+     */
+    public function getFields()
+    {
+        return $this->fields;
     }
 
     /**
-    * @param $name
-    */
-    public function setName($name) {
-    	$this->name = $name;
-    }
+     * Set the value of fields
+     */
+    public function setFields($fields): self
+    {
+        $this->fields = $fields;
 
-    public function getType() {
-    	return $this->type;
-    }
-
-    /**
-    * @param $type
-    */
-    public function setType($type) {
-    	$this->type = $type;
-    }
-
-    public function getHtmlDefaults() {
-    	return $this->htmlDefaults;
-    }
-
-    /**
-    * @param $htmlDefaults
-    */
-    public function setHtmlDefaults($htmlDefaults) {
-    	$this->htmlDefaults = $htmlDefaults;
+        return $this;
     }
 }
