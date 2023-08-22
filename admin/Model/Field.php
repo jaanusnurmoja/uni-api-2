@@ -1,56 +1,65 @@
 <?php
 namespace Model;
 
-class Field {
+class Field
+{
     private $id;
     private $name;
     private $type;
     private $htmlDefaults;
 
-    public function getId() {
-    	return $this->id;
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
-    * @param $id
-    */
-    public function setId($id) {
-    	$this->id = $id;
+     * @param $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
-    public function getName() {
-    	return $this->name;
-    }
-
-    /**
-    * @return Table
-    */
-    /**
-    * @param $name
-    */
-    public function setName($name) {
-    	$this->name = $name;
-    }
-
-    public function getType() {
-    	return $this->type;
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
-    * @param $type
-    */
-    public function setType($type) {
-    	$this->type = $type;
+     * @return Table
+     */
+    /**
+     * @param $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
     }
 
-    public function getHtmlDefaults() {
-    	return $this->htmlDefaults;
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**
-    * @param $htmlDefaults
-    */
-    public function setHtmlDefaults($htmlDefaults) {
-    	$this->htmlDefaults = $htmlDefaults;
+     * @param $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+    }
+
+    public function getHtmlDefaults()
+    {
+        return $this->htmlDefaults;
+    }
+
+    /**
+     * @param $htmlDefaults
+     */
+    public function setHtmlDefaults($htmlDefaults)
+    {
+        $this->htmlDefaults = $htmlDefaults;
     }
 }

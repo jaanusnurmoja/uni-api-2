@@ -1,0 +1,845 @@
+-- phpMyAdmin SQL Dump
+-- version 5.0.2
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Loomise aeg: Nov 21, 2022 kell 01:18 PL
+-- Serveri versioon: 10.4.11-MariaDB
+-- PHP versioon: 7.4.6
+
+SET FOREIGN_KEY_CHECKS=0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Andmebaas: `test`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `beers`
+--
+
+CREATE TABLE `beers` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `abv` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `producers_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `beers`
+--
+
+INSERT INTO `beers` (`name`, `abv`, `id`, `update_date`, `producers_id`) VALUES
+('Saku', 'SBR', 1, '2022-10-04 03:05:23', 1),
+('A.LeCoq', 'AC', 2, '2022-10-04 03:05:34', 2),
+('Adelscott', 'ADS', 3, '2022-11-06 23:41:04', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `beers_events`
+--
+
+CREATE TABLE `beers_events` (
+  `id` int(11) NOT NULL,
+  `beers_id` int(11) DEFAULT NULL,
+  `events_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `beers_events`
+--
+
+INSERT INTO `beers_events` (`id`, `beers_id`, `events_id`) VALUES
+(1, 1, 1),
+(3, 1, 2),
+(2, 2, 1),
+(4, 2, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `conductors`
+--
+
+CREATE TABLE `conductors` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `nationality` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `orchestraId` int(11) DEFAULT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `conductors`
+--
+
+INSERT INTO `conductors` (`name`, `nationality`, `id`, `orchestraId`, `update_date`) VALUES
+('Aadu Vahtkumm', 'Eesti', 1, 1, '2022-10-15 21:52:43'),
+('Leelo Luhvtvahvel', 'Eesti', 2, 1, '2022-10-15 21:52:51');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `crossref`
+--
+
+CREATE TABLE `crossref` (
+  `id` int(11) NOT NULL,
+  `table_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`table_value`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `crossref`
+--
+
+INSERT INTO `crossref` (`id`, `table_value`) VALUES
+(1, '{\"events\":1,\"beers\":1}'),
+(2, '{\"events\":1,\"beers\":2}'),
+(3, '{\"events\":2,\"beers\":1}'),
+(4, '{\"events\":2,\"beers\":2}'),
+(8, '{\"events\":2,\"beers\":3}'),
+(9, '{\"products\":[4,5]}'),
+(10, '{\"products\":[6,4]}'),
+(11, '{\"products\":[4,7]}'),
+(12, '{\"products\":[4,8]}'),
+(13, '{\"products\":[4,9]}'),
+(14, '{\"products\":[9,3]}'),
+(15, '{\"products\":[6,3]}');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `events`
+--
+
+CREATE TABLE `events` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `start_date` datetime NOT NULL,
+  `id` int(11) NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `events`
+--
+
+INSERT INTO `events` (`name`, `start_date`, `id`, `update_date`) VALUES
+('Õlleõued', '2022-10-07 14:00:00', 1, '2022-10-03 20:00:34'),
+('Õllekambrid', '2022-10-08 17:00:00', 2, '2022-10-03 20:00:34');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `events_beers`
+--
+
+CREATE TABLE `events_beers` (
+  `id` int(11) NOT NULL,
+  `events_id` int(11) DEFAULT NULL,
+  `beers_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `events_beers`
+--
+
+INSERT INTO `events_beers` (`id`, `events_id`, `beers_id`) VALUES
+(1, 1, 1),
+(2, 1, 2),
+(3, 2, 1),
+(4, 2, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `fields`
+--
+
+CREATE TABLE `fields` (
+  `id` int(11) NOT NULL,
+  `models_id` int(11) NOT NULL,
+  `category` enum('pk','fk','data') COLLATE utf8mb4_estonian_ci NOT NULL,
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `type` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `belongs_to` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `parent_key` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `fields`
+--
+
+INSERT INTO `fields` (`id`, `models_id`, `category`, `name`, `type`, `belongs_to`, `parent_key`) VALUES
+(1, 1, 'fk', 'producers_id', 'INT', 'producers', 'producers.id'),
+(2, 2, 'fk', 'orchestraId', 'INT', 'orchestras', 'orchestras.id'),
+(3, 4, 'fk', 'orchestraId', 'INT', 'orchestras', 'orchestras.id'),
+(4, 6, 'fk', 'instruments_id', 'INT', 'instruments', 'instruments.id');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `instruments`
+--
+
+CREATE TABLE `instruments` (
+  `id` int(11) NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `purchaseDate` datetime NOT NULL,
+  `manufacturers_id` int(11) DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `orchestraId` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `instruments`
+--
+
+INSERT INTO `instruments` (`id`, `type`, `purchaseDate`, `manufacturers_id`, `createdAt`, `updatedAt`, `orchestraId`) VALUES
+(1, 'violin', '2021-05-22 08:12:34', 1, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(2, 'pipe organ', '2020-10-01 23:54:33', 2, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(3, 'guitar', '2018-03-03 19:46:11', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(4, 'pipe organ', '2019-03-16 16:41:54', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(5, 'trumpet', '2018-04-24 11:42:06', 3, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(6, 'piano', '2018-08-07 00:47:57', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(7, 'guitar', '2019-10-07 15:06:23', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(8, 'trumpet', '2017-03-23 11:59:20', 3, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(9, 'pipe organ', '2020-12-09 07:40:24', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(10, 'trombone', '2021-07-25 07:23:14', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 1),
+(11, 'guitar', '2022-03-12 02:53:31', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(12, 'flute', '2018-04-21 06:53:47', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(13, 'guitar', '2020-05-25 19:44:31', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(14, 'harp', '2018-03-01 04:08:10', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(15, 'pipe organ', '2018-10-08 15:36:12', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(16, 'violin', '2022-01-01 14:51:56', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(17, 'trumpet', '2018-10-15 12:00:42', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(18, 'harp', '2019-04-01 11:52:20', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(19, 'guitar', '2018-01-31 19:16:56', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(20, 'guitar', '2016-11-10 11:09:51', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 2),
+(21, 'harp', '2019-11-18 14:49:46', NULL, '2022-09-09 22:12:12', '2022-09-09 22:12:12', 3),
+(22, 'trombone', '2016-09-07 07:08:17', 3, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(23, 'violin', '2018-07-12 00:12:39', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(24, 'violin', '2021-10-02 14:16:57', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(25, 'trumpet', '2022-08-30 05:03:53', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(26, 'piano', '2018-06-21 17:25:18', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(27, 'pipe organ', '2022-03-18 20:29:05', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(28, 'flute', '2020-01-07 23:31:51', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(29, 'harp', '2017-07-25 07:04:39', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3),
+(30, 'guitar', '2017-04-01 21:05:54', NULL, '2022-09-09 22:12:13', '2022-09-09 22:12:13', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `manufacturers`
+--
+
+CREATE TABLE `manufacturers` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `nationality` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `manufacturers`
+--
+
+INSERT INTO `manufacturers` (`name`, `nationality`, `id`, `update_date`) VALUES
+('Stradivari', 'Italy', 1, '2022-11-14 00:11:36'),
+('Hammond', 'USA', 2, '2022-11-14 00:11:55'),
+('Yamaha', 'Japan', 3, '2022-11-14 00:12:12');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `models`
+--
+
+CREATE TABLE `models` (
+  `id` int(11) NOT NULL,
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `pk` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL DEFAULT '''id''',
+  `belongs_to` tinyint(4) NOT NULL DEFAULT 0,
+  `data` enum('default','custom') COLLATE utf8mb4_estonian_ci NOT NULL DEFAULT 'default',
+  `has_many_and_belongs_to` tinyint(4) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `models`
+--
+
+INSERT INTO `models` (`id`, `name`, `pk`, `belongs_to`, `data`, `has_many_and_belongs_to`) VALUES
+(1, 'beers', 'id', 1, 'default', 1),
+(2, 'conductors', 'id', 1, 'default', 0),
+(3, 'events', 'id', 0, 'default', 1),
+(4, 'instruments', 'id', 1, 'default', 0),
+(5, 'orchestras', 'id', 0, 'default', 0),
+(6, 'players', 'id', 1, 'default', 0),
+(7, 'producers', 'id', 0, 'default', 0),
+(8, 'products', 'id', 0, 'default', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `orchestras`
+--
+
+CREATE TABLE `orchestras` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `orchestras`
+--
+
+INSERT INTO `orchestras` (`id`, `name`, `createdAt`, `updatedAt`) VALUES
+(1, 'Jalisco Philharmonic', '2022-09-09 22:12:12', '2022-09-09 22:12:12'),
+(2, 'Symphony No. 4', '2022-09-09 22:12:12', '2022-09-09 22:12:12'),
+(3, 'Symphony No. 8', '2022-09-09 22:12:12', '2022-09-09 22:12:12');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `orchestras_instruments`
+--
+
+CREATE TABLE `orchestras_instruments` (
+  `orchestras_id` int(11) DEFAULT NULL,
+  `instruments_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `players`
+--
+
+CREATE TABLE `players` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `nationality` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `instruments_id` int(11) DEFAULT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `players`
+--
+
+INSERT INTO `players` (`name`, `nationality`, `id`, `instruments_id`, `update_date`) VALUES
+('Aadu Vahtkumm', 'Eesti', 1, 1, '2022-10-15 21:52:43'),
+('Leelo Luhvtvahvel', 'Eesti', 2, 1, '2022-10-15 21:52:51'),
+('violin violin', '', 3, 1, '2022-10-26 17:13:50'),
+('pipe organ pipe organ', '', 4, 2, '2022-10-26 17:13:50'),
+('guitar guitar', '', 5, 3, '2022-10-26 17:13:50'),
+('pipe organ pipe organ', '', 6, 4, '2022-10-26 17:13:50'),
+('trumpet trumpet', '', 7, 5, '2022-10-26 17:13:50'),
+('piano piano', '', 8, 6, '2022-10-26 17:13:50'),
+('guitar guitar', '', 9, 7, '2022-10-26 17:13:50'),
+('trumpet trumpet', '', 10, 8, '2022-10-26 17:13:50'),
+('pipe organ pipe organ', '', 11, 9, '2022-10-26 17:13:50'),
+('trombone trombone', '', 12, 10, '2022-10-26 17:13:50'),
+('guitar guitar', '', 13, 11, '2022-10-26 17:13:50'),
+('flute flute', '', 14, 12, '2022-10-26 17:13:50'),
+('guitar guitar', '', 15, 13, '2022-10-26 17:13:50'),
+('harp harp', '', 16, 14, '2022-10-26 17:13:50'),
+('pipe organ pipe organ', '', 17, 15, '2022-10-26 17:13:50'),
+('violin violin', '', 18, 16, '2022-10-26 17:13:50'),
+('trumpet trumpet', '', 19, 17, '2022-10-26 17:13:50'),
+('harp harp', '', 20, 18, '2022-10-26 17:13:50'),
+('guitar guitar', '', 21, 19, '2022-10-26 17:13:50'),
+('guitar guitar', '', 22, 20, '2022-10-26 17:13:50'),
+('harp harp', '', 23, 21, '2022-10-26 17:13:50'),
+('trombone trombone', '', 24, 22, '2022-10-26 17:13:50'),
+('violin violin', '', 25, 23, '2022-10-26 17:13:50'),
+('violin violin', '', 26, 24, '2022-10-26 17:13:50'),
+('trumpet trumpet', '', 27, 25, '2022-10-26 17:13:50'),
+('piano piano', '', 28, 26, '2022-10-26 17:13:50'),
+('pipe organ pipe organ', '', 29, 27, '2022-10-26 17:13:50'),
+('flute flute', '', 30, 28, '2022-10-26 17:13:50'),
+('harp harp', '', 31, 29, '2022-10-26 17:13:50'),
+('guitar guitar', '', 32, 30, '2022-10-26 17:13:50'),
+('violin violin', '', 34, 1, '2022-10-26 17:13:56'),
+('pipe organ pipe organ', '', 35, 2, '2022-10-26 17:13:56'),
+('guitar guitar', '', 36, 3, '2022-10-26 17:13:56'),
+('pipe organ pipe organ', '', 37, 4, '2022-10-26 17:13:56'),
+('trumpet trumpet', '', 38, 5, '2022-10-26 17:13:56'),
+('piano piano', '', 39, 6, '2022-10-26 17:13:56'),
+('guitar guitar', '', 40, 7, '2022-10-26 17:13:56'),
+('trumpet trumpet', '', 41, 8, '2022-10-26 17:13:56'),
+('pipe organ pipe organ', '', 42, 9, '2022-10-26 17:13:56'),
+('trombone trombone', '', 43, 10, '2022-10-26 17:13:56'),
+('guitar guitar', '', 44, 11, '2022-10-26 17:13:56'),
+('flute flute', '', 45, 12, '2022-10-26 17:13:56'),
+('guitar guitar', '', 46, 13, '2022-10-26 17:13:56'),
+('harp harp', '', 47, 14, '2022-10-26 17:13:56'),
+('pipe organ pipe organ', '', 48, 15, '2022-10-26 17:13:56'),
+('violin violin', '', 49, 16, '2022-10-26 17:13:56'),
+('trumpet trumpet', '', 50, 17, '2022-10-26 17:13:56'),
+('harp harp', '', 51, 18, '2022-10-26 17:13:56'),
+('guitar guitar', '', 52, 19, '2022-10-26 17:13:56'),
+('guitar guitar', '', 53, 20, '2022-10-26 17:13:56'),
+('harp harp', '', 54, 21, '2022-10-26 17:13:56'),
+('trombone trombone', '', 55, 22, '2022-10-26 17:13:56'),
+('violin violin', '', 56, 23, '2022-10-26 17:13:56'),
+('violin violin', '', 57, 24, '2022-10-26 17:13:56'),
+('trumpet trumpet', '', 58, 25, '2022-10-26 17:13:56'),
+('piano piano', '', 59, 26, '2022-10-26 17:13:56'),
+('pipe organ pipe organ', '', 60, 27, '2022-10-26 17:13:56'),
+('flute flute', '', 61, 28, '2022-10-26 17:13:56'),
+('harp harp', '', 62, 29, '2022-10-26 17:13:56'),
+('guitar guitar', '', 63, 30, '2022-10-26 17:13:56');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `producers`
+--
+
+CREATE TABLE `producers` (
+  `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `nationality` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `update_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `producers`
+--
+
+INSERT INTO `producers` (`name`, `nationality`, `id`, `update_date`) VALUES
+('Saku', 'Eesti', 1, '2022-10-04 03:04:39'),
+('A.LeCoq', 'Eesti', 2, '2022-10-04 03:04:39'),
+('Adelscott', 'France', 3, '2022-11-06 23:40:35');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `producers_beers`
+--
+
+CREATE TABLE `producers_beers` (
+  `producers_id` int(11) DEFAULT NULL,
+  `beers_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `products`
+--
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `category` varchar(255) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `price` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `products`
+--
+
+INSERT INTO `products` (`id`, `title`, `category`, `price`, `createdAt`, `updatedAt`) VALUES
+(1, 'süntekas1', 'pill', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(2, 'süntekas2', 'pill', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(3, 'süntekas3', 'pill', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(4, 'süntekas4', 'pill', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(5, 'midikaabel', 'tarvik', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(6, 'pedaal', 'tarvik', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(7, 'audiokaabel', 'tarvik', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(8, 'usb-midi adapter', 'tarvik', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(9, 'statiiv', 'tarvik', 0, '0000-00-00 00:00:00', '0000-00-00 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `relations`
+--
+
+CREATE TABLE `relations` (
+  `id` int(11) NOT NULL,
+  `type` enum('belongsTo -','hasManyAndBelongsTo','belongsTo - hasMany','inner hasManyAndBelongsTo','inner belongsTo-','inner belongsTo - hasMany') COLLATE utf8mb4_estonian_ci NOT NULL,
+  `allow_has_many` tinyint(1) DEFAULT NULL,
+  `is_inner` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `relations`
+--
+
+INSERT INTO `relations` (`id`, `type`, `allow_has_many`, `is_inner`) VALUES
+(1, 'belongsTo - hasMany', 0, 0),
+(2, 'hasManyAndBelongsTo', NULL, 0),
+(3, 'inner hasManyAndBelongsTo', NULL, 1),
+(4, 'belongsTo - hasMany', 1, 0),
+(5, 'inner belongsTo-', 1, 0),
+(6, 'inner belongsTo - hasMany', 1, 0),
+(7, 'belongsTo - hasMany', 1, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `relation_details`
+--
+
+CREATE TABLE `relation_details` (
+  `id` int(11) NOT NULL,
+  `relations_id` int(11) NOT NULL,
+  `role` enum('belongsTo','parent','hasManyAndBelongsTo') COLLATE utf8mb4_estonian_ci NOT NULL,
+  `key_field` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `hasMany` tinyint(1) DEFAULT NULL,
+  `models_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `relation_details`
+--
+
+INSERT INTO `relation_details` (`id`, `relations_id`, `role`, `key_field`, `hasMany`, `models_id`) VALUES
+(1, 1, 'parent', 'id', 1, 7),
+(2, 1, 'belongsTo', 'producers_id', NULL, 1),
+(3, 2, 'hasManyAndBelongsTo', 'id', NULL, 1),
+(4, 2, 'hasManyAndBelongsTo', 'id', NULL, 3),
+(5, 3, 'hasManyAndBelongsTo', 'id', NULL, 8),
+(6, 4, 'belongsTo', 'orchestraId', NULL, 2),
+(7, 4, 'parent', 'id', 1, 5),
+(8, 6, 'belongsTo', 'orchestraId', NULL, 4),
+(9, 6, 'parent', 'id', 1, 5),
+(10, 7, 'belongsTo', 'instruments_id', 1, 6),
+(11, 7, 'parent', 'id', 1, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Tabeli struktuur tabelile `users`
+--
+
+CREATE TABLE `users` (
+  `username` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `password` varchar(60) COLLATE utf8mb4_estonian_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `token` varchar(32) COLLATE utf8mb4_estonian_ci DEFAULT NULL,
+  `token_expiring_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
+
+--
+-- Andmete tõmmistamine tabelile `users`
+--
+
+INSERT INTO `users` (`username`, `password`, `id`, `token`, `token_expiring_date`) VALUES
+('admin', '$2y$10$aBO2IWkFSb09cU5CRRqn.e.VvsOq/trW26yD72QU5Y.ZpNxYIOjkq', 1, NULL, '2022-10-03 19:48:43');
+
+--
+-- Indeksid tõmmistatud tabelitele
+--
+
+--
+-- Indeksid tabelile `beers`
+--
+ALTER TABLE `beers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `producers_id` (`producers_id`);
+
+--
+-- Indeksid tabelile `beers_events`
+--
+ALTER TABLE `beers_events`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `beers_events` (`beers_id`,`events_id`),
+  ADD KEY `events_id` (`events_id`);
+
+--
+-- Indeksid tabelile `conductors`
+--
+ALTER TABLE `conductors`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `orchestra` (`orchestraId`);
+
+--
+-- Indeksid tabelile `crossref`
+--
+ALTER TABLE `crossref`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `table_value` (`table_value`(768));
+
+--
+-- Indeksid tabelile `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `events_beers`
+--
+ALTER TABLE `events_beers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `events_beers` (`events_id`,`beers_id`),
+  ADD KEY `beers_id` (`beers_id`);
+
+--
+-- Indeksid tabelile `fields`
+--
+ALTER TABLE `fields`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `models` (`models_id`);
+
+--
+-- Indeksid tabelile `instruments`
+--
+ALTER TABLE `instruments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `orchestraId` (`orchestraId`),
+  ADD KEY `manufacturers` (`manufacturers_id`);
+
+--
+-- Indeksid tabelile `manufacturers`
+--
+ALTER TABLE `manufacturers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `models`
+--
+ALTER TABLE `models`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `orchestras`
+--
+ALTER TABLE `orchestras`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `orchestras_instruments`
+--
+ALTER TABLE `orchestras_instruments`
+  ADD KEY `orchestras_id` (`orchestras_id`),
+  ADD KEY `instruments_id` (`instruments_id`);
+
+--
+-- Indeksid tabelile `players`
+--
+ALTER TABLE `players`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `instruments` (`instruments_id`) USING BTREE;
+
+--
+-- Indeksid tabelile `producers`
+--
+ALTER TABLE `producers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `producers_beers`
+--
+ALTER TABLE `producers_beers`
+  ADD KEY `producers_id` (`producers_id`),
+  ADD KEY `beers_id` (`beers_id`);
+
+--
+-- Indeksid tabelile `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `relations`
+--
+ALTER TABLE `relations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeksid tabelile `relation_details`
+--
+ALTER TABLE `relation_details`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `models` (`models_id`),
+  ADD KEY `relations` (`relations_id`);
+
+--
+-- Indeksid tabelile `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT tõmmistatud tabelitele
+--
+
+--
+-- AUTO_INCREMENT tabelile `beers`
+--
+ALTER TABLE `beers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT tabelile `beers_events`
+--
+ALTER TABLE `beers_events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT tabelile `conductors`
+--
+ALTER TABLE `conductors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT tabelile `crossref`
+--
+ALTER TABLE `crossref`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT tabelile `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT tabelile `events_beers`
+--
+ALTER TABLE `events_beers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT tabelile `fields`
+--
+ALTER TABLE `fields`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT tabelile `instruments`
+--
+ALTER TABLE `instruments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT tabelile `manufacturers`
+--
+ALTER TABLE `manufacturers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT tabelile `models`
+--
+ALTER TABLE `models`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT tabelile `orchestras`
+--
+ALTER TABLE `orchestras`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT tabelile `players`
+--
+ALTER TABLE `players`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+
+--
+-- AUTO_INCREMENT tabelile `producers`
+--
+ALTER TABLE `producers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT tabelile `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT tabelile `relations`
+--
+ALTER TABLE `relations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT tabelile `relation_details`
+--
+ALTER TABLE `relation_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT tabelile `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Tõmmistatud tabelite piirangud
+--
+
+--
+-- Piirangud tabelile `beers`
+--
+ALTER TABLE `beers`
+  ADD CONSTRAINT `beers_ibfk_1` FOREIGN KEY (`producers_id`) REFERENCES `producers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `beers_events`
+--
+ALTER TABLE `beers_events`
+  ADD CONSTRAINT `beers_events_ibfk_1` FOREIGN KEY (`beers_id`) REFERENCES `beers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `beers_events_ibfk_2` FOREIGN KEY (`events_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `events_beers`
+--
+ALTER TABLE `events_beers`
+  ADD CONSTRAINT `events_beers_ibfk_1` FOREIGN KEY (`events_id`) REFERENCES `events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `events_beers_ibfk_2` FOREIGN KEY (`beers_id`) REFERENCES `beers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `instruments`
+--
+ALTER TABLE `instruments`
+  ADD CONSTRAINT `instruments_ibfk_1` FOREIGN KEY (`orchestraId`) REFERENCES `orchestras` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `manufacturers` FOREIGN KEY (`manufacturers_id`) REFERENCES `manufacturers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `orchestras_instruments`
+--
+ALTER TABLE `orchestras_instruments`
+  ADD CONSTRAINT `orchestras_instruments_ibfk_1` FOREIGN KEY (`orchestras_id`) REFERENCES `orchestras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `orchestras_instruments_ibfk_2` FOREIGN KEY (`instruments_id`) REFERENCES `instruments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `producers_beers`
+--
+ALTER TABLE `producers_beers`
+  ADD CONSTRAINT `producers_beers_ibfk_1` FOREIGN KEY (`producers_id`) REFERENCES `producers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `producers_beers_ibfk_2` FOREIGN KEY (`beers_id`) REFERENCES `beers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Piirangud tabelile `relation_details`
+--
+ALTER TABLE `relation_details`
+  ADD CONSTRAINT `models` FOREIGN KEY (`models_id`) REFERENCES `models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `relations` FOREIGN KEY (`relations_id`) REFERENCES `relations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+SET FOREIGN_KEY_CHECKS=1;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

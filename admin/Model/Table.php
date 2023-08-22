@@ -4,13 +4,13 @@ class Table
 {
     public $hello;
 
-    private $id;
-    private $name;
-    private $pk = 'id';
-    private Data $data;
-    private Relations $belongsTo;
-    private Relations $hasMany;
-    private Relations $hasManyAndBelongsTo;
+    public $id;
+    public $name;
+    public $pk = 'id';
+    public Data $data;
+    public Relations $belongsTo;
+    public Relations $hasMany;
+    public Relations $hasManyAndBelongsTo;
 
     public function __construct($hello = false)
     {
