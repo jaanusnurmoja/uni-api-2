@@ -12,9 +12,9 @@ class Table
     public Relations $hasMany;
     public Relations $hasManyAndBelongsTo;
 
-    public function __construct($hello = false)
+    public function __construct($id = null, $hello = false)
     {
-        if ($hello === true) {
+        if ($id == $this->id || $hello === true) {
             $this->hello = 'I am an admin.';
             return $this;
         }
@@ -125,7 +125,7 @@ class Table
 
     public function clean()
     {
-        unset($this->data, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo);
+        unset($this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo);
         return $this;
     }
 }

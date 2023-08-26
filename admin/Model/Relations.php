@@ -30,8 +30,10 @@ class Relations
      */
     public function setRelationDetails($relations)
     {
-        foreach ($relations as $key => $relation) {
+/*         foreach ($relations as $key => $relation) {
             $this->relationDetails[$key] = $relation;
         }
+ */
+    array_push($this->relationDetails, $relations);
     }
 }
