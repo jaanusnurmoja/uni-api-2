@@ -7,6 +7,9 @@ class Table
     public $id;
     public $name;
     public $pk = 'id';
+    public $fieldData;
+    public $canBelongTo;
+    public $canHmabt;
     public Data $data;
     public Relations $belongsTo;
     public Relations $hasMany;
@@ -127,5 +130,38 @@ class Table
     {
         unset($this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo);
         return $this;
+    }
+
+    public function getFieldData() {
+    	return $this->fieldData;
+    }
+
+    /**
+    * @param $fieldData
+    */
+    public function setFieldData($fieldData) {
+    	$this->fieldData = $fieldData;
+    }
+
+    public function getCanBelongTo() {
+    	return $this->canBelongTo;
+    }
+
+    /**
+    * @param $canBelongTo
+    */
+    public function setCanBelongTo($canBelongTo) {
+    	$this->canBelongTo = $canBelongTo;
+    }
+
+    public function getCanHmabt() {
+    	return $this->canHmabt;
+    }
+
+    /**
+    * @param $canHmabt
+    */
+    public function setCanHmabt($canHmabt) {
+    	$this->canHmabt = $canHmabt;
     }
 }
