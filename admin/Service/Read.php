@@ -67,11 +67,11 @@ class Read
             $relationDetails->setRole($row['role']);
             $relationDetails->setKeyField($row['key_field']);
             $relationDetails->setHasMany($row['hasMany']);
+            if ($relationDetails->getRole() == 'belongsTo') {
 
             $relations->setTable($model);
             $relations->setRelationDetails($relationDetails);
 
-            if ($relationDetails->getRole() == 'belongsTo') {
                 $model->setBelongsTo($relations);
             }            
 
