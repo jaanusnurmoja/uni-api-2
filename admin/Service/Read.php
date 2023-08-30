@@ -1,13 +1,13 @@
 <?php namespace Service;
 
+use Model\Relation;
+use Model\RelationDetails;
+use Model\Relations;
 use mysqli;
 use \DTO\ListDTO;
 use \DTO\TableDTO;
 use \Model\Data;
 use \Model\Field;
-use Model\RelationDetails;
-use Model\Relations;
-use Model\Relation;
 
 class Read
 {
@@ -53,31 +53,35 @@ class Read
             $data->setTable($model);
             if ($row['data'] == 'default') {
                 $fields = $this->getDefaultFields($row['name']);
-                $data->setFields($fields);                
+                $data->setFields($fields);
             }
             $model->setData($data);
-            $rel->setId($row['rid']);
-            $rel->setType($row['type']);
-            $rel->setAllowHasMany((bool) $row['allow_has_many']);
-            $rel->setIsInner($row['is_inner']);
+            if (!empty($row['rid'])) {
+                $rel->setId($row['rid']);
 
-            $relationDetails->setId($row['rd_id']);
-            $relationDetails->setRelation($rel);
-            $relationDetails->setTable($model);
-            $relationDetails->setRole($row['role']);
-            $relationDetails->setKeyField($row['key_field']);
-            $relationDetails->setHasMany($row['hasMany']);
-            if ($relationDetails->getRole() == 'belongsTo') {
+                $rel->setType($row['type']);
+                $rel->setAllowHasMany((bool) $row['allow_has_many']);
+                $rel->setIsInner((bool) $row['is_inner']);
+            }
 
-            $relations->setTable($model);
-            $relations->setRelationDetails($relationDetails);
+            if ($row['rd_id']) {
+                $relationDetails->setId($row['rd_id']);
+                $relationDetails->setRelation($rel);
+                $relationDetails->setTable($model);
+                $relationDetails->setRole($row['role']);
+                $relationDetails->setKeyField($row['key_field']);
+                $relationDetails->setHasMany($row['hasMany']);
+                if ($relationDetails->getRole() == 'belongsTo') {
 
-                $model->setBelongsTo($relations);
-            }            
+                    $relations->setTable($model);
+                    $relations->setRelationDetails($relationDetails);
 
+                    $model->setBelongsTo($relations);
+                }
+            }
 
 //            $getData = $this->getData($model, $data);
- //           $model->setData();
+            //           $model->setData();
             //print_r($model);
 
             $tableDTO = new TableDTO;
@@ -87,7 +91,7 @@ class Read
             $tableDTO->setData($model->getData()->getFields());
 
             //$rowList[$row['id']] = $tableDTO;
-            $rowList[$row['id']] = $model;
+            $rowList[$row['id']] = $tableDTO;
         }
 //   \mysqli_free_result($q);
 
@@ -95,31 +99,32 @@ class Read
 
     }
 
-    public function getDefaultFields($table) {
+    public function getDefaultFields($table)
+    {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-    $query = "SHOW COLUMNS FROM $table";
-    $q = $db->query($query);
-    $fields = [];
-    while ($row = $q->fetch_assoc()) {
-        if (empty($row['Key'])) {
-            $field = new Field();
-            $field->setName($row['Field']);
-            $field->setType($row['Type']);
-            $fields[$row['Field']] = $field;
-        }
-    }
-    return $fields;
-}
-/*     public function getData($model, $data)
-    {
+        $query = "SHOW COLUMNS FROM $table";
+        $q = $db->query($query);
         $fields = [];
-        for ($i = 0; $i < count($fields); $i++) {
-            $field = new Field();
-            $field->setName();
-
+        while ($row = $q->fetch_assoc()) {
+            if (empty($row['Key'])) {
+                $field = new Field();
+                $field->setName($row['Field']);
+                $field->setType($row['Type']);
+                $fields[$row['Field']] = $field;
+            }
         }
+        return $fields;
     }
+/*     public function getData($model, $data)
+{
+$fields = [];
+for ($i = 0; $i < count($fields); $i++) {
+$field = new Field();
+$field->setName();
+
+}
+}
  */
     public function req($r)
     {
