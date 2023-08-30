@@ -5,14 +5,14 @@ require_once 'Autoload.php';
 use \Controller\Table as TableController;
 use \Model\Table;
 
-$request = explode('/', $_SERVER['PATH_INFO']);
+$request = isset($_SERVER['PATH_INFO']) ?  explode('/', $_SERVER['PATH_INFO']) : [];
 
 echo 'Hello world!';
 echo '<hr>';
 
 $tc = new TableController();
 
-$model = new Table(true);
+$model = new Table(null, true);
 echo $model->hello;
 echo '<hr>';
 echo '<pre>';
@@ -21,6 +21,7 @@ echo '</pre>';
 echo '<pre>';
 print_r($tc->getTables($model));
 echo '</pre>';
+
 /*
 $model->setId(1);
 $model->setName('table');

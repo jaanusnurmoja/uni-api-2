@@ -5,6 +5,10 @@ class TableDTO
     public $id;
     public $name;
     public $pk;
+    public $data;
+    public $belongsTo;
+    public $hasMany;
+    public $hasManyAndBelongsTo;
 
     /**
      * Get the value of id
@@ -58,5 +62,49 @@ class TableDTO
         $this->pk = $pk;
 
         return $this;
+    }
+
+    public function getData() {
+    	return $this->data;
+    }
+
+    /**
+    * @param $data
+    */
+    public function setData($data) {
+    	$this->data = $data;
+    }
+
+    public function getBelongsTo() {
+    	return $this->belongsTo;
+    }
+
+    /**
+    * @param $belongsTo
+    */
+    public function setBelongsTo($belongsTo) {
+    	$this->belongsTo = $belongsTo;
+    }
+
+    public function getHasMany() {
+    	return $this->hasMany;
+    }
+
+    /**
+    * @param $hasMany
+    */
+    public function setHasMany($hasMany) {
+    	$this->hasMany = $hasMany;
+    }
+
+    public function getHasManyAndBelongsTo() {
+    	return $this->hasManyAndBelongsTo;
+    }
+
+    /**
+    * @param $hasManyAndBelongsTo
+    */
+    public function setHasManyAndBelongsTo($hasManyAndBelongsTo) {
+    	$this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 }
