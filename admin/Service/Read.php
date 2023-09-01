@@ -67,12 +67,7 @@ class Read
             //$relations->setTable($model);
             $relations->setRelationDetails($relationDetails);
 
-                    $relations->setTable($model);
-                    $relations->setRelationDetails($relationDetails);
-
-                    $model->setBelongsTo($relations);
-                }
-            }
+            $model->setBelongsTo($relations);
 
 //            $getData = $this->getData($model, $data);
             //           $model->setData();
@@ -84,8 +79,8 @@ class Read
             $tableDTO->setPk($model->getPk());
             $tableDTO->setData($model->getData()->getFields());
 
-            //$rowList[$row['id']] = $tableDTO;
-            $rowList[$row['rowid']] = $tableDTO;
+            //$rowList[$row['id']] = $model;
+            $rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
 
