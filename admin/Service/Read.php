@@ -31,7 +31,7 @@ class Read
             $where = ' WHERE' . implode(' AND', $w);
         }
 
-        $query = "SELECT t.*, f.id as fid, f.name as field, rd.id as rd_id, rd.*, r.id as rid, r.* FROM models t
+        $query = "SELECT t.id as rowid, t.*, f.id as fid, f.name as field, rd.id as rd_id, rd.*, r.id as rid, r.* FROM models t
         LEFT JOIN fields f ON f.models_id = t.id
         LEFT JOIN relation_details rd ON rd.models_id = t.id
         LEFT JOIN relations r ON r.id = rd.relations_id
@@ -46,12 +46,12 @@ class Read
             $relationDetails = new RelationDetails();
             $rel = new Relation();
             //$r = new \Model\Table();
-            $model->setId($row['id']);
+            $model->setId($row['rowid']);
             $model->setName($row['name']);
             $model->setPk($row['pk']);
             $data = new Data();
             $data->setTable($model);
-            if ($row['data'] == 'default') {
+            if ($row['field_data'] == 'default') {
                 $fields = $this->getDefaultFields($row['name']);
                 $data->setFields($fields);                
             }
@@ -69,7 +69,7 @@ class Read
             $relationDetails->setHasMany($row['hasMany']);
             if ($relationDetails->getRole() == 'belongsTo') {
 
-            $relations->setTable($model);
+            //$relations->setTable($model);
             $relations->setRelationDetails($relationDetails);
 
                 $model->setBelongsTo($relations);
@@ -87,7 +87,7 @@ class Read
             $tableDTO->setData($model->getData()->getFields());
 
             //$rowList[$row['id']] = $tableDTO;
-            $rowList[$row['id']] = $model;
+            $rowList[$row['rowid']] = $tableDTO;
         }
 //   \mysqli_free_result($q);
 
