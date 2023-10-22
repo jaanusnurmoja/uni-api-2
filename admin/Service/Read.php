@@ -90,8 +90,23 @@ class Read
             $rowList[$row['rowid']] = $tableDTO;
         }
 //   \mysqli_free_result($q);
+        $listDTO = new ListDTO($rowList);
 
-        return new ListDTO($rowList);
+        foreach($listDTO->list as $dtoRow) {
+            $hasMany = [];
+            foreach ($relations->getRelationDetails() as $rels) {
+                print_r($dtoRow->id);
+                if ($rels->getTable()->getId() == $dtoRow->id) {
+                    array_push($hasMany, $rels);
+                }
+            }
+            if (!empty($hasMany)) {
+                $dtoRow->hasMany = $hasMany;
+            }
+        }
+
+        return $listDTO;
+        //return $relations;
 
     }
 
