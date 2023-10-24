@@ -8,6 +8,7 @@ use \Model\Field;
 use Model\RelationDetails;
 use Model\Relations;
 use Model\Relation;
+use Model\Table;
 
 class Read
 {
@@ -18,7 +19,7 @@ class Read
         return new mysqli($host, $user, $pass, $dbname);
     }
 
-    public function getTables($model = null, $params = null)
+    public function getTables(Table $model = null, $params = null, Relation $rel = null, RelationDetails $relationDetails = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
@@ -39,60 +40,64 @@ class Read
 
         $q = $db->query($query);
 
-        $relations = new Relations();
         $rowList = [];
+        $rowsDebug = [];
 
         while ($row = $q->fetch_assoc()) {
-            $relationDetails = new RelationDetails();
+            unset($row['id']);
+            $rowsDebug[] = $row;
+            while ($row['rd_id'] != null && (empty($relationDetails) || $relationDetails->getId() != $row['rd_id'])) {
+                $relationDetails = new RelationDetails();
             $rel = new Relation();
-            //$r = new \Model\Table();
-            $model->setId($row['rowid']);
-            $model->setName($row['name']);
-            $model->setPk($row['pk']);
-            $data = new Data();
-            $data->setTable($model);
-            if ($row['field_data'] == 'default') {
-                $fields = $this->getDefaultFields($row['name']);
-                $data->setFields($fields);                
+                $rel->setId($row['rid']);
+                $rel->setType($row['type']);
+                $rel->setAllowHasMany((bool) $row['allow_has_many']);
+                $rel->setIsInner($row['is_inner']);
+
+                $relationDetails->setId($row['rd_id']);
+                $relationDetails->setRelation($rel);
+                $relationDetails->setRole($row['role']);
+                $relationDetails->setKeyField($row['key_field']);
+                $relationDetails->setHasMany($row['hasMany']);
             }
-            $model->setData($data);
-            $rel->setId($row['rid']);
-            $rel->setType($row['type']);
-            $rel->setAllowHasMany((bool) $row['allow_has_many']);
-            $rel->setIsInner($row['is_inner']);
+            if (empty($model->getId()) || $model->getId() != $row['rowid']) {
+                $model = new Table();
+                $model->setId($row['rowid']);
+                $model->setName($row['name']);
+                $model->setPk($row['pk']);
+                $data = new Data();
+                $data->setTable($model);
+                if ($row['field_data'] == 'default') {
+                    $fields = $this->getDefaultFields($row['name']);
+                    $data->setFields($fields);                
+                }
+                $model->setData($data);
 
-            $relationDetails->setId($row['rd_id']);
-            $relationDetails->setRelation($rel);
-            $relationDetails->setTable($model);
-            $relationDetails->setRole($row['role']);
-            $relationDetails->setKeyField($row['key_field']);
-            $relationDetails->setHasMany($row['hasMany']);
-            if ($relationDetails->getRole() == 'belongsTo') {
+            }
+                $relationDetails->setTable($model);
+            //if (!($relationDetails->getId() == $row['rd_id']) && $row['rd_id'] != null) {
+                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
 
-            //$relations->setTable($model);
-            $relations->setRelationDetails($relationDetails);
-
-                $model->setBelongsTo($relations);
-            }            
+                    $model->addRelationDetails($relationDetails);
+                }
+            //}
 
 
-//            $getData = $this->getData($model, $data);
- //           $model->setData();
-            //print_r($model);
+
 
             $tableDTO = new TableDTO;
             $tableDTO->setId($model->getId());
             $tableDTO->setName($model->getName());
             $tableDTO->setPk($model->getPk());
             $tableDTO->setData($model->getData()->getFields());
+            $tableDTO->setBelongsTo($model->getRelationDetails());
 
             //$rowList[$row['id']] = $tableDTO;
-            $rowList[$row['rowid']] = $tableDTO;
+            $rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
-        $listDTO = new ListDTO($rowList);
-
-        foreach($listDTO->list as $dtoRow) {
+/*
+        foreach($rowList as $dtoRow) {
             $hasMany = [];
             foreach ($relations->getRelationDetails() as $rels) {
                 print_r($dtoRow->id);
@@ -104,7 +109,8 @@ class Read
                 $dtoRow->hasMany = $hasMany;
             }
         }
-
+*/
+        $listDTO = new ListDTO($rowList);
         return $listDTO;
         //return $relations;
 

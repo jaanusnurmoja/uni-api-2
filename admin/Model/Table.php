@@ -1,5 +1,7 @@
 <?php namespace Model;
 
+use ArrayIterator;
+
 class Table
 {
     public $hello;
@@ -8,9 +10,7 @@ class Table
     public $name;
     public $pk = 'id';
     public Data $data;
-    public Relations $belongsTo;
-    public Relations $hasMany;
-    public Relations $hasManyAndBelongsTo;
+    public $relationDetails = [];
 
     public function __construct($id = null, $hello = false)
     {
@@ -75,57 +75,22 @@ class Table
         $this->data = $data;
     }
 
+
     /**
-     * @return Relations
-     */
-    public function getBelongsTo(): Relations
-    {
-        return $this->belongsTo;
+    * @return array
+    */
+    public function getRelationDetails(): array {
+    	return $this->relationDetails;
     }
 
     /**
-     * @param Relations $belongsTo
-     */
-    public function setBelongsTo(Relations $belongsTo): void
-    {
-        $this->belongsTo = $belongsTo;
+    * @param array $relationDetails
+    */
+    public function setRelationDetails(array $relationDetails): void {
+    	$this->relationDetails = $relationDetails;
     }
 
-    /**
-     * @return Relations
-     */
-    public function getHasMany(): Relations
-    {
-        return $this->hasMany;
-    }
-
-    /**
-     * @param Relations $hasMany
-     */
-    public function setHasMany(Relations $hasMany): void
-    {
-        $this->hasMany = $hasMany;
-    }
-
-    /**
-     * @return Relations
-     */
-    public function getHasManyAndBelongsTo(): Relations
-    {
-        return $this->hasManyAndBelongsTo;
-    }
-
-    /**
-     * @param Relations $hasManyAndBelongsTo
-     */
-    public function setHasManyAndBelongsTo(Relations $hasManyAndBelongsTo): void
-    {
-        $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
-    }
-
-    public function clean()
-    {
-        unset($this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo);
-        return $this;
+    public function addRelationDetails(RelationDetails $relationDetails) {
+        array_push($this->relationDetails, $relationDetails);
     }
 }

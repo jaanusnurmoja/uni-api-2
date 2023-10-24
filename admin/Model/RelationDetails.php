@@ -3,13 +3,21 @@
 class RelationDetails
 {
 
-    private int $id;
+    private ?int $id = 0;
     private Relation $relation;
     private $role;
     private $keyField;
     private $hasMany;
-    private Table $table;
+    public Table $table;
 
+    public function __construct(?int $id = null) {
+        if ($id !== null) {
+            $this->id = $id;
+        }
+        if (isset($this->id) && is_numeric($this->id)) {
+            return $this;
+        }
+    }
     /**
      * Get the value of id
      */
