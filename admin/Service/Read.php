@@ -19,7 +19,7 @@ class Read
         return new mysqli($host, $user, $pass, $dbname);
     }
 
-    public function getTables(Table $model = null, $params = null, Relation $rel = null, RelationDetails $relationDetails = null)
+    public function getTables(Table $model = null, $params = null, Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
@@ -48,7 +48,7 @@ class Read
             $rowsDebug[] = $row;
             while ($row['rd_id'] != null && (empty($relationDetails) || $relationDetails->getId() != $row['rd_id'])) {
                 $relationDetails = new RelationDetails();
-            $rel = new Relation();
+                $rel = new Relation();
                 $rel->setId($row['rid']);
                 $rel->setType($row['type']);
                 $rel->setAllowHasMany((bool) $row['allow_has_many']);
@@ -69,30 +69,27 @@ class Read
                 $data->setTable($model);
                 if ($row['field_data'] == 'default') {
                     $fields = $this->getDefaultFields($row['name']);
-                    $data->setFields($fields);                
+                    $data->setFields($fields);
                 }
                 $model->setData($data);
 
             }
                 $relationDetails->setTable($model);
-            //if (!($relationDetails->getId() == $row['rd_id']) && $row['rd_id'] != null) {
                 if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
 
                     $model->addRelationDetails($relationDetails);
                 }
-            //}
 
-
-
-
-            $tableDTO = new TableDTO;
-            $tableDTO->setId($model->getId());
-            $tableDTO->setName($model->getName());
-            $tableDTO->setPk($model->getPk());
-            $tableDTO->setData($model->getData()->getFields());
-            $tableDTO->setBelongsTo($model->getRelationDetails());
-
-            //$rowList[$row['id']] = $tableDTO;
+/*
+if (empty($tableDTO) || $tableDTO->getId() != $row['rowid']) {
+    $tableDTO = new TableDTO();
+    $tableDTO->setId($model->getId());
+    $tableDTO->setName($model->getName());
+    $tableDTO->setPk($model->getPk());
+    $tableDTO->setData($model->getData()->getFields());
+    $tableDTO->setBelongsTo($model->getRelationDetails());
+}
+*/
             $rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
