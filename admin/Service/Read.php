@@ -59,16 +59,17 @@ class Read
                 $relationDetails->setRole($row['role']);
                 $relationDetails->setKeyField($row['key_field']);
                 $relationDetails->setHasMany($row['hasMany']);
+                $relationDetails->setOtherTable($row['other_table']);
             }
             if (empty($model->getId()) || $model->getId() != $row['rowid']) {
                 $model = new Table();
                 $model->setId($row['rowid']);
-                $model->setName($row['name']);
+                $model->setName($row['table_name']);
                 $model->setPk($row['pk']);
                 $data = new Data();
                 $data->setTable($model);
                 if ($row['field_data'] == 'default') {
-                    $fields = $this->getDefaultFields($row['name']);
+                    $fields = $this->getDefaultFields($row['table_name']);
                     $data->setFields($fields);
                 }
                 $model->setData($data);
