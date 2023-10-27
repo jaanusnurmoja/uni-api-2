@@ -3,12 +3,13 @@
 class RelationDetails
 {
 
-    private ?int $id = 0;
-    private Relation $relation;
-    private $role;
-    private $keyField;
-    private $hasMany;
+    public ?int $id = 0;
+    public Relation $relation;
+    public $role;
+    public $keyField;
+    public $hasMany;
     public Table $table;
+    public $otherTable;
 
     public function __construct(?int $id = null) {
         if ($id !== null) {
@@ -124,5 +125,16 @@ class RelationDetails
         $this->table = $table;
 
         return $this;
+    }
+
+    public function getOtherTable() {
+    	return $this->otherTable;
+    }
+
+    /**
+    * @param $otherTable
+    */
+    public function setOtherTable($otherTable) {
+    	$this->otherTable = $otherTable;
     }
 }

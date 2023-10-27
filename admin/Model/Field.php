@@ -3,10 +3,10 @@ namespace Model;
 
 class Field
 {
-    private $id;
-    private $name;
-    private $type;
-    private $htmlDefaults;
+    public $id;
+    public $name;
+    public $type;
+    public $htmlDefaults;
 
     public function getId()
     {
