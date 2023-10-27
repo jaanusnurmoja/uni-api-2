@@ -61,7 +61,7 @@ class Read
                 $relationDetails->setHasMany($row['hasMany']);
                 $relationDetails->setOtherTable($row['other_table']);
             }
-            if (empty($model->getId()) || $model->getId() != $row['rowid']) {
+            if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
                 $model->setName($row['table_name']);
@@ -91,7 +91,8 @@ if (empty($tableDTO) || $tableDTO->getId() != $row['rowid']) {
     $tableDTO->setBelongsTo($model->getRelationDetails());
 }
 */
-            $rowList[$row['rowid']] = $model;
+            $rowList[$row['rowid']] = new TableDTO($model);
+            //$rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
 /*

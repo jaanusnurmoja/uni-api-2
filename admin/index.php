@@ -15,11 +15,12 @@ $tc = new TableController();
 $model = new Table(null, true);
 echo $model->hello;
 echo '<hr>';
+echo 'Nüüd on uutmoodi: <hr>';
 echo '<pre>';
 print_r($tc->pathParams($request));
 echo '</pre>';
 echo '<pre>';
-print_r($tc->getTables($model));
+print_r($tc->getTables());
 echo '</pre>';
 
 /*

@@ -10,7 +10,7 @@ class Table
     public $name;
     public $pk = 'id';
     public Data $data;
-    public $relationDetails = [];
+    public array $relationDetails = [];
 
     public function __construct($id = null, $hello = false)
     {

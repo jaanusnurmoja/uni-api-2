@@ -1,14 +1,37 @@
 <?php namespace DTO;
-
+use \Model\Table;
 class TableDTO
 {
     public $id;
     public $name;
     public $pk;
     public $data;
-    public $belongsTo;
-    public $hasMany;
-    public $hasManyAndBelongsTo;
+    public array $belongsTo = [];
+    public array $hasMany = [];
+    public array $hasManyAndBelongsTo = [];
+
+    public function __construct(Table $model) {
+        $this->id = $model->getId();
+        $this->name = $model->getName();
+        $this->pk = $model->getPk();
+        $this->data = $model->getData();
+        unset($this->data->table);
+        foreach ($model->getRelationDetails() as $rdRow) {
+            
+            unset($rdRow->table);
+            if ($rdRow->getRole() == 'belongsTo') {
+                
+                array_push($this->belongsTo, $rdRow);
+            }
+            if ($rdRow->getRole() == 'hasMany') {
+                array_push($this->hasMany, $rdRow);
+            }
+            if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
+                array_push($this->hasManyAndBelongsTo, $rdRow);
+            }
+        }
+
+    }
 
     /**
      * Get the value of id
