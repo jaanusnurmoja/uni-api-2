@@ -10,7 +10,7 @@ class TableDTO
     public array $hasMany = [];
     public array $hasManyAndBelongsTo = [];
 
-    public function __construct(Table $model = null) {
+    public function __construct(Table $model) {
         $this->id = $model->getId();
         $this->name = $model->getName();
         $this->pk = $model->getPk();
