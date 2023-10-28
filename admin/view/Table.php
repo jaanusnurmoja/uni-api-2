@@ -10,7 +10,7 @@ class Table
     public function tableDetails()
     {
         echo '<h1>' . $this->tableSingleOrList->name . '</h1>';
-        echo '<table>';
+        echo '<table class="table-warning table-striped">';
 
         foreach ($this->tableSingleOrList as $key => $value) {
             if (!is_object($value) && !is_array($value)) {
@@ -40,13 +40,13 @@ foreach ($field as $k => $v) {
             ?>
 
 <h1>Tabelid</h1>
-<table>
+<table class="table table-success table-striped">
     <thead>
         <tr>
             <?php
 $thead = get_object_vars($this->tableSingleOrList[1]);
             foreach ($thead as $key => $value) {
-                echo "<td>" . $key . "</td>";
+                echo "<th>" . $key . "</th>";
 
             }
             ?>
