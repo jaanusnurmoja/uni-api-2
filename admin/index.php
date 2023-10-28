@@ -16,12 +16,13 @@ $r = $tc->pathParams();
 if (isset($r[1]) && $r[1] == 'tables') {
     if (isset($r[2])) {
         if (isset($r[3]) && $r[3] == 'fields' && isset($r[4])) {
-            echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
+            echo json_encode($tc->getField($r[2]), JSON_PRETTY_PRINT);
         } else {
-            echo json_encode($tc->getTableByIdOrName(), JSON_PRETTY_PRINT);
+            $key = is_numeric($r[2]) ? 'id' : 'name';
+            $tc->getTableByIdOrName($key, $r[2]);
         }
     } else {
-        echo json_encode($tc->getTables());
+        echo $tc->getTables();
     }
 }
 else {
