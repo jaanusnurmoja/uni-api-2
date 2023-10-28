@@ -11,13 +11,23 @@ $tc = new TableController();
 //echo '<pre>';
 //print_r($tc->pathParams($request));
 //echo '</pre>';
-$r = $tc->pathParams($request);
+$r = $tc->pathParams();
 
 if (isset($r[1]) && $r[1] == 'tables') {
-    echo json_encode($tc->getTables());
+    if (isset($r[2])) {
+        if (isset($r[3]) && $r[3] == 'fields' && isset($r[4])) {
+            echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
+        } else {
+            echo json_encode($tc->getTableByIdOrName(), JSON_PRETTY_PRINT);
+        }
+    } else {
+        echo json_encode($tc->getTables());
+    }
 }
 else {
-    echo '{"request":';
+    echo '{
+        "juhend":"lisa url-ile tables/tabelinimi/fields/väljanimi",
+        "request":';
         echo json_encode($tc->pathParams($request));
         echo ',';
         echo '"data":';

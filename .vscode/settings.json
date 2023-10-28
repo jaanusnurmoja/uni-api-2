@@ -1,4 +1,4 @@
 {
-    "php.suggest.basic": true,
+    "php.suggest.basic": false,
     "php.validate.enable": false
 }
