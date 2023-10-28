@@ -1,5 +1,7 @@
 <?php namespace DTO;
+
 use \Model\Table;
+
 class TableDTO
 {
     public $id;
@@ -10,17 +12,18 @@ class TableDTO
     public array $hasMany = [];
     public array $hasManyAndBelongsTo = [];
 
-    public function __construct(Table $model) {
-        $this->id = $model->getId();
-        $this->name = $model->getName();
-        $this->pk = $model->getPk();
-        $this->data = $model->getData();
+    public function __construct(Table $model)
+    {
+        $this->id = $model->getId() ? $model->getId() : null;
+        $this->name = $model->getName() ? $model->getName() : null;
+        $this->pk = $model->getPk() ? $model->getPk() : null;
+        $this->data = $model->getData() ? $model->getData() : null;
         unset($this->data->table);
         foreach ($model->getRelationDetails() as $rdRow) {
-            
+
             unset($rdRow->table);
             if ($rdRow->getRole() == 'belongsTo') {
-                
+
                 array_push($this->belongsTo, $rdRow);
             }
             if ($rdRow->getRole() == 'hasMany') {
@@ -87,47 +90,55 @@ class TableDTO
         return $this;
     }
 
-    public function getData() {
-    	return $this->data;
+    public function getData()
+    {
+        return $this->data;
     }
 
     /**
-    * @param $data
-    */
-    public function setData($data) {
-    	$this->data = $data;
+     * @param $data
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
     }
 
-    public function getBelongsTo() {
-    	return $this->belongsTo;
-    }
-
-    /**
-    * @param $belongsTo
-    */
-    public function setBelongsTo($belongsTo) {
-    	$this->belongsTo = $belongsTo;
-    }
-
-    public function getHasMany() {
-    	return $this->hasMany;
+    public function getBelongsTo()
+    {
+        return $this->belongsTo;
     }
 
     /**
-    * @param $hasMany
-    */
-    public function setHasMany($hasMany) {
-    	$this->hasMany = $hasMany;
+     * @param $belongsTo
+     */
+    public function setBelongsTo($belongsTo)
+    {
+        $this->belongsTo = $belongsTo;
     }
 
-    public function getHasManyAndBelongsTo() {
-    	return $this->hasManyAndBelongsTo;
+    public function getHasMany()
+    {
+        return $this->hasMany;
     }
 
     /**
-    * @param $hasManyAndBelongsTo
-    */
-    public function setHasManyAndBelongsTo($hasManyAndBelongsTo) {
-    	$this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
+     * @param $hasMany
+     */
+    public function setHasMany($hasMany)
+    {
+        $this->hasMany = $hasMany;
+    }
+
+    public function getHasManyAndBelongsTo()
+    {
+        return $this->hasManyAndBelongsTo;
+    }
+
+    /**
+     * @param $hasManyAndBelongsTo
+     */
+    public function setHasManyAndBelongsTo($hasManyAndBelongsTo)
+    {
+        $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 }

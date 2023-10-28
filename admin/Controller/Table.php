@@ -1,41 +1,51 @@
 <?php namespace Controller;
 
 use \Service\Read;
-use \View\Table as TableDetails;
+use \View\Table as TableListOrDetails;
 
 //use function View\tableDetails;
 
 class Table
 {
-    
-    public function getTables($r = null)
+
+    public function getTables($api = false)
     {
         $read = new Read;
-        return $read->getTables($r);
-        //return 'Siin pole midagi';
+        $tableList = new TableListOrDetails($read->getTables()->list);
+        if ($api === true) {
+            return $read->getTables()->list;
+        } else {
+            return $tableList->tableList();
+        }
     }
 
-    public function getTableByIdOrName() {
+    public function getTableByIdOrName($api = false)
+    {
         global $request;
-        foreach($this->getTables()->list as $table) {
-        $tableDetails = new TableDetails($table);
-            if(in_array($request[2], [$table->getId(), $table->getName()])) {
+        foreach ($this->getTables(true) as $table) {
+            $tableDetails = new TableListOrDetails($table);
+            if (in_array($request[2], [$table->getId(), $table->getName()])) {
                 if (!isset($request[3])) {
-                    return $tableDetails->tableDetails();
-                }
-                else {
-                    return $table;
+                    if ($api === true) {
+                        return $table;
+                    } else {
+                        return $tableDetails->tableDetails();
+                    }
                 }
             }
         }
     }
 
-    public function getField($table = null) {
+    public function getField($table = null)
+    {
         global $request;
-        if ($table == null) $table = $this->getTableByIdOrName();
-        if ($request[3] == "fields")  {
-            foreach($table->getData()->getFields() as $field) {
-                if($field->getName() == $request[4]) {
+        if ($table == null) {
+            $table = $this->getTableByIdOrName();
+        }
+
+        if ($request[3] == "fields") {
+            foreach ($table->getData()->getFields() as $field) {
+                if ($field->getName() == $request[4]) {
                     return $field;
                 }
             }
