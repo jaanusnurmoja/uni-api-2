@@ -31,13 +31,13 @@ if (!$api) {
         <div class="container-fluid">
             <ul class="navbar-nav nav-pills list-group-horizontal">
                 <li class="nav-item">
-                    <a class="navbar-brand" href=".">Admin</a>
+                    <a class="navbar-brand" href="/uni-api/admin">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="navbar-brand" href="./tables">Tabelid</a>
+                    <a class="navbar-brand" href="/uni-api/admin/tables">Tabelid</a>
                 </li>
             </ul>
-            <a class="navbar-brand" href="..">Sait</a>
+            <a class="navbar-brand" href="/uni-api">Sait</a>
 
         </div>
     </nav>
