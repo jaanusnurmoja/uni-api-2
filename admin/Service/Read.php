@@ -18,12 +18,12 @@ class Read
         return new mysqli($host, $user, $pass, $dbname);
     }
 
-    public function getTables(Table $model = null, $params = null, Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
+    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
         $where = '';
-        if ($params) {
+        if (!empty($params)) {
             $w = [];
             foreach ($params as $key => $value) {
                 $w[] = " $key = '$value'";
@@ -36,7 +36,8 @@ class Read
         LEFT JOIN relation_details rd ON rd.models_id = t.id
         LEFT JOIN relations r ON r.id = rd.relations_id
         $where";
-
+        print_r($params);
+        print_r($query);
         $q = $db->query($query);
 
         $rowList = [];
