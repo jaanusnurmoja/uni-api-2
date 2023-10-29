@@ -22,16 +22,14 @@ class Table
     public function getTableByIdOrName($api = false)
     {
         global $request;
+        $read = new Read;
         $key = is_numeric($request[2]) ? 'rowid' : 'table_name';
-        foreach ($this->getTables(true, [$key => $request[2]]) as $table) {
-            $tableDetails = new TableListOrDetails($table);
-            if (in_array($request[2], [$table->getId(), $table->getName()])) {
-                if ($api === true) {
-                    return $table;
-                } else {
-                    $tableDetails->tableDetails();
-                }
-            }
+        $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
+        $tableDetails = new TableListOrDetails($table);
+        if ($api === true) {
+            return $table;
+        } else {
+            $tableDetails->tableDetails();
         }
     }
 
