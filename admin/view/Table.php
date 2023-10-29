@@ -60,7 +60,7 @@ foreach ($this->tableSingleOrList as $row) {
                 foreach ($row as $key => $value) {
                     if ($key == 'name') {
                         $url = isset($request[1]) ? $key : "tables/$value";
-                        $value = "<a href='$url'>$value</a>";
+                        $value = "<a href='$url' class='link-dark'>$value</a>";
                     }
                     if ($key == "data") {
                         $value = $value->fields;
