@@ -5,10 +5,9 @@ use \DTO\ListDTO;
 use \DTO\TableDTO;
 use \Model\Data;
 use \Model\Field;
-use Model\RelationDetails;
-use Model\Relations;
-use Model\Relation;
-use Model\Table;
+use \Model\Relation;
+use \Model\RelationDetails;
+use \Model\Table;
 
 class Read
 {
@@ -75,71 +74,72 @@ class Read
                 $model->setData($data);
 
             }
-                $relationDetails->setTable($model);
-                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+            $relationDetails->setTable($model);
+            if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
 
-                    $model->addRelationDetails($relationDetails);
-                }
+                $model->addRelationDetails($relationDetails);
+            }
 
 /*
 if (empty($tableDTO) || $tableDTO->getId() != $row['rowid']) {
-    $tableDTO = new TableDTO();
-    $tableDTO->setId($model->getId());
-    $tableDTO->setName($model->getName());
-    $tableDTO->setPk($model->getPk());
-    $tableDTO->setData($model->getData()->getFields());
-    $tableDTO->setBelongsTo($model->getRelationDetails());
+$tableDTO = new TableDTO();
+$tableDTO->setId($model->getId());
+$tableDTO->setName($model->getName());
+$tableDTO->setPk($model->getPk());
+$tableDTO->setData($model->getData()->getFields());
+$tableDTO->setBelongsTo($model->getRelationDetails());
 }
-*/
+ */
             $rowList[$row['rowid']] = new TableDTO($model);
             //$rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
 /*
-        foreach($rowList as $dtoRow) {
-            $hasMany = [];
-            foreach ($relations->getRelationDetails() as $rels) {
-                print_r($dtoRow->id);
-                if ($rels->getTable()->getId() == $dtoRow->id) {
-                    array_push($hasMany, $rels);
-                }
-            }
-            if (!empty($hasMany)) {
-                $dtoRow->hasMany = $hasMany;
-            }
-        }
-*/
+foreach($rowList as $dtoRow) {
+$hasMany = [];
+foreach ($relations->getRelationDetails() as $rels) {
+print_r($dtoRow->id);
+if ($rels->getTable()->getId() == $dtoRow->id) {
+array_push($hasMany, $rels);
+}
+}
+if (!empty($hasMany)) {
+$dtoRow->hasMany = $hasMany;
+}
+}
+ */
         $listDTO = new ListDTO($rowList);
         return $listDTO;
         //return $relations;
 
     }
 
-    public function getDefaultFields($table) {
+    public function getDefaultFields($table)
+    {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-    $query = "SHOW COLUMNS FROM $table";
-    $q = $db->query($query);
-    $fields = [];
-    while ($row = $q->fetch_assoc()) {
-        if (empty($row['Key'])) {
-            $field = new Field();
-            $field->setName($row['Field']);
-            $field->setType($row['Type']);
-            $fields[$row['Field']] = $field;
-        }
-    }
-    return $fields;
-}
-/*     public function getData($model, $data)
-    {
+        $query = "SHOW COLUMNS FROM $table";
+        $q = $db->query($query);
         $fields = [];
-        for ($i = 0; $i < count($fields); $i++) {
-            $field = new Field();
-            $field->setName();
-
+        while ($row = $q->fetch_assoc()) {
+            if (empty($row['Key'])) {
+                $field = new Field();
+                $field->setName($row['Field']);
+                $field->setType($row['Type']);
+                $fields[$row['Field']] = $field;
+            }
         }
+        return $fields;
     }
+/*     public function getData($model, $data)
+{
+$fields = [];
+for ($i = 0; $i < count($fields); $i++) {
+$field = new Field();
+$field->setName();
+
+}
+}
  */
     public function req($r)
     {
