@@ -8,10 +8,10 @@ use \View\Table as TableListOrDetails;
 class Table
 {
 
-    public function getTables($api = false)
+    public function getTables($api = false, $props = array())
     {
         $read = new Read;
-        $tableList = new TableListOrDetails($read->getTables()->list);
+        $tableList = new TableListOrDetails($read->getTables(null, $props)->list);
         if ($api === true) {
             return $read->getTables()->list;
         } else {
@@ -22,15 +22,14 @@ class Table
     public function getTableByIdOrName($api = false)
     {
         global $request;
-        foreach ($this->getTables(true) as $table) {
-            $tableDetails = new TableListOrDetails($table);
-            if (in_array($request[2], [$table->getId(), $table->getName()])) {
-                if ($api === true) {
-                    return $table;
-                } else {
-                    $tableDetails->tableDetails();
-                }
-            }
+        $read = new Read;
+        $key = is_numeric($request[2]) ? 'rowid' : 'table_name';
+        $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
+        $tableDetails = new TableListOrDetails($table);
+        if ($api === true) {
+            return $table;
+        } else {
+            $tableDetails->tableDetails();
         }
     }
 
