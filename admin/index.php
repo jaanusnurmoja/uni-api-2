@@ -12,7 +12,8 @@ $tc = new TableController();
 //print_r($tc->pathParams($request));
 //echo '</pre>';
 
-?>
+if (!$api) {
+    ?>
 <!DOCTYPE html>
 <html lang="et">
 
@@ -26,14 +27,30 @@ $tc = new TableController();
 </head>
 
 <body>
+    <nav class="navbar sticky-top navbar-dark bg-dark">
+        <div class="container-fluid">
+            <ul class="navbar-nav nav-pills list-group-horizontal">
+                <li class="nav-item">
+                    <a class="navbar-brand" href=".">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="./tables">Tabelid</a>
+                </li>
+            </ul>
+            <a class="navbar-brand" href="..">Sait</a>
+
+        </div>
+    </nav>
+
     <div class="container">
         <?php
+}
 $r = $tc->pathParams();
 
-if (isset($r[1]) && $r[1] == 'tables') {
-    if (isset($r[2])) {
-        if (isset($r[3])) {
-            if ($r[3] == 'fields' && isset($r[4])) {
+if (!empty($r[1]) && $r[1] == 'tables') {
+    if (!empty($r[2])) {
+        if (!empty($r[3])) {
+            if ($r[3] == 'fields' && !empty($r[4])) {
                 echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
             }
         } else {
@@ -41,20 +58,18 @@ if (isset($r[1]) && $r[1] == 'tables') {
         }
     } else {
         echo json_encode($tc->getTables($api));
+
     }
 } else {
-    echo '{
-        "juhend":"lisa url-ile tables/tabelinimi/fields/väljanimi",
-        "request":';
-    echo json_encode($tc->pathParams($request));
-    echo ',';
-    echo '"data":';
-    echo json_encode($tc->getTables());
-    echo '}';
+    if (empty($r[1])) {
+        $tc->getTables($api);
+    }
 
 }
-?>
+if (!$api) {
+    ?>
     </div>
 </body>
 
 </html>
+<?php }?>

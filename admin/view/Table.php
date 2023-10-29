@@ -21,7 +21,8 @@ class Table
 <tr>
     <td><?php echo $key ?></td>
     <td>
-        <ul><?php
+        <ul>
+            <?php
 foreach ($field as $k => $v) {
                         echo "<li>$k: $v</li>";
                     }?></ul>

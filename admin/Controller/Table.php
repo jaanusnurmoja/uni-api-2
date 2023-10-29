@@ -15,7 +15,7 @@ class Table
         if ($api === true) {
             return $read->getTables()->list;
         } else {
-            return $tableList->tableList();
+            $tableList->tableList();
         }
     }
 
@@ -25,26 +25,22 @@ class Table
         foreach ($this->getTables(true) as $table) {
             $tableDetails = new TableListOrDetails($table);
             if (in_array($request[2], [$table->getId(), $table->getName()])) {
-                if (!isset($request[3])) {
-                    if ($api === true) {
-                        return $table;
-                    } else {
-                        return $tableDetails->tableDetails();
-                    }
+                if ($api === true) {
+                    return $table;
+                } else {
+                    $tableDetails->tableDetails();
                 }
             }
         }
     }
 
-    public function getField($table = null)
+    public function getField($api = false)
     {
         global $request;
-        if ($table == null) {
-            $table = $this->getTableByIdOrName();
-        }
+        $table = $this->getTableByIdOrName(true);
 
         if ($request[3] == "fields") {
-            foreach ($table->getData()->getFields() as $field) {
+            foreach ($table->data->getFields() as $field) {
                 if ($field->getName() == $request[4]) {
                     return $field;
                 }
