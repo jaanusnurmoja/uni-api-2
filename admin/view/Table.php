@@ -58,6 +58,10 @@ $thead = get_object_vars($this->tableSingleOrList[1]);
 foreach ($this->tableSingleOrList as $row) {
                 echo "<tr>";
                 foreach ($row as $key => $value) {
+                    if ($key == 'name') {
+                        $url = isset($request[1]) ? $key : "tables/$value";
+                        $value = "<a href='$url'>$value</a>";
+                    }
                     if ($key == "data") {
                         $value = $value->fields;
                     }
