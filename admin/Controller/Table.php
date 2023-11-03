@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use \Service\Read;
+use View\Form\NewTable;
 use \View\Table as TableListOrDetails;
 
 //use function View\tableDetails;
@@ -23,17 +24,33 @@ class Table
     {
         global $request;
         $read = new Read;
+        if ($request[2] != 'new') {
         $key = is_numeric($request[2]) ? 'rowid' : 'table_name';
-        $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
+        // $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
+        $table = $read->getTables(null, [$key => $request[2]]);
         $tableDetails = new TableListOrDetails($table);
         if ($api === true) {
             return $table;
         } else {
-            $tableDetails->tableDetails();
+            if (isset($request[3]) && $request[3] == 'edit') {
+                $tableDetails->edit->editTableForm();
+            }
+            else {
+                $tableDetails->tableDetails();
+            }
+        }
+            
         }
     }
 
-    public function getField($api = false)
+    public function newTable(){
+        $t = new \Model\Table();
+        $t->setId(0);
+            $newTable = new NewTable($t);
+            $newTable->newTableForm();
+    }
+
+    public function getField()
     {
         global $request;
         $table = $this->getTableByIdOrName(true);

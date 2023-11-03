@@ -4,7 +4,6 @@ use ArrayIterator;
 
 class Table
 {
-    public $hello;
 
     public $id;
     public $name;
@@ -12,10 +11,12 @@ class Table
     public Data $data;
     public array $relationDetails = [];
 
-    public function __construct($id = null, $hello = false)
+    public function __construct($id = null)
     {
-        if ($id == $this->id || $hello === true) {
-            $this->hello = 'I am an admin.';
+        if ($id == $this->id || $id == 0) {
+            if ( $id == 0 && empty($this->data)) {
+                $this->data = new Data();
+            }
             return $this;
         }
     }

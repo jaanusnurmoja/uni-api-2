@@ -47,21 +47,32 @@ if (!$api) {
 }
 $r = $tc->pathParams();
 
-if (!empty($r[1]) && $r[1] == 'tables') {
-    if (!empty($r[2])) {
-        if (!empty($r[3])) {
-            if ($r[3] == 'fields' && !empty($r[4])) {
+if (!empty($r['type']) && $r['type'] == 'tables') {
+    if (!empty($r['item'])) {
+        if (!empty($r['subtype'])) {
+            if ($r['subtype'] == 'fields' && !empty($r['subitem'])) {
                 echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
             }
+            else {
+                if ($r['subtype'] == 'edit') {
+                    $tc->getTableByIdOrName();
+                }
+            }
         } else {
-            echo json_encode($tc->getTableByIdOrName($api), JSON_PRETTY_PRINT);
+                if ($r['item'] == 'new') {
+                    echo 'new';
+                    $tc->newTable();
+                }
+                else {
+                    echo json_encode($tc->getTableByIdOrName($api), JSON_PRETTY_PRINT);
+                }
         }
     } else {
         echo json_encode($tc->getTables($api));
 
     }
 } else {
-    if (empty($r[1])) {
+    if (empty($r['type'])) {
         $tc->getTables($api);
     }
 

@@ -40,7 +40,8 @@ class Read
 
         $rowList = [];
         $rowsDebug = [];
-
+        $single = null;
+        
         while ($row = $q->fetch_assoc()) {
             unset($row['id']);
             $rowsDebug[] = $row;
@@ -89,7 +90,8 @@ $tableDTO->setData($model->getData()->getFields());
 $tableDTO->setBelongsTo($model->getRelationDetails());
 }
  */
-            $rowList[$row['rowid']] = new TableDTO($model);
+            $single = new TableDTO($model);           
+ $rowList[$row['rowid']] =$single; 
             //$rowList[$row['rowid']] = $model;
         }
 //   \mysqli_free_result($q);
@@ -107,8 +109,14 @@ $dtoRow->hasMany = $hasMany;
 }
 }
  */
-        $listDTO = new ListDTO($rowList);
-        return $listDTO;
+ if (!empty($params) && count($rowList) == 1) {
+    return $single;
+ } else {
+    return new ListDTO($rowList);
+ }
+ 
+// $listDTO = new ListDTO($rowList);
+ //       return $listDTO;
         //return $relations;
 
     }
@@ -140,10 +148,15 @@ $field->setName();
 }
 }
  */
-    public function req($r)
+    public function req($r = [])
     {
-        $r['debug'] = 'ohoohhooi';
-        return $r;
+        $new = [];
+        if (isset($r[1])) $new['type'] = $r[1];
+        if (isset($r[2])) $new['item'] = $r[2];
+        if (isset($r[3])) $new['subtype'] = $r[3];
+        if (isset($r[4])) $new['subitem']= $r[4];
+        $new['debug'] = 'ohoohhooi';
+        return $new;
     }
 
 }

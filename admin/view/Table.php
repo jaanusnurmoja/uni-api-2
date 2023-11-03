@@ -1,25 +1,32 @@
 <?php namespace View;
 
+use View\Form\EditTable;
+
 class Table
 {
     public $tableSingleOrList;
+    public $edit;
+    public $new;
+    
     public function __construct($tableSingleOrList)
     {
         $this->tableSingleOrList = $tableSingleOrList;
+        $this->edit = new EditTable($tableSingleOrList);
     }
     public function tableDetails()
     {
         echo '<h1>' . $this->tableSingleOrList->name . '</h1>';
-        echo '<table class="table-warning table-striped">';
+        echo '<table class="table table-warning table-striped">';
 
         foreach ($this->tableSingleOrList as $key => $value) {
             if (!is_object($value) && !is_array($value)) {
                 echo '<tr><td>' . $key . '</td><td>' . $value . '</td></tr>';
             } else {
                 if ($key == 'data') {
-                    foreach ($this->tableSingleOrList->data->fields as $key => $field) {?>
+                    echo '<tr><td colspan = "2"><h2>Andmeväljad</h2></td></tr>';
+                    foreach ($this->tableSingleOrList->data->fields as $fkey => $field) {?>
 <tr>
-    <td><?php echo $key ?></td>
+    <td><?php echo $fkey ?></td>
     <td>
         <ul>
             <?php
@@ -30,6 +37,15 @@ foreach ($field as $k => $v) {
 </tr>
 <?php
 }
+                }
+                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
+                    echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
+                    foreach ($value as $ak => $av) {
+                        foreach ($av as $rdKey => $rdValue) {
+                            if (is_object($rdValue)) $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
+                            echo "<tr><td>$rdKey</td><td>$rdValue</td></tr>";
+                        }
+                    }
                 }
             }
         }

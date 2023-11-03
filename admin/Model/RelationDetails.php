@@ -7,7 +7,7 @@ class RelationDetails
     public Relation $relation;
     public $role;
     public $keyField;
-    public $hasMany;
+    public bool $hasMany;
     public Table $table;
     public $otherTable;
 
@@ -94,7 +94,7 @@ class RelationDetails
     /**
      * Get the value of hasMany
      */
-    public function getHasMany()
+    public function getHasMany(): bool
     {
         return $this->hasMany;
     }

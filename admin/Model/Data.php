@@ -3,7 +3,7 @@
 class Data
 {
     public Table $table;
-    public $fields;
+    public $fields = [];
 
     /**
      * Get the value of table
