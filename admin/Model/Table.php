@@ -1,7 +1,5 @@
 <?php namespace Model;
 
-use ArrayIterator;
-
 class Table
 {
 

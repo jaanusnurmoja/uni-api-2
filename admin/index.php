@@ -60,7 +60,6 @@ if (!empty($r['type']) && $r['type'] == 'tables') {
             }
         } else {
                 if ($r['item'] == 'new') {
-                    echo 'new';
                     $tc->newTable();
                 }
                 else {

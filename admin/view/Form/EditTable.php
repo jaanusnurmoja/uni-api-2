@@ -38,7 +38,8 @@ class EditTable
             <td colspan=" 2">
                 <h2>Andmeväljad</h2>
             </td>
-        </tr> <?php foreach ($data->data->fields as $fkey => $field) {?>
+        </tr> <?php 
+        foreach ($data->data->fields as $fkey => $field) {?>
         <tr>
             <td><?php echo $fkey ?></td>
             <td>
