@@ -63,11 +63,20 @@ if (!empty($r['type']) && $r['type'] == 'tables') {
                     $tc->newTable();
                 }
                 else {
-                    echo json_encode($tc->getTableByIdOrName($api), JSON_PRETTY_PRINT);
+                    if ($api){
+                        echo json_encode($tc->getTableByIdOrName($api), JSON_PRETTY_PRINT);
+                    } else {
+                        $tc->getTableByIdOrName();
+                    }
                 }
         }
     } else {
-        echo json_encode($tc->getTables($api));
+        if ($api){
+            echo json_encode($tc->getTables($api), JSON_PRETTY_PRINT);
+        }
+        else {
+            $tc->getTables($api);
+        }
 
     }
 } else {
