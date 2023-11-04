@@ -67,12 +67,14 @@ $thead = get_object_vars($this->tableSingleOrList[1]);
 
             }
             ?>
+            <th>Muuda / Lisa</th>
         </tr>
     </thead>
     <tbody>
         <?php
 foreach ($this->tableSingleOrList as $row) {
                 echo "<tr>";
+                $url = '';
                 foreach ($row as $key => $value) {
                     if ($key == 'name') {
                         $url = isset($request[1]) ? $key : "tables/$value";
@@ -89,6 +91,7 @@ foreach ($this->tableSingleOrList as $row) {
                     }
                     echo '<td>' . $value . '</td>';
                 }
+                echo "<td><a href='$url/edit' class='link-dark'>Muuda</a></td>";
                 echo "</tr>";
             }
 
