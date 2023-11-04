@@ -6,8 +6,10 @@ class EditTable
     public $data;
     
     public function __construct($data = null) {
-        $read = new \Service\Read();
-        $this->relations = $read->getRelations();
+        $readRels = new \Controller\Table();
+        $list = new \DTO\ListDTO();
+        $readRels->getRelationsList($list);
+        $this->relations = $list->list;
         $this->data = $data;
     }
 

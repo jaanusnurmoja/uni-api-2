@@ -1,5 +1,6 @@
 <?php namespace Controller;
 
+use DTO\ListDTO;
 use \Service\Read;
 use \View\Form\NewTable;
 use \View\Table as TableListOrDetails;
@@ -64,9 +65,9 @@ class Table
         }
     }
 
-    public function getRelationsList() {
+    public function getRelationsList(ListDTO $listDTO) {
         $read = new Read();
-        return $read->getRelations();
+        $listDTO->__construct($read->getRelations());
     }
     
     public function pathParams()
