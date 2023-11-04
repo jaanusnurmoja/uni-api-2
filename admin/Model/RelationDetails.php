@@ -102,7 +102,7 @@ class RelationDetails
     /**
      * Set the value of hasMany
      */
-    public function setHasMany($hasMany): self
+    public function setHasMany(bool $hasMany): self
     {
         $this->hasMany = $hasMany;
 

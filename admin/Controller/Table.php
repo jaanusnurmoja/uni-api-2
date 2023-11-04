@@ -1,7 +1,7 @@
 <?php namespace Controller;
 
 use \Service\Read;
-use View\Form\NewTable;
+use \View\Form\NewTable;
 use \View\Table as TableListOrDetails;
 
 //use function View\tableDetails;
@@ -63,6 +63,12 @@ class Table
             }
         }
     }
+
+    public function getRelationsList() {
+        $read = new Read();
+        return $read->getRelations();
+    }
+    
     public function pathParams()
     {
         global $request;

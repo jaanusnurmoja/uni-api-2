@@ -80,45 +80,15 @@ class Read
                 $model->addRelationDetails($relationDetails);
             }
 
-/*
-if (empty($tableDTO) || $tableDTO->getId() != $row['rowid']) {
-$tableDTO = new TableDTO();
-$tableDTO->setId($model->getId());
-$tableDTO->setName($model->getName());
-$tableDTO->setPk($model->getPk());
-$tableDTO->setData($model->getData()->getFields());
-$tableDTO->setBelongsTo($model->getRelationDetails());
-}
- */
-            $single = new TableDTO($model);           
- $rowList[$row['rowid']] =$single; 
-            //$rowList[$row['rowid']] = $model;
+            $single = new TableDTO($model);
+            $rowList[$row['rowid']] =$single; 
         }
-//   \mysqli_free_result($q);
-/*
-foreach($rowList as $dtoRow) {
-$hasMany = [];
-foreach ($relations->getRelationDetails() as $rels) {
-print_r($dtoRow->id);
-if ($rels->getTable()->getId() == $dtoRow->id) {
-array_push($hasMany, $rels);
-}
-}
-if (!empty($hasMany)) {
-$dtoRow->hasMany = $hasMany;
-}
-}
- */
- if (!empty($params) && count($rowList) == 1) {
+if (!empty($params) && count($rowList) == 1) {
     return $single;
  } else {
     return new ListDTO($rowList);
  }
  
-// $listDTO = new ListDTO($rowList);
- //       return $listDTO;
-        //return $relations;
-
     }
 
     public function getDefaultFields($table)
@@ -138,16 +108,27 @@ $dtoRow->hasMany = $hasMany;
         }
         return $fields;
     }
-/*     public function getData($model, $data)
-{
-$fields = [];
-for ($i = 0; $i < count($fields); $i++) {
-$field = new Field();
-$field->setName();
 
-}
-}
- */
+ public function getRelations() {
+    $relations = [];
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+
+        $query = "SELECT * FROM relations";
+        $q = $db->query($query);
+
+        while ($row = $q->fetch_assoc()) {
+
+            $rel = new Relation();
+            $rel->setId($row['id']);
+            $rel->setType($row['type']);
+            $rel->setAllowHasMany((bool) $row['allow_has_many']);
+            $rel->setIsInner($row['is_inner']);
+            array_push($relations, $rel);
+
+        }
+    return $relations;
+ }
     public function req($r = [])
     {
         $new = [];
