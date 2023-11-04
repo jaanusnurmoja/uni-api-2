@@ -58,6 +58,14 @@ foreach ($field as $k => $v) {
 
 <h1>Tabelid</h1>
 <table class="table table-success table-striped">
+    <caption class="caption-top"><a class="btn btn-sm btn-success"
+            href="<?php echo isset($request[1]) ? '' : 'tables';?>/new">
+            <i class="bi bi-plus-warning bi-plus-lg"></i> Lisa uus</a></caption>
+    <caption class="caption-bottom"><a class="btn btn-sm btn-success"
+            href="<?php echo isset($request[1]) ? '' : 'tables';?>/new">
+            <i class="bi bi-plus-warning bi-plus-lg"></i> Lisa uus
+        </a>
+    </caption>
     <thead>
         <tr>
             <?php
@@ -67,7 +75,7 @@ $thead = get_object_vars($this->tableSingleOrList[1]);
 
             }
             ?>
-            <th>Muuda / Lisa</th>
+            <th>Muuda / Kustuta</th>
         </tr>
     </thead>
     <tbody>
@@ -91,7 +99,8 @@ foreach ($this->tableSingleOrList as $row) {
                     }
                     echo '<td>' . $value . '</td>';
                 }
-                echo "<td><a href='$url/edit' class='link-dark'>Muuda</a></td>";
+                echo "<td>
+                <a href='$url/edit' class='btn btn-sm btn-warning'>Muuda</a> | <a href='$url/delete' class='btn btn-sm btn-danger'>Kustuta</a>               </td>";
                 echo "</tr>";
             }
 
