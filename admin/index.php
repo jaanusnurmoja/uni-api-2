@@ -34,12 +34,6 @@ if (!empty($_SERVER['QUERY_STRING']))
 		}
 	}
 
-print_r($http.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
-
-
-//echo '<pre>';
-//print_r($tc->pathParams($request));
-//echo '</pre>';
 
 if (!$api) {
     ?>
