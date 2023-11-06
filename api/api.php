@@ -4,7 +4,7 @@ ini_set('display_errors', 0);
 
 error_reporting(0);
 
-require_once 'config.php';
+//require_once 'config.php';
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
@@ -13,7 +13,10 @@ $request = explode('/', $_SERVER['PATH_INFO']);
 $input = json_decode(file_get_contents('php://input'), true);
 
 // connect to the mysql database
-$link = mysqli_connect($host, $user, $pass, $dbname);
+$cnf = parse_ini_file('../config/connection.ini');
+$link = new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+
+//$link = mysqli_connect($host, $user, $pass, $dbname);
 mysqli_set_charset($link, 'utf8');
 
 /**

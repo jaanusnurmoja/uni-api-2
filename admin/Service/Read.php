@@ -14,8 +14,11 @@ class Read
 
     protected function cnn()
     {
-        require __DIR__ . '/../../api/config.php';
-        return new mysqli($host, $user, $pass, $dbname);
+        // require __DIR__ . '/../../api/config.php';
+        // return new mysqli($host, $user, $pass, $dbname);
+    	$cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+		return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+
     }
 
     public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
