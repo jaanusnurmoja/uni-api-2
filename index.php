@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION) || empty($_SESSION)) session_start();
+session_start();
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];
@@ -29,6 +29,7 @@ function loggedIn()
 
 ?>
 
+
 <!DOCTYPE html>
 <html lang="et">
 
@@ -56,7 +57,7 @@ function loggedIn()
                 <li class="nav-item">
                     <a class="navbar-brand" href="/uni-api">Avaleht</a>
                 </li>
-                <?php
+					<?php
 					if (loggedIn())
 					{?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
