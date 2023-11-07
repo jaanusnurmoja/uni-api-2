@@ -2,8 +2,8 @@
 
 class Data
 {
-    private Table $table;
-    private $fields;
+    public Table $table;
+    public $fields = [];
 
     /**
      * Get the value of table

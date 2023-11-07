@@ -8,22 +8,28 @@ use \DTO\ListDTO;
 use \DTO\TableDTO;
 use \Model\Data;
 use \Model\Field;
+use \Model\Relation;
+use \Model\RelationDetails;
+use \Model\Table;
 
 class Read
 {
 
     protected function cnn()
     {
-        require __DIR__ . '/../../api/config.php';
-        return new mysqli($host, $user, $pass, $dbname);
+        // require __DIR__ . '/../../api/config.php';
+        // return new mysqli($host, $user, $pass, $dbname);
+    	$cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+		return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+
     }
 
-    public function getTables($model = null, $params = null)
+    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
         $where = '';
-        if ($params) {
+        if (!empty($params)) {
             $w = [];
             foreach ($params as $key => $value) {
                 $w[] = " $key = '$value'";
@@ -36,56 +42,59 @@ class Read
         LEFT JOIN relation_details rd ON rd.models_id = t.id
         LEFT JOIN relations r ON r.id = rd.relations_id
         $where";
-
         $q = $db->query($query);
 
-        $relations = new Relations();
         $rowList = [];
-
+        $rowsDebug = [];
+        $single = null;
+        
         while ($row = $q->fetch_assoc()) {
-            $relationDetails = new RelationDetails();
-            $rel = new Relation();
-            //$r = new \Model\Table();
-            $model->setId($row['rowid']);
-            $model->setName($row['name']);
-            $model->setPk($row['pk']);
-            $data = new Data();
-            $data->setTable($model);
-            if ($row['field_data'] == 'default') {
-                $fields = $this->getDefaultFields($row['name']);
-                $data->setFields($fields);
-            }
-            $model->setData($data);
-            if (!empty($row['rid'])) {
+            unset($row['id']);
+            $rowsDebug[] = $row;
+            while ($row['rd_id'] != null && (empty($relationDetails) || $relationDetails->getId() != $row['rd_id'])) {
+                $relationDetails = new RelationDetails();
+                $rel = new Relation();
                 $rel->setId($row['rid']);
-
                 $rel->setType($row['type']);
                 $rel->setAllowHasMany((bool) $row['allow_has_many']);
-                $rel->setIsInner((bool) $row['is_inner']);
+                $rel->setIsInner($row['is_inner']);
+
+                $relationDetails->setId($row['rd_id']);
+                $relationDetails->setRelation($rel);
+                $relationDetails->setRole($row['role']);
+                $relationDetails->setKeyField($row['key_field']);
+                $relationDetails->setHasMany($row['hasMany']);
+                $relationDetails->setOtherTable($row['other_table']);
+            }
+            if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
+                $model = new Table();
+                $model->setId($row['rowid']);
+                $model->setName($row['table_name']);
+                $model->setPk($row['pk']);
+                $data = new Data();
+                $data->setTable($model);
+                if ($row['field_data'] == 'default') {
+                    $fields = $this->getDefaultFields($row['table_name']);
+                    $data->setFields($fields);
+                }
+                $model->setData($data);
+
+            }
+            $relationDetails->setTable($model);
+            if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+
+                $model->addRelationDetails($relationDetails);
             }
 
-            //$relations->setTable($model);
-            $relations->setRelationDetails($relationDetails);
-
-            $model->setBelongsTo($relations);
-
-//            $getData = $this->getData($model, $data);
-            //           $model->setData();
-            //print_r($model);
-
-            $tableDTO = new TableDTO;
-            $tableDTO->setId($model->getId());
-            $tableDTO->setName($model->getName());
-            $tableDTO->setPk($model->getPk());
-            $tableDTO->setData($model->getData()->getFields());
-
-            //$rowList[$row['id']] = $model;
-            $rowList[$row['rowid']] = $model;
+            $single = new TableDTO($model);
+            $rowList[$row['rowid']] =$single; 
         }
-//   \mysqli_free_result($q);
-
-        return new ListDTO($rowList);
-
+if (!empty($params) && count($rowList) == 1) {
+    return $single;
+ } else {
+    return new ListDTO($rowList);
+ }
+ 
     }
 
     public function getDefaultFields($table)
@@ -105,20 +114,36 @@ class Read
         }
         return $fields;
     }
-/*     public function getData($model, $data)
-{
-$fields = [];
-for ($i = 0; $i < count($fields); $i++) {
-$field = new Field();
-$field->setName();
 
-}
-}
- */
-    public function req($r)
+ public function getRelations() {
+    $relations = [];
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+
+        $query = "SELECT * FROM relations";
+        $q = $db->query($query);
+
+        while ($row = $q->fetch_assoc()) {
+
+            $rel = new Relation();
+            $rel->setId($row['id']);
+            $rel->setType($row['type']);
+            $rel->setAllowHasMany((bool) $row['allow_has_many']);
+            $rel->setIsInner($row['is_inner']);
+            array_push($relations, $rel);
+
+        }
+    return $relations;
+ }
+    public function req($r = [])
     {
-        $r['debug'] = 'ohoohhooi';
-        return $r;
+        $new = [];
+        if (isset($r[1])) $new['type'] = $r[1];
+        if (isset($r[2])) $new['item'] = $r[2];
+        if (isset($r[3])) $new['subtype'] = $r[3];
+        if (isset($r[4])) $new['subitem']= $r[4];
+        $new['debug'] = 'ohoohhooi';
+        return $new;
     }
 
 }

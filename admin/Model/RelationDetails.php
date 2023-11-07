@@ -3,13 +3,22 @@
 class RelationDetails
 {
 
-    private int $id;
-    private Relation $relation;
-    private $role;
-    private $keyField;
-    private $hasMany;
-    private Table $table;
+    public ?int $id = 0;
+    public Relation $relation;
+    public $role;
+    public $keyField;
+    public bool $hasMany;
+    public Table $table;
+    public $otherTable;
 
+    public function __construct(?int $id = null) {
+        if ($id !== null) {
+            $this->id = $id;
+        }
+        if (isset($this->id) && is_numeric($this->id)) {
+            return $this;
+        }
+    }
     /**
      * Get the value of id
      */
@@ -85,7 +94,7 @@ class RelationDetails
     /**
      * Get the value of hasMany
      */
-    public function getHasMany()
+    public function getHasMany(): bool
     {
         return $this->hasMany;
     }
@@ -93,7 +102,7 @@ class RelationDetails
     /**
      * Set the value of hasMany
      */
-    public function setHasMany($hasMany): self
+    public function setHasMany(bool $hasMany): self
     {
         $this->hasMany = $hasMany;
 
@@ -116,5 +125,16 @@ class RelationDetails
         $this->table = $table;
 
         return $this;
+    }
+
+    public function getOtherTable() {
+    	return $this->otherTable;
+    }
+
+    /**
+    * @param $otherTable
+    */
+    public function setOtherTable($otherTable) {
+    	$this->otherTable = $otherTable;
     }
 }

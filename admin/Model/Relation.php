@@ -2,10 +2,10 @@
 
 class Relation
 {
-    private $id;
-    private $type;
-    private bool $allowHasMany;
-    private bool $isInner;
+    public $id;
+    public $type;
+    public bool $allowHasMany;
+    public bool $isInner;
 
     public function getId()
     {
