@@ -1,29 +1,36 @@
 <?php namespace Admin;
 
-require_once 'Autoload.php';
+//require_once 'Autoload.php';
 
 use \Controller\Table as TableController;
 
-if (!isset($_SESSION) || empty($_SESSION)) session_start();
+session_start();
+$thisDir = dirname($_SERVER['SCRIPT_NAME']);
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];
-$api = isset($_GET['api']) ? true : false;
-$tc = new TableController();
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
+
+
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-$siteBase = str_replace(['/admin', $path, '/index.php'], '', $_SERVER['PHP_SELF']);
+$current = str_replace(['/index.php'], '', $_SERVER['PHP_SELF']);
+
+$currentFullUrl = $http.$_SERVER['HTTP_HOST'].$current.$path;
+
+$_SESSION['urlComingFrom'] = $uri;
+
+$siteBase = str_replace(['/admin', $path], '', $current);
+
 $siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
 
-$_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF']);
+$_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF'] . $path);
 
 if (!empty($_SERVER['QUERY_STRING']))
 {
 	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
-	$_SESSION['urlComingFrom'] = $uri;
 
 
     function loggedIn()
@@ -33,6 +40,13 @@ if (!empty($_SERVER['QUERY_STRING']))
 			return $_SESSION['currentPerson'];
 		}
 	}
+if (isset($_SESSION['newfrom'])) print_r($_SESSION['newfrom']);
+print_r($_SESSION['loginstart']);
+
+$api = isset($_GET['api']) ? true : false;
+include_once __DIR__ .'/Controller/Table.php';
+
+$tc = new \Controller\Table();
 
 
 if (!$api) {
@@ -72,13 +86,15 @@ if (!$api) {
 					if (loggedIn())
 					{?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='user/logout'"><?=loggedIn()?> | LOGOUT</button></li>
+                        onclick="window.location.href='<?php echo $siteBaseUrl?>/user/logout'"><?=loggedIn()?> |
+                        LOGOUT</button></li>
                 <?php }
 					else
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='https://id.nurmoja.net.ee'">Estonian ID CARD</button></li>
+                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?php echo urlencode($currentFullUrl)?>'">Estonian
+                        ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
                             style="max-height:16px"><span
@@ -108,45 +124,72 @@ if (!$api) {
     <div class="container">
         <?php
 }
-$r = $tc->pathParams();
+if (loggedIn()) {
+    $r = $tc->pathParams();
 
-if (!empty($r['type']) && $r['type'] == 'tables') {
-    if (!empty($r['item'])) {
-        if (!empty($r['subtype'])) {
-            if ($r['subtype'] == 'fields' && !empty($r['subitem'])) {
-                echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
-            }
-            else {
-                if ($r['subtype'] == 'edit') {
-                    $tc->getTableByIdOrName();
+    if (!empty($r['type']) && $r['type'] == 'tables') {
+        if (!empty($r['item'])) {
+            if (!empty($r['subtype'])) {
+                if ($r['subtype'] == 'fields' && !empty($r['subitem'])) {
+                    echo json_encode($tc->getField(), JSON_PRETTY_PRINT);
+                } else {
+                    if ($r['subtype'] == 'edit') {
+                        $tc->getTableByIdOrName();
+                    }
                 }
-            }
-        } else {
+            } else {
                 if ($r['item'] == 'new') {
                     $tc->newTable();
-                }
-                else {
-                    if ($api){
+                } else {
+                    if ($api) {
                         echo json_encode($tc->getTableByIdOrName($api), JSON_PRETTY_PRINT);
                     } else {
                         $tc->getTableByIdOrName();
                     }
                 }
+            }
+        } else {
+            if ($api) {
+                echo json_encode($tc->getTables($api), JSON_PRETTY_PRINT);
+            } else {
+                $tc->getTables($api);
+            }
+
         }
     } else {
-        if ($api){
-            echo json_encode($tc->getTables($api), JSON_PRETTY_PRINT);
-        }
-        else {
+        if (empty($r['type'])) {
             $tc->getTables($api);
         }
 
     }
 } else {
-    if (empty($r['type'])) {
-        $tc->getTables($api);
-    }
+    ?>
+        <div class="card w-75">
+            <div class="card-body">
+                <h5 class="card-title">Tuleb sisse logida</h5>
+                <div class="card-text">
+                    Hea huviline! Selleks, et vaadata ringi halduskeskkonnas, peaksid olema sisse logitud.
+                    Soovitan seda teha id-kaardiga. Sotsiaalmeedia kontoga sisselogimine ei tundu hetkel töökindel
+                    olevat.
+                    Praegu ei saa sisseloginust kasutajat - sisseloginu on üksnes oma sessiooniga sees.
+                </div>
+            </div>
+        </div>
+        <div class=" card w-75">
+            <div class="card-body">
+                <h5 class="card-title">Need to log in</h5>
+                <div class="card-text">
+                    Dear visitor! You should be logged in to look around the administration environment.
+                    I recommend doing this with an ID card. Logging in with a social media account does not seem to be
+                    reliable
+                    at the moment.
+                    Currently, a login does not become a registered user - a login is only logged in with its own
+                    session.
+                </div>
+            </div>
+        </div>
 
+        <?php
 }
 if (!$api) {
     ?>
