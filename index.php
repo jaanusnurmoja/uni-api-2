@@ -57,7 +57,7 @@ function loggedIn()
                 <li class="nav-item">
                     <a class="navbar-brand" href="/uni-api">Avaleht</a>
                 </li>
-					<?php
+                <?php
 					if (loggedIn())
 					{?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
@@ -67,7 +67,9 @@ function loggedIn()
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='https://id.nurmoja.net.ee'">Estonian ID CARD</button></li>
+                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?=urlencode($siteBaseUrl)?>'">Estonian
+                        ID
+                        CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
                             style="max-height:16px"><span
@@ -75,7 +77,7 @@ function loggedIn()
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php'
+                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
                     _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
                         'twitter'

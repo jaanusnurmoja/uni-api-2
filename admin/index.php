@@ -77,10 +77,10 @@ if (!$api) {
         <div class="container-fluid">
             <ul class="navbar-nav nav-pills list-group-horizontal">
                 <li class="nav-item">
-                    <a class="navbar-brand" href="/uni-api/admin">Admin</a>
+                    <a class="navbar-brand" href="<?=$siteBaseUrl?>/admin">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="navbar-brand" href="/uni-api/admin/tables">Tabelid</a>
+                    <a class="navbar-brand" href="<?=$siteBaseUrl?>/admin/tables">Tabelid</a>
                 </li>
                 <?php
 					if (loggedIn())
@@ -93,7 +93,7 @@ if (!$api) {
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?php echo urlencode($currentFullUrl)?>'">Estonian
+                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?=urlencode($currentFullUrl)?>'">Estonian
                         ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
@@ -102,7 +102,7 @@ if (!$api) {
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php'
+                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
                     _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
                         'twitter'
