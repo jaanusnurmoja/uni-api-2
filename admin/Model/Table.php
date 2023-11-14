@@ -1,4 +1,6 @@
 <?php namespace Model;
+include 'Data.php';
+use Model\Data as DataFields;
 
 class Table
 {
@@ -6,8 +8,8 @@ class Table
     public $id;
     public $name;
     public $pk = 'id';
-    public Data $data;
-    public array $relationDetails = [];
+    public $data;
+    public $relationDetails = [];
 
     public function __construct($id = null)
     {

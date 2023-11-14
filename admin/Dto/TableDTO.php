@@ -1,4 +1,4 @@
-<?php namespace DTO;
+<?php namespace Dto;
 
 use \Model\Table;
 
@@ -8,9 +8,9 @@ class TableDTO
     public $name;
     public $pk;
     public $data;
-    public array $belongsTo = [];
-    public array $hasMany = [];
-    public array $hasManyAndBelongsTo = [];
+    public $belongsTo = [];
+    public $hasMany = [];
+    public $hasManyAndBelongsTo = [];
 
     public function __construct(Table $model)
     {

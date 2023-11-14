@@ -2,7 +2,7 @@
 
 class Data
 {
-    public Table $table;
+    public $table;
     public $fields = [];
 
     /**

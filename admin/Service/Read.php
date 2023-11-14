@@ -1,11 +1,15 @@
 <?php namespace Service;
 
-use Model\Relation;
-use Model\RelationDetails;
-use Model\Relations;
 use mysqli;
-use \DTO\ListDTO;
-use \DTO\TableDTO;
+include_once __DIR__.'/../Model/RelationDetails.php';
+include_once __DIR__.'/../Model/Relation.php';
+include_once __DIR__.'/../Model/Table.php';
+include_once __DIR__.'/../Model/Field.php';
+include_once __DIR__.'/../Dto/TableDTO.php';
+include_once __DIR__.'/../Dto/ListDTO.php';
+
+use \Dto\ListDTO;
+use \Dto\TableDTO;
 use \Model\Data;
 use \Model\Field;
 use \Model\Relation;
@@ -57,13 +61,13 @@ class Read
                 $rel->setId($row['rid']);
                 $rel->setType($row['type']);
                 $rel->setAllowHasMany((bool) $row['allow_has_many']);
-                $rel->setIsInner($row['is_inner']);
+                $rel->setIsInner((bool) $row['is_inner']);
 
                 $relationDetails->setId($row['rd_id']);
                 $relationDetails->setRelation($rel);
                 $relationDetails->setRole($row['role']);
                 $relationDetails->setKeyField($row['key_field']);
-                $relationDetails->setHasMany($row['hasMany']);
+                $relationDetails->setHasMany((bool)$row['hasMany']);
                 $relationDetails->setOtherTable($row['other_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {

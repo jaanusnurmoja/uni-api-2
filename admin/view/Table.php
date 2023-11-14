@@ -1,6 +1,7 @@
 <?php namespace View;
 
 use View\Form\EditTable;
+include_once __DIR__.'/Form/EditTable.php';
 
 class Table
 {

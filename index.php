@@ -8,6 +8,7 @@ $api = isset($_GET['api']) ? true : false;
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $siteBase = str_replace(['/admin', $path, '/index.php'], '', $_SERVER['PHP_SELF']);
+
 $siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF']);
@@ -18,15 +19,18 @@ if (!empty($_SERVER['QUERY_STRING']))
 }
 
 $_SESSION['urlComingFrom'] = $uri;
+$socialIni = parse_ini_file('config/social.ini', true);
+$oneAllSubDomain = $socialIni['OneAll']['subDomain'];
+$idCardAuthService = $socialIni['IdCard']['authService'];
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
 
 function loggedIn()
 {
-    if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson']))
-    {
-        return $_SESSION['currentPerson'];
-    }
+if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson']))
+{
+return $_SESSION['currentPerson'];
 }
-
+}
 ?>
 
 
@@ -39,12 +43,11 @@ function loggedIn()
     </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script type="text/javascript">
     var oa = document.createElement('script');
     oa.type = 'text/javascript';
     oa.async = true;
-    oa.src = '//nurmoja.api.oneall.com/socialize/library.js'
+    oa.src = '//<?=$oneAllSubDomain?>.api.oneall.com/socialize/library.js'
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(oa, s);
     </script>
@@ -67,9 +70,8 @@ function loggedIn()
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?=urlencode($siteBaseUrl)?>'">Estonian
-                        ID
-                        CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
+                        ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
                             style="max-height:16px"><span

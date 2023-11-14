@@ -142,7 +142,7 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 
     foreach ($relations as $rtbl => $relation) {
         if ($rtbl == 'hasManyAndBelongsTo' && empty($origTable)) {
-            $xref = hasManyAndBelongsTo($relation, $relations, $table);
+            $xref = hasManyAndBelongsTo($relation, $relations, $table, $thisTableData);
             if (!empty($xref)) {
                 $thisTableData['hasManyAndBelongsTo']['xref'] = $xref;
 
@@ -270,8 +270,6 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
  */
 function buildQuery($rowid = null)
 {
-    $xref = null;
-
     foreach (getDataWithRelations() as $table => $tableData) {
 
         //global $request;
@@ -293,7 +291,7 @@ function buildQuery($rowid = null)
         $sql = "SELECT $columns FROM `$table`
         ";
         if (isset($tableData['hasManyAndBelongsTo'])) {
-            // $xref = $tableData['hasManyAndBelongsTo']['xref'];
+            $xref = $tableData['hasManyAndBelongsTo']['xref'];
             foreach ($tableData['hasManyAndBelongsTo']['tables'] as $refTable => $refTableData) {
                 $sql .= buildQueryJoins($refTable, $refTableData, $table, $tableData, $xref);
             }

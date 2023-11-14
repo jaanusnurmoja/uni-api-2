@@ -1,4 +1,4 @@
-<?php namespace DTO;
+<?php namespace Dto;
 
 class ListDTO
 {

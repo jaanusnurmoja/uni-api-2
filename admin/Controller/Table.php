@@ -1,5 +1,8 @@
 <?php namespace Controller;
 
+include_once __DIR__.'/../Service/Read.php';
+include_once __DIR__.'/../View/Table.php';
+include_once __DIR__.'/../View/Form/NewTable.php';
 use DTO\ListDTO;
 use \Service\Read;
 use \View\Form\NewTable;
@@ -73,7 +76,7 @@ class Table
     public function pathParams()
     {
         global $request;
-        $read = new Read;
+        $read = new Read();
         return $read->req($request);
     }
 

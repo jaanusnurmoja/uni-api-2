@@ -1,7 +1,6 @@
-<?php namespace Api\Config;
-
-// database infos & credentials
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'test';
+<?php
+  // database infos & credentials
+  $host = 'localhost';
+  $user = 'np11988_jaanus';
+  $pass = '1455151503050305';
+  $dbname = 'np11988_test';

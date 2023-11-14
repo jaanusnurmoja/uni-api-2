@@ -2,7 +2,8 @@
 
 //require_once 'Autoload.php';
 
-use \Controller\Table as TableController;
+//use \Controller\Table;
+//include_once __DIR__ .'/Controller/Table.php';
 
 session_start();
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
@@ -40,10 +41,12 @@ if (!empty($_SERVER['QUERY_STRING']))
 			return $_SESSION['currentPerson'];
 		}
 	}
+
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
+
 
 $api = isset($_GET['api']) ? true : false;
 include_once __DIR__ .'/Controller/Table.php';
@@ -118,7 +121,7 @@ if (!$api) {
                 </li>
                 <?php }?>
             </ul>
-            <a class="navbar-brand" href="/uni-api">Sait</a>
+            <a class="navbar-brand" href="<?=$siteBaseUrl?>">Sait</a>
 
         </div>
     </nav>
