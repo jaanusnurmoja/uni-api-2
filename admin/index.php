@@ -40,8 +40,10 @@ if (!empty($_SERVER['QUERY_STRING']))
 			return $_SESSION['currentPerson'];
 		}
 	}
-if (isset($_SESSION['newfrom'])) print_r($_SESSION['newfrom']);
-print_r($_SESSION['loginstart']);
+$socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
+$oneAllSubDomain = $socialIni['OneAll']['subDomain'];
+$idCardAuthService = $socialIni['IdCard']['authService'];
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
 
 $api = isset($_GET['api']) ? true : false;
 include_once __DIR__ .'/Controller/Table.php';
@@ -66,7 +68,7 @@ if (!$api) {
     var oa = document.createElement('script');
     oa.type = 'text/javascript';
     oa.async = true;
-    oa.src = '//nurmoja.api.oneall.com/socialize/library.js'
+    oa.src = '//<?=$oneAllSubDomain?>.api.oneall.com/socialize/library.js'
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(oa, s);
     </script>
@@ -93,7 +95,7 @@ if (!$api) {
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='https://id.nurmoja.net.ee?cb=<?=urlencode($currentFullUrl)?>'">Estonian
+                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
                         ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
