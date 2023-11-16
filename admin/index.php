@@ -13,46 +13,42 @@ $request = !empty($path) ? explode('/', $path) : [];
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 
-
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $current = str_replace(['/index.php'], '', $_SERVER['PHP_SELF']);
 
-$currentFullUrl = $http.$_SERVER['HTTP_HOST'].$current.$path;
+$currentFullUrl = $http . $_SERVER['HTTP_HOST'] . $current . $path;
 
 $_SESSION['urlComingFrom'] = $uri;
 
 $siteBase = str_replace(['/admin', $path], '', $current);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF'] . $path);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
+function loggedIn()
+{
+    if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson'])) {
+        return $_SESSION['currentPerson'];
+    } else {
+        return 'Jaanus in dev mode';
 
-
-    function loggedIn()
-	{
-		if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson']))
-		{
-			return $_SESSION['currentPerson'];
-		}
-	}
+    }
+}
 
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
-
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 $api = isset($_GET['api']) ? true : false;
-include_once __DIR__ .'/Controller/Table.php';
+include_once __DIR__ . '/Controller/Table.php';
 
 $tc = new \Controller\Table();
-
 
 if (!$api) {
     ?>
@@ -64,9 +60,28 @@ if (!$api) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
+    </script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Droid+Sans" media="all" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Oswald" media="all" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:600" media="all" />
+    <script src="<?=$siteBase?>/common/js/jquery.cycle2.min.js">
+    </script>
+    <script src="<?=$siteBase?>/common/js/jquery.base64.js"></script>
+    <script src="<?=$siteBase?>/common/js/jquery.validate.min.js">
+    </script>
+    <script src="<?=$siteBase?>/common/js/jquery.masonry.min.js">
+    </script>
+    <script src="<?=$siteBase?>/common/js/frontend.js"></script>
+    <script src="<?=$siteBase?>/common/js/jquery.serializejson.min.js">
+    </script>
+
     <script type="text/javascript">
     var oa = document.createElement('script');
     oa.type = 'text/javascript';
@@ -88,17 +103,14 @@ if (!$api) {
                     <a class="navbar-brand" href="<?=$siteBaseUrl?>/admin/tables">Tabelid</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?php echo $siteBaseUrl?>/user/logout'"><?=loggedIn()?> |
+                        onclick="window.location.href='<?php echo $siteBaseUrl ?>/user/logout'"><?=loggedIn()?> |
                         LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Estonian
                         ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
@@ -107,7 +119,7 @@ if (!$api) {
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
                     _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
                         'twitter'
@@ -127,6 +139,10 @@ if (!$api) {
     </nav>
 
     <div class="container">
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
+            integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+        <script src="<?=$siteBase?>/common/js/repeatable-fields.js?version=1.5.0">
+        </script>
         <?php
 }
 if (loggedIn()) {
@@ -199,6 +215,17 @@ if (loggedIn()) {
 if (!$api) {
     ?>
     </div>
+    <script>
+    jQuery(function() {
+        jQuery('.repeat').each(function() {
+            jQuery(this).repeatable_fields({
+                wrapper: 'table',
+                container: 'tbody',
+            });
+        });
+    });
+    </script>
+
 </body>
 
 </html>
