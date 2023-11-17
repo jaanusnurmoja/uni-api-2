@@ -1,12 +1,12 @@
 <?php namespace Service;
 
 use mysqli;
-include_once __DIR__.'/../Model/RelationDetails.php';
-include_once __DIR__.'/../Model/Relation.php';
-include_once __DIR__.'/../Model/Table.php';
-include_once __DIR__.'/../Model/Field.php';
-include_once __DIR__.'/../Dto/TableDTO.php';
-include_once __DIR__.'/../Dto/ListDTO.php';
+include_once __DIR__ . '/../Model/RelationDetails.php';
+include_once __DIR__ . '/../Model/Relation.php';
+include_once __DIR__ . '/../Model/Table.php';
+include_once __DIR__ . '/../Model/Field.php';
+include_once __DIR__ . '/../Dto/TableDTO.php';
+include_once __DIR__ . '/../Dto/ListDTO.php';
 
 use \Dto\ListDTO;
 use \Dto\TableDTO;
@@ -23,8 +23,8 @@ class Read
     {
         // require __DIR__ . '/../../api/config.php';
         // return new mysqli($host, $user, $pass, $dbname);
-    	$cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
-		return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+        $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+        return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
 
     }
 
@@ -51,7 +51,7 @@ class Read
         $rowList = [];
         $rowsDebug = [];
         $single = null;
-        
+
         while ($row = $q->fetch_assoc()) {
             unset($row['id']);
             $rowsDebug[] = $row;
@@ -67,7 +67,7 @@ class Read
                 $relationDetails->setRelation($rel);
                 $relationDetails->setRole($row['role']);
                 $relationDetails->setKeyField($row['key_field']);
-                $relationDetails->setHasMany((bool)$row['hasMany']);
+                $relationDetails->setHasMany((bool) $row['hasMany']);
                 $relationDetails->setOtherTable($row['other_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
@@ -91,14 +91,14 @@ class Read
             }
 
             $single = new TableDTO($model);
-            $rowList[$row['rowid']] =$single; 
+            $rowList[$row['rowid']] = $single;
         }
-if (!empty($params) && count($rowList) == 1) {
-    return $single;
- } else {
-    return new ListDTO($rowList);
- }
- 
+        if (!empty($params) && count($rowList) == 1) {
+            return $single;
+        } else {
+            return new ListDTO($rowList);
+        }
+
     }
 
     public function getDefaultFields($table)
@@ -119,9 +119,10 @@ if (!empty($params) && count($rowList) == 1) {
         return $fields;
     }
 
- public function getRelations() {
-    $relations = [];
-            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    public function getRelations()
+    {
+        $relations = [];
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
 
         $query = "SELECT * FROM relations";
@@ -137,15 +138,27 @@ if (!empty($params) && count($rowList) == 1) {
             array_push($relations, $rel);
 
         }
-    return $relations;
- }
+        return $relations;
+    }
     public function req($r = [])
     {
         $new = [];
-        if (isset($r[1])) $new['type'] = $r[1];
-        if (isset($r[2])) $new['item'] = $r[2];
-        if (isset($r[3])) $new['subtype'] = $r[3];
-        if (isset($r[4])) $new['subitem']= $r[4];
+        if (isset($r[1])) {
+            $new['type'] = $r[1];
+        }
+
+        if (isset($r[2])) {
+            $new['item'] = $r[2];
+        }
+
+        if (isset($r[3])) {
+            $new['subtype'] = $r[3];
+        }
+
+        if (isset($r[4])) {
+            $new['subitem'] = $r[4];
+        }
+
         $new['debug'] = 'ohoohhooi';
         return $new;
     }
