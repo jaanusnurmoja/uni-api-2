@@ -57,6 +57,10 @@ if (!$api) {
 
 <head>
     <title>Admin</title>
+    <link href="<?=$siteBase?>/common/css/rhyzz-bootstrap.min.css">
+    <link href="<?=$siteBase?>/common/css/rhyzz-bootstrap-theme.min.css">
+    <link href="<?=$siteBase?>/common/css/frontend.css">
+    <link href="<?=$siteBase?>/common/css/reset.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -138,7 +142,7 @@ if (loggedIn()) {?>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="rhyzz-bootstrap container">
         <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
             integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
         <script src="<?=$siteBase?>/common/js/repeatable-fields.js?version=1.5.0">
@@ -221,6 +225,7 @@ if (!$api) {
             jQuery(this).repeatable_fields({
                 wrapper: 'table',
                 container: 'tbody',
+                row: '.trow',
             });
         });
     });

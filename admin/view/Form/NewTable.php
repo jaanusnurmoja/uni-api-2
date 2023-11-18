@@ -16,7 +16,8 @@ class NewTable
             $table = new \Model\Table();
         }
         $this->dto = new \DTO\TableDTO($table);
-        $this->postBody = file_get_contents('php://input');
+        $forminput = file_get_contents('php://input');
+            parse_str($forminput, $this->postBody);
     }
 
     public function newTableForm($data = null)
@@ -35,25 +36,47 @@ class NewTable
 foreach ($data as $key => $value) {
             if ($key != "id") {
                 if (!is_object($value) && !is_array($value)) {?>
-    <div> <?php echo $key ?> </div>
-    <div><input type="text" name="table[<?php echo $key ?>]" value="<?php echo $value ?>" /></div>
+    <label> <?php echo $key ?> <input type="text" name="table[<?php echo $key ?>]" value="<?php echo $value ?>" /></label>
     <?php } else {
                     if ($key == 'data') {?>
     <h2>Andmeväljad</h2>
-    <table class="table table-warning table-striped wrapper">
+    <table class="table table-warning table-striped table-sm wrapper">
         <thead>
             <tr>
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
-        <tbody class="container ui-sortable" data-rf-row-count="0"> <?php
-//$newField->setName('new');
-                        $data->data->fields[] = new \Model\Field();
-
-                        foreach ($data->data->fields as $fkey => $field) {?>
-            <tr class="template row" style="display: none;"> <?php
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count=1> 
+        <?php $f0 = new \Model\Field(); ?>
+            <tr class="template trow"> <?php
+            ?>
+                            <td>
+                                <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
+                            </td>
+                            <td>
+                                <fieldset>
+                                    <?php foreach ($f0 as $k0 => $v0) {
+                                        if ($k0 == 'id') {
+            
+                                            // $fKey
+                                            echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
+                                        } else {
+                                            echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' type='text' value='$v0' />";
+                                        }
+                                    }?>
+                                </fieldset>
+                            </td>
+                            <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+                        </tr>
+                        <?php
+                            $data->data->fields[] = new \Model\Field();
+            
+                        foreach ($data->data->fields as $fkey => $field) {
+                            //$field = new \Model\Field();
+                            ?>
+            <tr class="trow"> <?php
 ?>
-                <td><?php echo $fkey ?>
+                <td>
                     <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
@@ -62,9 +85,9 @@ foreach ($data as $key => $value) {
                             if ($k == 'id') {
 
                                 // $fKey
-                                echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k]' id='$k' value='$v' /> ";
+                                echo "<input type='hidden' name='table[data][fields][0][$k]' id='$k' value='$v' /> ";
                             } else {
-                                echo "<label for='$k'>$k</label> <input name='table[data][fields][{{row-count-placeholder}}][$k]' id='$k' type='text' value='$v' />";
+                                echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k' type='text' value='$v' />";
                             }
                         }?>
                     </fieldset>
@@ -82,17 +105,18 @@ foreach ($data as $key => $value) {
 $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                         if (in_array($key, $roles)) {
                             echo '<h4>' . $key . '</h4>';?>
-    <table class="table table-warning table-striped wrapper">
+    <table class="table table-warning table-striped table-sm wrapper">
         <thead>
             <tr>
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
         <tbody class="container ui-sortable" data-rf-row-count="0">
-            <tr class="template row" style="display:none;">
-                <td><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
+            <tr class="template trow" style="display:none;">
+                <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
-                    <div>
+                <table>
+
                         <?php $data->$key = [];
                             $data->$key[0] = new \Model\RelationDetails();
                             if (!isset($data->$key[0]->relation)) {
@@ -102,10 +126,10 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                             foreach ($data->$key[0] as $rdKey => $rdValue) {
                                 if ($rdKey == 'relation') {
                                     ?>
-                        <div>
-                            <div><?php echo $rdKey ?>
-                            </div>
-                            <div><select name="table[<?=$key?>][{{row-count-placeholder}}][<?=$rdKey?>]">
+                        <tr>
+                            <td><?php echo $rdKey ?>
+                            </td>
+                            <td><select name="table[<?=$key?>][{{row-count-placeholder}}][<?=$rdKey?>]">
                                     <option value=''></option>
                                     <?php echo "\n";
                                     foreach ($this->relations as $r) {
@@ -118,24 +142,24 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                                 <span><?php foreach ($rdValue as $attr => $val) {
                                         echo "$attr: $val; ";
                                     }?></span>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
                         <?php
 } else {
                                     if (is_bool($rdValue)) {
                                         $checked = $rdValue ? ' checked="checked"' : '';
-                                        echo "<div><div>$rdKey</div><div><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></div></div>";
+                                        echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
                                     } else {
                                         if ($rdKey == "id") {
                                             echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
                                         } else {
-                                            echo "<div><div>$rdKey</div><div><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></div></div>";
+                                            echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                                         }
                                     }
                                 }
                             }
                             ?>
-                    </div>
+                </table>
                 </td>
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
                 </td>
