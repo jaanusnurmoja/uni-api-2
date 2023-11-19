@@ -1,9 +1,12 @@
 <?php namespace Controller;
 
 include_once __DIR__.'/../Service/Read.php';
+include_once __DIR__.'/../Service/Create.php';
 include_once __DIR__.'/../View/Table.php';
 include_once __DIR__.'/../View/Form/NewTable.php';
-use DTO\ListDTO;
+use \DTO\ListDTO;
+use Dto\TableDTO;
+use \Service\Create;
 use \Service\Read;
 use \View\Form\NewTable;
 use \View\Table as TableListOrDetails;
@@ -54,6 +57,23 @@ class Table
             $newTable->newTableForm();
     }
 
+    public function addTable($input){
+
+        $create = new Create();
+        // $ipDTO = new TableDTO();
+        // foreach ($input as $iKey => $iValue) {
+        //     $ipDTO->{'set' . ucfirst($iKey)}($iValue);
+        // }
+        foreach ($input as $k => $v) {
+            if (empty($v)) {
+                unset($input[$k]);
+            }
+        }
+        echo '<hr>';
+        print_r($input);
+        $create->addTableToList($input);
+    }
+
     public function getField()
     {
         global $request;
@@ -61,7 +81,7 @@ class Table
 
         if ($request[3] == "fields") {
             foreach ($table->data->getFields() as $field) {
-                if ($field->getName() == $request[4]) {
+                if ($field->getTableName() == $request[4]) {
                     return $field;
                 }
             }

@@ -8,6 +8,7 @@ include_once __DIR__ . '/../Model/Table.php';
 include_once __DIR__ . '/../Model/Field.php';
 include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
+include_once __DIR__ . '/../../common/Helper.php';
 
 class Create
 {
@@ -19,14 +20,14 @@ class Create
         return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
     }
 
-    public function addTableToList(\Dto\TableDTO $tableDTO)
+    public function addTableToList($input)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-        unset($tableDTO->id);
+        unset($input->id);
         $props = [];
         $vals = [];
-        foreach ($tableDTO as $key => $value) {
+        foreach ($input as $key => $value) {
             if (!is_array($value) && !is_object($value)) {
                 $props[] = \Common\Helper::uncamelize($key);
                 $vals[] = $value;
@@ -34,7 +35,7 @@ class Create
         }
         $propsList = implode(", ", $props);
         $valsList = implode("', '", $vals);
-        $fields = $tableDTO->getData()["fields"];
+        $fields = $input["data"]["fields"];
         $dbFields = [];
 
         foreach ($fields as $field) {
@@ -44,17 +45,32 @@ class Create
         $sql = "INSERT INTO `models` ($propsList)
         VALUES ('$valsList');
         ";
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-        $stmt->insert_id;
+        $db->execute_query($sql);
+        print_r($db->insert_id);
+
+        //$stmt = $db->prepare($sql);
+        //$stmt->execute();
     }
+    /** 
+     * CREATE TABLE `test`.`katseloom` 
+     * (
+     * `id` INT NOT NULL AUTO_INCREMENT , 
+     * `onju` BOOLEAN NOT NULL DEFAULT FALSE , 
+     * `pealkiri` VARCHAR(255) NOT NULL , 
+     * `kirjeldus` LONGTEXT NULL , 
+     * PRIMARY KEY (`id`)
+     * ) ENGINE = InnoDB;
+    */
     private function addTableToDB(\Dto\TableDTO $tableDTO)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
         $where = '';
 
-        $sqlCreate = "CREATE TABLE IF NOT EXISTS" . $tableDTO->getName() . "";
+        $sqlCreate = "CREATE TABLE IF NOT EXISTS " . $tableDTO->getTableName() . "(
+            
+        )
+        ENGINE = InnoDB;";
         $db->execute_query($sqlCreate);
     }
 

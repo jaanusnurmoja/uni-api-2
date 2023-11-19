@@ -5,17 +5,17 @@ use \Model\Table;
 class TableDTO
 {
     public $id;
-    public $name;
+    public $tableName;
     public $pk;
     public $data;
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
 
-    public function __construct(Table $model)
+    public function __construct(Table $model=null)
     {
         $this->id = $model->getId() ? $model->getId() : null;
-        $this->name = $model->getName() ? $model->getName() : null;
+        $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
         unset($this->data->table);
@@ -57,17 +57,17 @@ class TableDTO
     /**
      * Get the value of name
      */
-    public function getName()
+    public function getTableName()
     {
-        return $this->name;
+        return $this->tableName;
     }
 
     /**
      * Set the value of name
      */
-    public function setName($name): self
+    public function setTableName($name): self
     {
-        $this->name = $name;
+        $this->tableName = $name;
 
         return $this;
     }

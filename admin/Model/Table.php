@@ -6,7 +6,7 @@ class Table
 {
 
     public $id;
-    public $name;
+    public $tableName;
     public $pk = 'id';
     public $data;
     public $relationDetails = [];
@@ -34,17 +34,17 @@ class Table
         $this->id = $id;
     }
 
-    public function getName()
+    public function getTableName()
     {
-        return $this->name;
+        return $this->tableName;
     }
 
     /**
      * @param $name
      */
-    public function setName($name)
+    public function setTableName($name)
     {
-        $this->name = $name;
+        $this->tableName = $name;
     }
 
     public function getPk()

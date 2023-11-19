@@ -5,12 +5,14 @@ class NewTable
     public $dto;
     public $relations;
     public $postBody;
+    public $tableCtrl;
     public function __construct($table = null)
     {
-        $readRels = new \Controller\Table();
+        $tableCtrl = new \Controller\Table();
         $list = new \DTO\ListDTO();
-        $readRels->getRelationsList($list);
+        $tableCtrl->getRelationsList($list);
         $this->relations = $list->list;
+        $this->tableCtrl = $tableCtrl;
 
         if (empty($table)) {
             $table = new \Model\Table();
@@ -20,15 +22,15 @@ class NewTable
             parse_str($forminput, $this->postBody);
     }
 
-    public function newTableForm($data = null)
+    public function newTableForm($d = null)
     {
-        if (empty($data)) {
+        if (empty($d)) {
             $data = $this->dto;
         }
 
         ?>
 <h1>
-    Uus tabel: <?php echo $data->name ?>
+    Uus tabel: <?php echo $data->tableName ?>
 </h1>
 
 <form id="new-table" name="new-table" class="repeat" method="post" enctype='application/json'>
@@ -177,5 +179,9 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
 </form>
 
 <?php
+if (!empty($this->postBody)) {
+    print_r($this->postBody);
+    $this->tableCtrl->addTable($this->postBody['table']);
+}
 }
 }

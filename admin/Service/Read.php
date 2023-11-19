@@ -73,7 +73,7 @@ class Read
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
-                $model->setName($row['table_name']);
+                $model->setTableName($row['table_name']);
                 $model->setPk($row['pk']);
                 $data = new Data();
                 $data->setTable($model);
