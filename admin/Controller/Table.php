@@ -5,7 +5,7 @@ include_once __DIR__.'/../Service/Create.php';
 include_once __DIR__.'/../View/Table.php';
 include_once __DIR__.'/../View/Form/NewTable.php';
 use \DTO\ListDTO;
-use Dto\TableDTO;
+use \Dto\TableDTO;
 use \Service\Create;
 use \Service\Read;
 use \View\Form\NewTable;
@@ -60,10 +60,6 @@ class Table
     public function addTable($input){
 
         $create = new Create();
-        // $ipDTO = new TableDTO();
-        // foreach ($input as $iKey => $iValue) {
-        //     $ipDTO->{'set' . ucfirst($iKey)}($iValue);
-        // }
         foreach ($input as $k => $v) {
             if (empty($v)) {
                 unset($input[$k]);
@@ -71,7 +67,7 @@ class Table
         }
         echo '<hr>';
         print_r($input);
-        $create->addTableToList($input);
+        $create->addTableToDB($input);
     }
 
     public function getField()

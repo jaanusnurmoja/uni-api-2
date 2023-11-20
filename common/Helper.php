@@ -17,4 +17,10 @@ class Helper
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
     }
 
+    public static function setAndEnumValues($table, $field) {
+        $read = new \Service\Read();
+        return $read->setAndEnumValues($table, $field);
+    }
+
+
 }

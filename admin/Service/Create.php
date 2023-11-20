@@ -20,6 +20,45 @@ class Create
         return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
     }
 
+    public function addTableToDB($input)
+    {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+        $indexes = [];
+
+        $sqlCreate = "CREATE TABLE IF NOT EXISTS " . $input['tableName'] . "(
+            `$input[pk]` int(11) NOT NULL AUTO_INCREMENT";
+            
+            if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
+                foreach ($input['belongsTo'] as $fk) {
+                $sqlCreate .= ",
+                `$fk[keyField]` int(11) DEFAULT NULL";
+                $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
+                }
+            }
+            foreach ($input['data']['fields'] as $column) {
+                $sqlCreate .= ",
+                `$column[name]` $column[type]";
+                if (empty($column['defOrNull'])) {
+                    $sqlCreate .= " NOT NULL";
+                } 
+                if (!empty($column['defaultValue'])) {
+                    $sqlCreate .= " DEFAULT '$column[defaultValue]'";
+                } else {
+                    if ($column['defOrNull']) {
+                        $sqlCreate .= " DEFAULT NULL";
+                    }
+                }
+            }
+           $sqlCreate .= ",
+           PRIMARY KEY (`$input[pk]`),
+           " . implode(',
+           ', $indexes) . "
+           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
+            //print_r($sqlCreate);
+        $db->execute_query($sqlCreate);
+    }
+
     public function addTableToList($input)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -46,7 +85,7 @@ class Create
         VALUES ('$valsList');
         ";
         $db->execute_query($sql);
-        print_r($db->insert_id);
+        //print_r($db->insert_id);
 
         //$stmt = $db->prepare($sql);
         //$stmt->execute();
@@ -61,17 +100,4 @@ class Create
      * PRIMARY KEY (`id`)
      * ) ENGINE = InnoDB;
     */
-    private function addTableToDB(\Dto\TableDTO $tableDTO)
-    {
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        $db = $this->cnn();
-        $where = '';
-
-        $sqlCreate = "CREATE TABLE IF NOT EXISTS " . $tableDTO->getTableName() . "(
-            
-        )
-        ENGINE = InnoDB;";
-        $db->execute_query($sqlCreate);
-    }
-
 }

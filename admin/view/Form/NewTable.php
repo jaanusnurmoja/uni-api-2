@@ -38,7 +38,8 @@ class NewTable
 foreach ($data as $key => $value) {
             if ($key != "id") {
                 if (!is_object($value) && !is_array($value)) {?>
-    <label> <?php echo $key ?> <input type="text" name="table[<?php echo $key ?>]" value="<?php echo $value ?>" /></label>
+    <label> <?php echo $key ?> <input type="text" name="table[<?php echo $key ?>]"
+            value="<?php echo $value ?>" /></label>
     <?php } else {
                     if ($key == 'data') {?>
     <h2>Andmeväljad</h2>
@@ -48,29 +49,35 @@ foreach ($data as $key => $value) {
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
-        <tbody class="repeatcontainer ui-sortable" data-rf-row-count=1> 
-        <?php $f0 = new \Model\Field(); ?>
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count=1>
+            <?php $f0 = new \Model\Field(); ?>
             <tr class="template trow"> <?php
             ?>
-                            <td>
-                                <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
-                            </td>
-                            <td>
-                                <fieldset>
-                                    <?php foreach ($f0 as $k0 => $v0) {
+                <td>
+                    <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
+                </td>
+                <td>
+                    <fieldset>
+                        <?php foreach ($f0 as $k0 => $v0) {
                                         if ($k0 == 'id') {
             
                                             // $fKey
                                             echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
                                         } else {
-                                            echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' type='text' value='$v0' />";
+                                            echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0'";
+                                            if (is_bool($v0)) {
+                                                $checked = $v0 ? ' checked="checked"' : '';
+                                                echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                                            } else {
+                                                echo " type='text' value='$v0' />";
+                                            }
                                         }
                                     }?>
-                                </fieldset>
-                            </td>
-                            <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
-                        </tr>
-                        <?php
+                    </fieldset>
+                </td>
+                <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+            </tr>
+            <?php
                             $data->data->fields[] = new \Model\Field();
             
                         foreach ($data->data->fields as $fkey => $field) {
@@ -89,7 +96,13 @@ foreach ($data as $key => $value) {
                                 // $fKey
                                 echo "<input type='hidden' name='table[data][fields][0][$k]' id='$k' value='$v' /> ";
                             } else {
-                                echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k' type='text' value='$v' />";
+                                echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k'";
+                                if (is_bool($v)) {
+                                    $checked = $v ? ' checked="checked"' : '';
+                                    echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                                } else {
+                                    echo " type='text' value='$v' />";
+                                }
                             }
                         }?>
                     </fieldset>
@@ -117,7 +130,7 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
             <tr class="template trow" style="display:none;">
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
-                <table>
+                    <table>
 
                         <?php $data->$key = [];
                             $data->$key[0] = new \Model\RelationDetails();
@@ -161,7 +174,7 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                                 }
                             }
                             ?>
-                </table>
+                    </table>
                 </td>
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
                 </td>

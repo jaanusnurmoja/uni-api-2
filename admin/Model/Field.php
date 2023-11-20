@@ -6,6 +6,8 @@ class Field
     public $id;
     public $name;
     public $type;
+    public bool $defOrNull = false;
+    public $defaultValue;
     public $htmlDefaults;
 
     public function getId()
@@ -21,7 +23,7 @@ class Field
         $this->id = $id;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -37,7 +39,7 @@ class Field
         $this->name = $name;
     }
 
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -50,7 +52,44 @@ class Field
         $this->type = $type;
     }
 
-    public function getHtmlDefaults()
+    /**
+     * Get the value of defOrNull
+     */
+    public function getDefOrNull(): bool
+    {
+        return $this->defOrNull;
+    }
+
+    /**
+     * Set the value of defOrNull
+     */
+    public function setDefOrNull($defOrNull): self
+    {
+        $this->defOrNull = $defOrNull;
+
+        return $this;
+    }
+
+    
+    /**
+     * Get the value of defaultValue
+     */
+    public function getDefaultValue(): ?string
+    {
+        return $this->defaultValue;
+    }
+
+    /**
+     * Set the value of defaultValue
+     */
+    public function setDefaultValue($defaultValue): self
+    {
+        $this->defaultValue = $defaultValue;
+
+        return $this;
+    }
+
+    public function getHtmlDefaults(): ?array
     {
         return $this->htmlDefaults;
     }
@@ -62,4 +101,5 @@ class Field
     {
         $this->htmlDefaults = $htmlDefaults;
     }
+
 }

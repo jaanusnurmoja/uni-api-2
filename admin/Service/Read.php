@@ -140,6 +140,32 @@ class Read
         }
         return $relations;
     }
+
+    /**See https: //www.barattalo.it/coding/php-to-get-enum-set-values-from-mysql-field/
+ */
+    public function setAndEnumValues($table, $field)
+    {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+        $query = "SHOW COLUMNS FROM `$table` LIKE '$field'";
+        $result = $db->query($query) or die('Error getting Enum/Set field ' . $db->error);
+        $row = $result->fetch_array();
+        if (stripos("." . $row[1], "enum(") > 0) {
+            $row[1] = str_replace("enum('", "", $row[1]);
+        } else {
+            $row[1] = str_replace("set('", "", $row[1]);
+        }
+
+        $row[1] = str_replace("','", "\n", $row[1]);
+        $row[1] = str_replace("')", "", $row[1]);
+        $ar = explode("\n", $row[1]);
+        for ($i = 0; $i < count($ar); $i++) {
+            $arOut[str_replace("''", "'", $ar[$i])] = str_replace("''", "'", $ar[$i]);
+        }
+
+        return $arOut;
+    }
+
     public function req($r = [])
     {
         $new = [];
