@@ -16,7 +16,7 @@ class Table
     }
     public function tableDetails()
     {
-        echo '<h1>' . $this->tableSingleOrList->name . '</h1>';
+        echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
         echo '<table class="table table-warning table-striped">';
 
         foreach ($this->tableSingleOrList as $key => $value) {
@@ -85,7 +85,7 @@ foreach ($this->tableSingleOrList as $row) {
                 echo "<tr>";
                 $url = '';
                 foreach ($row as $key => $value) {
-                    if ($key == 'name') {
+                    if ($key == 'tableName') {
                         $url = isset($request[1]) ? $key : "tables/$value";
                         $value = "<a href='$url' class='link-dark'>$value</a>";
                     }

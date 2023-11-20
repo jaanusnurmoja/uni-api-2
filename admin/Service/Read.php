@@ -46,6 +46,7 @@ class Read
         LEFT JOIN relation_details rd ON rd.models_id = t.id
         LEFT JOIN relations r ON r.id = rd.relations_id
         $where";
+        print_r($query);
         $q = $db->query($query);
 
         $rowList = [];
@@ -84,10 +85,12 @@ class Read
                 $model->setData($data);
 
             }
-            $relationDetails->setTable($model);
-            if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+            if (!empty($relationDetails)) {
+                $relationDetails->setTable($model);
+                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
 
-                $model->addRelationDetails($relationDetails);
+                    $model->addRelationDetails($relationDetails);
+                }
             }
 
             $single = new TableDTO($model);

@@ -22,7 +22,7 @@ class EditTable
 
         ?>
 <h1>
-    <?php echo $data->name ?>
+    <?php echo $data->tableName ?>
 </h1>
 
 <form id="edit-table" name="edit-table" class="repeat">

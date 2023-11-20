@@ -57,13 +57,16 @@ class Create
            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
             //print_r($sqlCreate);
         $db->execute_query($sqlCreate);
+        $this->addTableToList($input, $db);
     }
 
-    public function addTableToList($input)
+    public function addTableToList($input, $db = null)
     {
+        if (empty($db)) {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        $db = $this->cnn();
-        unset($input->id);
+        $db = $this->cnn();         
+        }
+        unset($input['id']);
         $props = [];
         $vals = [];
         foreach ($input as $key => $value) {
