@@ -1,6 +1,7 @@
 <?php namespace Service;
 
 use mysqli;
+use Service\Read;
 
 include_once __DIR__ . '/../Model/RelationDetails.php';
 include_once __DIR__ . '/../Model/Relation.php';
@@ -45,7 +46,7 @@ class Create
                 if (!empty($column['defaultValue'])) {
                     $sqlCreate .= " DEFAULT '$column[defaultValue]'";
                 } else {
-                    if ($column['defOrNull']) {
+                    if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
                         $sqlCreate .= " DEFAULT NULL";
                     }
                 }
@@ -69,29 +70,69 @@ class Create
         unset($input['id']);
         $props = [];
         $vals = [];
+        $dbFields = [];
+        $dataForRdSql = [];
         foreach ($input as $key => $value) {
             if (!is_array($value) && !is_object($value)) {
                 $props[] = \Common\Helper::uncamelize($key);
                 $vals[] = $value;
             }
+            if ($key == 'data') {
+                foreach ($value['fields'] as $field) {
+                    $dbFields[] = \Common\Helper::uncamelize($field["name"]);
+                }
+            }
+            if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsto'])) {
+                foreach ($value as $relationDetails) {
+                    $rdCols = [];
+                    $rdVals = [];
+                    foreach ($relationDetails as $rdKey => $rdValue) {
+                        if ($rdKey != 'id'){
+                            $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
+                            $rdVals[] = $rdValue;
+                        }
+                    }
+                    $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols,'rdVals'=> $rdVals];
+                    //$this->addRelation(current($input), $db->insert_id);
+                }
+            }
         }
         $propsList = implode(", ", $props);
         $valsList = implode("', '", $vals);
-        $fields = $input["data"]["fields"];
-        $dbFields = [];
-
-        foreach ($fields as $field) {
-            $dbFields[] = \Common\Helper::uncamelize($field["name"]);
-        }
-
         $sql = "INSERT INTO `models` ($propsList)
         VALUES ('$valsList');
         ";
         $db->execute_query($sql);
+        
+        if (!empty($db->insert_id) && !empty($dataForRdSql)) {
+            $this->addRelation($dataForRdSql, $db->insert_id);
+        }
+        //$read = new Read();
+        //$newTable = $read->getTables(null,['t.id' => $db->insert_id]);
+        
         //print_r($db->insert_id);
 
         //$stmt = $db->prepare($sql);
         //$stmt->execute();
+    }
+
+    public function addRelation($input, $tableId) {
+
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    $db = $this->cnn();
+
+        print_r($input);
+        foreach ($input as $lists) {
+            array_push($lists['rdCols'], 'models_id');
+            array_push($lists['rdVals'], $tableId);
+            $keyList = implode(',', $lists['rdCols']);
+            $valList = "'" . implode("','", $lists['rdVals']) . "'";
+            $sql = "INSERT INTO relation_details ($keyList)
+                        VALUES ($valList);";
+            print_r($sql);
+            $db->execute_query($sql);
+            print_r($db->insert_id);
+        }
     }
     /** 
      * CREATE TABLE `test`.`katseloom` 

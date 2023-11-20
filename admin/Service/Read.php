@@ -46,7 +46,6 @@ class Read
         LEFT JOIN relation_details rd ON rd.models_id = t.id
         LEFT JOIN relations r ON r.id = rd.relations_id
         $where";
-        print_r($query);
         $q = $db->query($query);
 
         $rowList = [];
