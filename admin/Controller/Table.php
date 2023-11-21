@@ -34,7 +34,7 @@ class Table
         if ($request[2] != 'new') {
         $key = is_numeric($request[2]) ? 'rowid' : 'table_name';
         // $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
-        print_r([$key => $request[2]]);
+        ([$key => $request[2]]);
         $table = $read->getTables(null, [$key => $request[2]]);
         $tableDetails = new TableListOrDetails($table);
         if ($api === true) {
@@ -67,7 +67,7 @@ class Table
             }
         }
         echo '<hr>';
-        print_r($input);
+        ($input);
         $create->addTableToDB($input);
     }
 

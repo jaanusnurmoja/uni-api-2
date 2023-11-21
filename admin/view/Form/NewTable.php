@@ -193,7 +193,7 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
 
 <?php
 if (!empty($this->postBody)) {
-    print_r($this->postBody);
+    ($this->postBody);
     $this->tableCtrl->addTable($this->postBody['table']);
 }
 }

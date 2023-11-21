@@ -57,8 +57,8 @@ switch ($table) {
                 $sql = "UPDATE `$table`
                 SET" . ($input["username"] ? "`username` = '" . $input["username"] . "'" : '')
                 . ($input["username"] && $input["password"] ? ", " : "") // add the comma if needed
-                 . ($input["password"] ? "`password` = '" . password_hash($input["password"], PASSWORD_BCRYPT) . "'" : '') // re-hash the new password
-                 . " WHERE `id`='$key'";
+                . ($input["password"] ? "`password` = '" . password_hash($input["password"], PASSWORD_BCRYPT) . "'" : '') // re-hash the new password
+                . " WHERE `id`='$key'";
                 break;
 
             default:
@@ -104,7 +104,7 @@ switch ($table) {
 }
 // excecute SQL statement
 
-// print_r($sql);
+($sql);
 $starttime = microtime(true);
 $result = mysqli_query($link, $sql);
 

@@ -1,7 +1,6 @@
 <?php namespace Service;
 
 use mysqli;
-use Service\Read;
 
 include_once __DIR__ . '/../Model/RelationDetails.php';
 include_once __DIR__ . '/../Model/Relation.php';
@@ -29,50 +28,50 @@ class Create
 
         $sqlCreate = "CREATE TABLE " . $input['tableName'] . "(
             `$input[pk]` int(11) NOT NULL AUTO_INCREMENT";
-            
-            if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
-                foreach ($input['belongsTo'] as $fk) {
+
+        if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
+            foreach ($input['belongsTo'] as $fk) {
                 $sqlCreate .= ",
                 `$fk[keyField]` int(11) DEFAULT NULL";
                 $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
-                }
             }
-            foreach ($input['data']['fields'] as $column) {
-                $sqlCreate .= ",
+        }
+        foreach ($input['data']['fields'] as $column) {
+            $sqlCreate .= ",
                 `$column[name]` $column[type]";
-                if (empty($column['defOrNull'])) {
-                    $sqlCreate .= " NOT NULL";
-                } 
-                if (!empty($column['defaultValue'])) {
-                    $sqlCreate .= " DEFAULT '$column[defaultValue]'";
-                } else {
-                    if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
-                        $sqlCreate .= " DEFAULT NULL";
-                    }
+            if (empty($column['defOrNull'])) {
+                $sqlCreate .= " NOT NULL";
+            }
+            if (!empty($column['defaultValue'])) {
+                $sqlCreate .= " DEFAULT '$column[defaultValue]'";
+            } else {
+                if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
+                    $sqlCreate .= " DEFAULT NULL";
                 }
             }
-           $sqlCreate .= ",
+        }
+        $sqlCreate .= ",
            PRIMARY KEY (`$input[pk]`),
            " . implode(',
            ', $indexes) . "
            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
-            //print_r($sqlCreate);
-            try {
-                $db->query($sqlCreate);
-                echo "<span class='bg-success'>Uus tabel $input[tableName] on loodud!</span>";
-                $this->addTableToList($input, $db);
-            } catch (\mysqli_sql_exception $e) {
-                $err = $e->getMessage();
-                echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
-            }
+        ($sqlCreate);
+        try {
+            $db->query($sqlCreate);
+            echo "<span class='bg-success'>Uus tabel $input[tableName] on loodud!</span>";
+            $this->addTableToList($input, $db);
+        } catch (\mysqli_sql_exception $e) {
+            $err = $e->getMessage();
+            echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+        }
 
     }
 
     public function addTableToList($input, $db = null)
     {
         if (empty($db)) {
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        $db = $this->cnn();         
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+            $db = $this->cnn();
         }
         unset($input['id']);
         $props = [];
@@ -94,12 +93,12 @@ class Create
                     $rdCols = [];
                     $rdVals = [];
                     foreach ($relationDetails as $rdKey => $rdValue) {
-                        if ($rdKey != 'id'){
+                        if ($rdKey != 'id') {
                             $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
                             $rdVals[] = $rdValue;
                         }
                     }
-                    $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols,'rdVals'=> $rdVals];
+                    $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
                     //$this->addRelation(current($input), $db->insert_id);
                 }
             }
@@ -110,25 +109,26 @@ class Create
         VALUES ('$valsList');
         ";
         $db->execute_query($sql);
-        
+
         if (!empty($db->insert_id) && !empty($dataForRdSql)) {
             $this->addRelation($dataForRdSql, $db->insert_id);
         }
         //$read = new Read();
         //$newTable = $read->getTables(null,['t.id' => $db->insert_id]);
-        
-        //print_r($db->insert_id);
+
+        ($db->insert_id);
 
         //$stmt = $db->prepare($sql);
         //$stmt->execute();
     }
 
-    public function addRelation($input, $tableId) {
+    public function addRelation($input, $tableId)
+    {
 
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $db = $this->cnn();
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
 
-        print_r($input);
+        ($input);
         foreach ($input as $lists) {
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
@@ -136,19 +136,19 @@ class Create
             $valList = "'" . implode("','", $lists['rdVals']) . "'";
             $sql = "INSERT INTO relation_details ($keyList)
                         VALUES ($valList);";
-            print_r($sql);
+            ($sql);
             $db->execute_query($sql);
-            print_r($db->insert_id);
+            ($db->insert_id);
         }
     }
-    /** 
-     * CREATE TABLE `test`.`katseloom` 
+    /**
+     * CREATE TABLE `test`.`katseloom`
      * (
-     * `id` INT NOT NULL AUTO_INCREMENT , 
-     * `onju` BOOLEAN NOT NULL DEFAULT FALSE , 
-     * `pealkiri` VARCHAR(255) NOT NULL , 
-     * `kirjeldus` LONGTEXT NULL , 
+     * `id` INT NOT NULL AUTO_INCREMENT ,
+     * `onju` BOOLEAN NOT NULL DEFAULT FALSE ,
+     * `pealkiri` VARCHAR(255) NOT NULL ,
+     * `kirjeldus` LONGTEXT NULL ,
      * PRIMARY KEY (`id`)
      * ) ENGINE = InnoDB;
-    */
+     */
 }
