@@ -27,7 +27,7 @@ class Create
         $db = $this->cnn();
         $indexes = [];
 
-        $sqlCreate = "CREATE TABLE IF NOT EXISTS " . $input['tableName'] . "(
+        $sqlCreate = "CREATE TABLE " . $input['tableName'] . "(
             `$input[pk]` int(11) NOT NULL AUTO_INCREMENT";
             
             if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
@@ -57,8 +57,15 @@ class Create
            ', $indexes) . "
            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
             //print_r($sqlCreate);
-        $db->execute_query($sqlCreate);
-        $this->addTableToList($input, $db);
+            try {
+                $db->query($sqlCreate);
+                echo "<span class='bg-success'>Uus tabel $input[tableName] on loodud!</span>";
+                $this->addTableToList($input, $db);
+            } catch (\mysqli_sql_exception $e) {
+                $err = $e->getMessage();
+                echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+            }
+
     }
 
     public function addTableToList($input, $db = null)
