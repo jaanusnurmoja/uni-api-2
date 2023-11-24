@@ -1,0 +1,101 @@
+{
+  "beers": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "producers_id": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "producers"
+      }
+    },
+    "description": "Kahepoolsed (many-to-many) seosed tabeliga events, ülem: producers"
+  },
+  "events": {
+    "pk": "id",
+    "data": {},
+    "description": "Kahepoolsed (many-to-many) seosed tabeliga beers"
+  },
+  "instruments": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "orchestraId": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "orchestras"
+      },
+      "manufacturers_id": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "manufacturers"
+      }
+    },
+    "description": "Ülemad: orchestras, manufacturers; alam: players"
+  },
+  "manufacturers": {
+    "pk": "id",
+    "data": {},
+    "description": "Alam: instruments"
+  },
+  "orchestras": {
+    "pk": "id",
+    "data": {},
+    "description": "Alamad: instruments, conductors, kaudne alam: players"
+  },
+  "producers": {
+    "pk": "id",
+    "data": {},
+    "description": "Alam: beers"
+  },
+  "conductors": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "orchestraId": {
+        "parentKey": "id",
+        "label": "name",
+        "table": "orchestras"
+      }
+    },
+    "description": "Ülem: orchestras"
+  },
+  "players": {
+    "pk": "id",
+    "data": {},
+    "belongsTo": {
+      "instruments_id": {
+        "parentKey": "id",
+        "label": "type",
+        "table": "instruments"
+      }
+    },
+    "description": "Ülem: instruments"
+  },
+  "products": {
+    "pk": "id",
+    "data": {},
+    "description": "Kahepoolsed (many-to-many) seosed iseendaga"
+  },
+  "hasManyAndBelongsTo": {
+    "xref": {
+      "table": "crossref",
+      "field": "table_value"
+    },
+    "tables": [
+      {
+        "events": 0,
+        "beers": 0
+      },
+      {
+        "products": {
+          "values": {
+            "thisId": 0,
+            "otherId": 0
+          },
+          "alias": "related_products"
+        }
+      }
+    ]
+  }
+}

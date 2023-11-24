@@ -1,0 +1,15 @@
+[OneAll]
+subDomain=youroneallsubdomain
+private=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+public=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+[LinkedIn]
+clientId=123456789012345
+clientSecret=yourverysecretlnappsecret
+redirectUri=https://example.com/thissite/user/social/linkedin/index.php
+[Facebook]
+app_id=123456789012345
+app_secret=yourverysecretfbappsecret
+[Google]
+clientId=yourclient-idxxxxx.apps.googleusercontent.com
+clientSecret=Yc9FnWeJ_Xg94jNrarIzbyy4
+redirectUri=https://example.com/thissite/user/social/google/google_auth_config.php
