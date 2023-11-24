@@ -64,6 +64,7 @@ class Create
             $err = $e->getMessage();
             echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
         }
+        $db->close();
 
     }
 
@@ -108,7 +109,7 @@ class Create
         $sql = "INSERT INTO `models` ($propsList)
         VALUES ('$valsList');
         ";
-        $db->execute_query($sql);
+        $db->query($sql);
 
         if (!empty($db->insert_id) && !empty($dataForRdSql)) {
             $this->addRelation($dataForRdSql, $db->insert_id);
@@ -116,10 +117,11 @@ class Create
         //$read = new Read();
         //$newTable = $read->getTables(null,['t.id' => $db->insert_id]);
 
-        ($db->insert_id);
+        // ($db->insert_id);
 
         //$stmt = $db->prepare($sql);
         //$stmt->execute();
+                $db->close();
     }
 
     public function addRelation($input, $tableId)
@@ -136,10 +138,9 @@ class Create
             $valList = "'" . implode("','", $lists['rdVals']) . "'";
             $sql = "INSERT INTO relation_details ($keyList)
                         VALUES ($valList);";
-            ($sql);
-            $db->execute_query($sql);
-            ($db->insert_id);
-        }
+            $db->query($sql);
+         $db->close();
+       }
     }
     /**
      * CREATE TABLE `test`.`katseloom`

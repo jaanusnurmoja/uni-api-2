@@ -8,7 +8,7 @@ Oodatava lõpptulemusena on võimalik kasutada kõiki http meetodeid  **GET**, *
 
 - Tõsta kõik failid saidi juurkausta
 
-- seadista `config.php` suhtlema andmebaasiga
+- seadista `config/connection.ini` suhtlema andmebaasiga
 
 - Jäta `models.json` nagu ta on (see on originaal) - meil on vaja hoopis relations.json faili
 
@@ -26,10 +26,11 @@ Number urli lõpus (tabelinimi/1) näitab konkreetse id-ga kirjet.
 
 # Olulisemad meetodid
 
-getRelations() tõlgib seadistuse jsoni php keelde`, 
+getRelations() tõlgib seadistuse jsoni php keelde`,
 
-getDataWithRelations 
+getDataWithRelations
 töötleb seadistust edasi, lisades ka hasMany,
+
 ```
 /**
  * Summary of getDataWithRelations
@@ -99,9 +100,10 @@ function getDataStructure($table = null)
 
     return getDataWithRelations($table)[$table];
 }
-``` 
+```
 
 getColumns + getJoinColumns koostavad väljade loetelu,
+
 ```
 /**
  * Summary of getColumns
@@ -177,6 +179,7 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
     return $cols;
 }
 ```
+
 buildQuery() ja buildQueryJoin() koostavad SELECT päringu
 
 ```
@@ -275,19 +278,19 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
         foreach ($xref['refTables'] as $refData) {
             if ($refData['inner']) {
                 $sql .= "JSON_CONTAINS(JSON_EXTRACT({$xref['field']}, '$.{$refData['thisTable']}'), 
-				`$table`.`{$tableData['pk']}`)
+    `$table`.`{$tableData['pk']}`)
              LEFT JOIN {$refData['asAlias']} ON
              (JSON_CONTAINS(JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['otherTable']}'), 
-			 `{$refData['alias']}`.`{$tableData['pk']}`)
+    `{$refData['alias']}`.`{$tableData['pk']}`)
              AND `{$refData['alias']}`.`{$tableData['pk']}` <> `{$refData['thisTable']}`.`{$tableData['pk']}`)";
             } else {
                 $sql .= "JSON_CONTAINS_PATH(`{$xref['field']}`, 'ALL','$.{$refData['thisTable']}',
-				'$.{$refData['otherTable']}')
+    '$.{$refData['otherTable']}')
             AND JSON_EXTRACT(`{$xref['field']}`, '$.{$refData['thisTable']}') = 
-			`{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
+   `{$refData['thisTable']}`.`{$refData['thisPk']['name']}`
             LEFT JOIN {$refData['asAlias']} ON 
-			JSON_EXTRACT(`{$xref['field']}`, 
-			'$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
+   JSON_EXTRACT(`{$xref['field']}`, 
+   '$.{$refData['otherTable']}') = `{$refData['alias']}`.`{$refData['otherPk']['name']}`
             ";
             }
         }
@@ -335,7 +338,8 @@ function getValueOrListFromSubQuery($table, $where = null, $value = null)
 
 ```
 
-reorganize paigutab ja lahterdab kirje andmed soovitud viisil 
+reorganize paigutab ja lahterdab kirje andmed soovitud viisil
+
 ```
 /**
  * Summary of reorganize
@@ -375,7 +379,8 @@ function reorganize($table, $item, $forBelongsTo = false)
 
 ```
 
-buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi ütleb, töötleb see andmebaasist saadud ridu. 
+buildQueryResults($data, $starttime = null, $mySQLtime = null) - nagu nimigi ütleb, töötleb see andmebaasist saadud ridu.
+
 ```
 /**
  * Summary of buildQueryResults
@@ -465,9 +470,10 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
 }
 
 ```
+
 Alammeetodid - buildResultsOfHMABT($dataRows, $tbl, $tblAlias) ja buildJoinedDataOfResults(
- $dataRows, $currentTable, $fKeyFromArray, $idKeyFromArray, $keys, $parentTable,$d = []), lisaks on tarvitusel mitmed abifunktsioonid. 
- 
+ $dataRows, $currentTable, $fKeyFromArray, $idKeyFromArray, $keys, $parentTable,$d = []), lisaks on tarvitusel mitmed abifunktsioonid.
+
 Päringuga tagastatud read saadetakse sellele meetodile nii, et ühtaegu mõõdetakse nii mysql kui ka php laadimise aega:
 
 ```
@@ -476,7 +482,7 @@ $result = mysqli_query($link, $sql);
 
 $dataRows = [];
 while ($row = mysqli_fetch_assoc($result)) {
-	$dataRows[$row['rowid']][] = $row;
+ $dataRows[$row['rowid']][] = $row;
 }
 
 $end = microtime(true);

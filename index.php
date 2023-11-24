@@ -24,12 +24,18 @@ $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
 
-function loggedIn()
-{
-if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson']))
-{
-return $_SESSION['currentPerson'];
-}
+include_once 'user/Session.php';
+
+if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+    new \user\Session();
+    function loggedIn()
+    {
+        if (isset($_SESSION['loggedIn']))
+        {
+            $u = $_SESSION['loggedIn']['userData'];
+            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+        }
+    }
 }
 ?>
 
@@ -43,6 +49,28 @@ return $_SESSION['currentPerson'];
     </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
+        integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.cycle2/2.1.6/jquery.cycle2.min.js"
+        integrity="sha512-lvcHFfj/075LnEasZKOkj1MF6aLlWtmpFEyd/Kc+waRnlulG5er/2fEBA5DBff4BZrcwfvnft0PiAv4cIpkjpw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
+        integrity="sha512-JRlcvSZAXT8+5SQQAvklXGJuxXTouyq8oIMaYERZQasB8SBDHZaUbeASsJWpk0UUrf89DP3/aefPPrlMR1h1yQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.20.0/jquery.validate.min.js"
+        integrity="sha512-WMEKGZ7L5LWgaPeJtw9MBM4i5w5OSBlSjTjCtSnvFJGSVD26gE5+Td12qN5pvWXhuWaWcVwF++F7aqu9cvqP0A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="86dc64a4e19322c20a32dff2-text/javascript" src="<?=$siteBase?>/common/js/jquery.base64.js"></script>
+    <!-- script type="86dc64a4e19322c20a32dff2-text/javascript" src="<?=$siteBase?>/common/js/jquery.masonry.min.js">
+    </!-->
+    <script type="86dc64a4e19322c20a32dff2-text/javascript" src="<?=$siteBase?>/common/js/frontend.js"></script>
+    <script type="86dc64a4e19322c20a32dff2-text/javascript" src="<?=$siteBase?>/common/js/jquery.serializejson.min.js">
+    </script>
+    <script type="86dc64a4e19322c20a32dff2-text/javascript" src="<?=$siteBase?>/common/js/repeatable-fields.js">
+    </script>
+
     <script type="text/javascript">
     var oa = document.createElement('script');
     oa.type = 'text/javascript';
@@ -143,16 +171,34 @@ foreach (json_decode($rel) as $table => $params) {
                     lihtsamaid vahendeid ning ka vajalikke php-teeke.
                 </p>
                 <div>
+                    <h4 class="bg-warning">Valmimas: halduskeskkond ja kasutajate automaatne registreerimine</h4>
+                    <p>
+                        Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
+                        pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
+                        automaatselt ka saidi kasutajaks, kui ta seda juba ei ole. Traditsioonilist
+                        "kasutajanimi:parool" tüüpi sisselogimist ning vormi kaudu kasutajaks registreerumist ma hetkel
+                        ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
+                        isikuprofiili ning seostada sellega kõik oma kasutajakontod.
+                    </p>
+                    <p>
+                        Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
+                        või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.
+                    </p>
+                </div>
+                <div>
                     <h4>Tähtsamad erisused:</h4>
                     <ol>
                         <li>
-                            json seadistusfailis <a href='api/relations.json'>relations.json</a> on defineeritud vaid
+                            json seadistusfailis <a href='api/relations.json'>relations.json</a> on defineeritud
+                            vaid
                             tabelite nimed ning iga
-                            tabeli many-to-one või many-to-many seosed. Väljade nimedest on ära toodud vaid primaar- ja
+                            tabeli many-to-one või many-to-many seosed. Väljade nimedest on ära toodud vaid primaar-
+                            ja
                             võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed. PLAANIS:
                             andmebaasipõhine haldus json faili asemel.</li>
                         <li>
-                            päringu väljade loetelud genereeritakse üldise seadistuse põhjal dünaamiliselt, kasutades
+                            päringu väljade loetelud genereeritakse üldise seadistuse põhjal dünaamiliselt,
+                            kasutades
                             päringut
                             SHOW
                             COLUMNS FROM tabeli_nimi. Peamise kirje alamtabelite väljanimed on aliasega `tabel:väli`
@@ -171,9 +217,11 @@ foreach (json_decode($rel) as $table => $params) {
                             täita võimatut missiooni.</h6>
                         <p>Suurim erinevus
                             MySQL päringu
-                            tulemuste tagastamise ja töödeldud andmete laadimise kiiruse vahel minu koduarvutis: MySQL:
+                            tulemuste tagastamise ja töödeldud andmete laadimise kiiruse vahel minu koduarvutis:
+                            MySQL:
                             0.007775068283081055,
-                            php: 5.6625449657440186 sekundit (orchestras, 4(!) andmerida koos kõigi alamate ja alamate
+                            php: 5.6625449657440186 sekundit (orchestras, 4(!) andmerida koos kõigi alamate ja
+                            alamate
                             alamatega). Veebimajutaja juures olid näitajad siiski paremad - 0.0010159015655517578 vs
                             1.9478819370269775
                         </p>
@@ -183,6 +231,20 @@ foreach (json_decode($rel) as $table => $params) {
         </div>
     </div>
     </div>
+    <script>
+    jQuery(function() {
+        jQuery('.repeat').each(function() {
+            jQuery(this).repeatable_fields({
+                wrapper: 'table',
+                container: 'tbody',
+                row: '.trow',
+            });
+        });
+    });
+    </script>
+    <!-- script src="https://ajax.cloudflare.com/cdn-cgi/scripts/a2bd7673/cloudflare-static/rocket-loader.min.js"
+        data-cf-settings="86dc64a4e19322c20a32dff2-|49" defer="">
+    </!-->
 </body>
 
 </html>

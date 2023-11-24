@@ -232,7 +232,6 @@
 
     // Initialize all repeatable field wrappers
     self.initialize(self);
-    console.log(self);
 
     return self;
   };
