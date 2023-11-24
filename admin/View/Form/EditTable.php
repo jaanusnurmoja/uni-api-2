@@ -21,80 +21,199 @@ class EditTable
     <?php echo $data->name ?>
 </h1>
 
-<form id="edit-table" name="edit-table">
+<form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
     <input type="hidden" name="id" value="<?php echo $data->id ?>" id="id" />
-    <table class="table table-warning table-striped">
-        <?php
+    <?php
 
             foreach ($data as $key => $value) {
                 if (!is_object($value) && !is_array($value) && $key != 'id') { ?>
-        <tr>
-            <td> <?php echo $key?> </td>
-            <td><input type="text" name="<?php echo $key?>" value="<?php echo $value?>" /></td>
-        </tr>
-        <?php } else {
+    <label> <?php echo $key?><input type="text" name="<?php echo $key?>" value="<?php echo $value?>" /></label>
+    <?php } else {
                         if ($key == 'data') {?>
-        <tr>
-            <td colspan=" 2">
-                <h2>Andmeväljad</h2>
-            </td>
-        </tr> <?php 
+    <h2>Andmeväljad</h2>
+    <table class="table table-warning table-striped table-sm wrapper">
+        <thead>
+            <tr>
+                <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
+            </tr>
+        </thead>
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count=1>
+            <?php $f0 = new \Model\Field(); ?>
+            <tr class="template trow"> <?php
+            ?>
+                <td>
+                    <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
+                </td>
+                <td>
+                    <fieldset>
+                        <?php foreach ($f0 as $k0 => $v0) {
+                                        if ($k0 == 'id') {
+            
+                                            // $fKey
+                                            echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
+                                        } else {
+                                            echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0'";
+                                            if (is_bool($v0)) {
+                                                $checked = $v0 ? ' checked="checked"' : '';
+                                                echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                                            } else {
+                                                echo " type='text' value='$v0' />";
+                                            }
+                                        }
+                                    }?>
+                    </fieldset>
+                </td>
+                <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+            </tr>
+            <?php 
         foreach ($data->data->fields as $fkey => $field) {?>
-        <tr>
-            <td><?php echo $fkey ?></td>
-            <td>
-                <fieldset>
-                    <?php
+            <tr class="trow">
+                <td>
+                    <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
+                </td>
+                <td>
+                    <fieldset>
+                        <?php
                         foreach ($field as $k => $v) {
                             if ($k == 'id') {
                                 echo "<input type='hidden' name='$k' id='$k' value='$v' /> ";
                             } else {
-                                echo "<label for='$k'>$k</label> <input name='$k' id='$k' type='text' value='$v' />";
+                                echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k'";
+                                if (is_bool($v)) {
+                                    $checked = $v ? ' checked="checked"' : '';
+                                    echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                                } else {
+                                    echo " type='text' value='$v' />";
+                                }
                             }
                         }?>
-                </fieldset>
-            </td>
-        </tr>
-        <?php 
+                    </fieldset>
+                </td>
+                <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+            </tr>
+            <?php 
                     }
+                        ?>
+        </tbody>
+    </table>
+    <?php
                 }
-                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
-                    echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
-                    foreach ($value as $av) {
-                        foreach ($av as $rdKey => $rdValue) {
-                            if (is_object($rdValue)) {
-                                ?>
-        <tr>
-            <td><?php echo $rdKey?></td>
-            <td><select name="<?php echo $rdKey?>">
-                    <?php 
-                    foreach ($this->relations as $r) {
-                                $selected = $rdValue == $r ? " selected='selected'" : '';
-                        echo "<option value='$r->id'$selected'>{$r->type}</option>\n";
-                }
-                    ?>
+                $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
+                if (in_array($key, $roles)) {
+                    echo '<h4>' . $key . '</h4>';?>
+    <table class="table table-warning table-striped table-sm wrapper">
+        <thead>
+            <tr>
+                <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
+            </tr>
+        </thead>
+        <tbody class="container ui-sortable" data-rf-row-count="0">
+            <tr class="template trow" style="display:none;">
+                <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
+                <td>
+                    <table>
 
-                </select>
-                <span><?php foreach($rdValue as $attr => $val) {
-                                echo "$attr: $val; ";
-                            }?></span>
-            </td>
-        </tr>
-        <?php
-                        } else {
+                        <?php $data->$key = [];
+                            $data->$key[0] = new \Model\RelationDetails();
+                            if (!isset($data->$key[0]->relation)) {
+                                $data->$key[0]->relation = new \Model\Relation();
+                            }
+
+                            foreach ($data->$key[0] as $rdKey => $rdValue) {
+                                if ($rdKey == 'relation') {
+                                    ?>
+                        <tr>
+                            <td><?php echo $rdKey ?>
+                            </td>
+                            <td><select name="table[<?=$key?>][{{row-count-placeholder}}][<?=$rdKey?>]">
+                                    <option value=''></option>
+                                    <?php echo "\n";
+                                    foreach ($this->relations as $r) {
+                                        $selected = $r->type == $key ? " selected='selected'" : '';
+                                        echo "<option value='$r->id'$selected'>{$r->type}</option>\n";
+                                    }
+                                    ?>
+
+                                </select>
+                                <span><?php foreach ($rdValue as $attr => $val) {
+                                        echo "$attr: $val; ";
+                                    }?></span>
+                            </td>
+                        </tr>
+                        <?php
+} else {
+                                    if (is_bool($rdValue)) {
+                                        $checked = $rdValue ? ' checked="checked"' : '';
+                                        echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
+                                    } else {
+                                        if ($rdKey == "id") {
+                                            echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
+                                        } else {
+                                            echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
+                                        }
+                                    }
+                                }
+                            }
+                            ?>
+                    </table>
+                </td>
+                <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+                </td>
+            </tr>
+            <?php
+            foreach ($value as $av) {
+            foreach ($av as $rdKey => $rdValue) {
+            if (is_object($rdValue)) {
+            ?>
+            <tr class="trow">
+                <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
+                <td>
+                    <table>
+                        <tr>
+                            <td><?php echo $rdKey?></td>
+                            <td><select name="<?php echo $rdKey?>">
+                                    <?php 
+                                foreach ($this->relations as $r) {
+                                            $selected = $rdValue == $r ? " selected='selected'" : '';
+                                    echo "<option value='$r->id'$selected'>{$r->type}</option>\n";
+                            }
+                                ?>
+
+                                </select>
+                                <span><?php foreach($rdValue as $attr => $val) {
+                                            echo "$attr: $val; ";
+                                        }?></span>
+                            </td>
+                        </tr>
+                        <?php 
+                         } else {
                             if (is_bool($rdValue)) {
                                 $checked = $rdValue ? ' checked="checked"' : '';
                                 echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='$rdKey' value=true$checked /></td></tr>";
                             } else {
-                                echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='$rdKey' value='$rdValue' /></td></tr>";
+                                if ($rdKey == "id") {
+                                    echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
+                                } else {
+                                    echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
+                                }
                             }
                         }
+                       
+                        ?>
+
+                    </table>
+                </td>
+                <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
+                </td>
+            </tr>
+            <?php
                     }
                 }
             }
         }
     }
 ?>
+        </tbody>
     </table>
     <input type="submit" value="Salvesta muudatused" />
 </form>
