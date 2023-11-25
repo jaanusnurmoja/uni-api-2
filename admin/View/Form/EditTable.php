@@ -4,6 +4,7 @@ class EditTable
 {
     public $relations;
     public $data;
+    public $postBody;
 
     public function __construct($data = null)
     {
@@ -12,6 +13,9 @@ class EditTable
         $readRels->getRelationsList($list);
         $this->relations = $list->list;
         $this->data = $data;
+        $forminput = file_get_contents('php://input');
+        parse_str($forminput, $this->postBody);
+
     }
 
     public function editTableForm($data = null)
@@ -23,7 +27,6 @@ class EditTable
 <h1>
     <?php echo $data->name ?>
 </h1>
-
 <form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
     <input type="hidden" name="id" value="<?php echo $data->id ?>" id="id" />
     <?php
@@ -40,7 +43,7 @@ class EditTable
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
-        <tbody class="repeatcontainer ui-sortable" data-rf-row-count=1>
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count>
             <?php $f0 = new \Model\Field(); ?>
             <tr class="template trow"> <?php
             ?>
@@ -112,7 +115,7 @@ class EditTable
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
-        <tbody class="container ui-sortable" data-rf-row-count="0">
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count>
             <tr class="template trow">
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
@@ -168,18 +171,18 @@ class EditTable
 
             <?php
         if (!empty($value)) {
-        foreach ($value as $av) {
+        foreach ($value as $i => $av) {
             ?>
 
             <tr class="trow">
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
-                    <table>
+                    <table id="<?=$key?>_{{row_count_placeholder}}">
                         <?php foreach ($av as $rdKey => $rdValue) { ?>
                         <?php if (is_object($rdValue)) { ?>
                         <tr>
                             <td><?php echo $rdKey?></td>
-                            <td><select name="<?php echo $rdKey?>">
+                            <td><select name="<?="table[$key][$i][$rdKey]"?>">
 
                                     <?php
                             foreach ($this->relations as $r) {
@@ -198,12 +201,12 @@ class EditTable
                         } else {
                             if (is_bool($rdValue)) {
                                 $checked = $rdValue ? ' checked="checked"' : '';
-                                echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='$rdKey' value=true$checked /></td></tr>";
+                                echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][$i][$rdKey]' value=true$checked /></td></tr>";
                             } else {
                                 if ($rdKey == "id") {
-                                    echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
+                                    echo "<input type='hidden' name='table[$key][$i][$rdKey]'>";
                                 } else {
-                                    echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
+                                    echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][$i][$rdKey]' value='$rdValue' /></td></tr>";
                                 }
                             }
                         }
@@ -230,5 +233,7 @@ class EditTable
  } ?>
     <input type="submit" value="Salvesta muudatused" />
 </form>
-<?php }
+<?php 
+
+}
     }

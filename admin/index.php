@@ -235,7 +235,7 @@ if (!$api) {
         jQuery('.repeat').each(function() {
             jQuery(this).repeatable_fields({
                 wrapper: 'table',
-                container: 'tbody',
+                container: '.repeatcontainer',
                 row: '.trow',
             });
         });

@@ -126,7 +126,7 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
             </tr>
         </thead>
-        <tbody class="container ui-sortable" data-rf-row-count="0">
+        <tbody class="repeatcontainer ui-sortable" data-rf-row-count="0">
             <tr class="template trow" style="display:none;">
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
