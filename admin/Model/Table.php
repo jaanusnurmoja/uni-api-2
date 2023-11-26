@@ -18,7 +18,10 @@ class Table
     {
         if ($id == $this->id || $id == 0) {
             if ( $id == 0 && empty($this->data)) {
-                $this->data = new Data();
+                $this->data = new DataFields();
+            }
+            if (empty($this->createdModified)) {
+                $this->createdModified = new CreatedModified();
             }
             return $this;
         }

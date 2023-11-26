@@ -9,7 +9,7 @@ class RelationDetails
     public Relation $relation;
     public $role;
     public $keyField;
-    public bool $hasMany;
+    public bool $hasMany = false;
     public Table $table;
     public $otherTable;
     public CreatedModified $createdModified;

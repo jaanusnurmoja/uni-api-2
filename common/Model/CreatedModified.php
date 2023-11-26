@@ -10,7 +10,7 @@ class CreatedModified {
     public ?int $modifiedBy = null;
     public ?string $modifiedWhen = null;
     
-    public function __construct(?int $tableId, ?string $tableName){
+    public function __construct($tableId=null, $tableName=null){
         
         if (!empty($tableId)) {
             if ($this->tableId == $tableId && $this->tableName == $tableName) {

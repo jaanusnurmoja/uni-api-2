@@ -6,10 +6,13 @@ class NewTable
     public $relations;
     public $postBody;
     public $tableCtrl;
+    private $currentUser;
+    
     public function __construct($table = null)
     {
         $tableCtrl = new \Controller\Table();
         $list = new \DTO\ListDTO();
+        $this->currentUser = $_SESSION['loggedIn']['userData'];
         $tableCtrl->getRelationsList($list);
         $this->relations = $list->list;
         $this->tableCtrl = $tableCtrl;
@@ -115,12 +118,15 @@ foreach ($data as $key => $value) {
         </tbody>
     </table>
     <?php
-} else {?>
-    <?php
+} else {
+if ($key == 'createdModified') {
+    ?>
+    <input type="hidden" name="table[createdModified][createdBy][id]" value="<?=$this->currentUser->id?>" />
+    <?php }
 $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                         if (in_array($key, $roles)) {
-                            echo '<h4>' . $key . '</h4>';?>
-    <table class="table table-warning table-striped table-sm wrapper">
+                            echo '<h4>' . $key . '</h4>';?> <table
+        class=" table table-warning table-striped table-sm wrapper">
         <thead>
             <tr>
                 <td width="10%" colspan="3"><span class="add btn btn-success btn-sm">Add</span></td>
@@ -175,6 +181,8 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                             }
                             ?>
                     </table>
+                    <input type="hidden" name="<?="table[$key][{{row-count-placeholder}}][createdBy][id]"?>"
+                        value="<?=$this->currentUser->id?>" />
                 </td>
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
                 </td>
