@@ -34,7 +34,7 @@ if (!empty($_SERVER['QUERY_STRING']))
 
 include_once __DIR__. '/../user/Session.php';
 
-if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
     function loggedIn()
     {

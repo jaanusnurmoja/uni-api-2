@@ -9,10 +9,10 @@ class User
     public $id;
     public $username;
     public $email;
-    public $password;
+    private $password;
     public $social;
-    public $userToken;
-    public $identityToken;
+    private $userToken;
+    private $identityToken;
     public $role = 'USER';
     //public \Person $person;
 
@@ -21,9 +21,9 @@ class User
             foreach ($userData as $key => $value) {
                 if ($key == 'ID') $key = 'id';
                 $key = Helper::camelize($key, true);
-                //if (property_exists($this, $key)) {
+                if (property_exists($this, $key)) {
                     $this->$key = $value;
-                //}
+                }
             }
         }
     }

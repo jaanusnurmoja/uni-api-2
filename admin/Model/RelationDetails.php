@@ -1,5 +1,7 @@
 <?php namespace Model;
 
+use common\Model\CreatedModified;
+
 class RelationDetails
 {
 
@@ -10,6 +12,7 @@ class RelationDetails
     public bool $hasMany;
     public Table $table;
     public $otherTable;
+    public CreatedModified $createdModified;
 
     public function __construct(?int $id = null) {
         if ($id !== null) {
@@ -136,5 +139,23 @@ class RelationDetails
     */
     public function setOtherTable($otherTable) {
     	$this->otherTable = $otherTable;
+    }
+
+    /**
+     * Get the value of createdModified
+     */
+    public function getCreatedModified(): CreatedModified
+    {
+        return $this->createdModified;
+    }
+
+    /**
+     * Set the value of createdModified
+     */
+    public function setCreatedModified(CreatedModified $createdModified): self
+    {
+        $this->createdModified = $createdModified;
+
+        return $this;
     }
 }

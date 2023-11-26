@@ -193,7 +193,15 @@ class EditTable
 
                                 </select>
                                 <span><?php foreach($rdValue as $attr => $val) {
-                                    echo "$attr: $val; ";
+                                    if (is_object($val) || is_array($val)) {
+                                        echo "<p>$attr:</p><ul>";
+                                        foreach ($val as $k => $v) {
+                                            echo "<li>$k: $v</li>";
+                                        }
+                                        echo '</ul>';
+                                    } else {
+                                        echo "$attr: $val; ";
+                                    }
                                 }?></span>
                             </td>
                         </tr>

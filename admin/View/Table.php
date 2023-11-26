@@ -16,13 +16,13 @@ class Table
     }
     public function tableDetails()
     {
-        echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
-        echo '<table class="table table-warning table-striped">';
+    echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
+    echo '<table class="table table-warning table-striped">';
 
-        foreach ($this->tableSingleOrList as $key => $value) {
-            if (!is_object($value) && !is_array($value)) {
-                echo '<tr><td>' . $key . '</td><td>' . $value . '</td></tr>';
-            } else {
+    foreach ($this->tableSingleOrList as $key => $value) {
+        if (!is_object($value) && !is_array($value)) {
+            echo '<tr><td>' . $key . '</td><td>' . $value . '</td></tr>';
+        } else {
                 if ($key == 'data') {
                     echo '<tr><td colspan = "2"><h2>Andmeväljad</h2></td></tr>';
                     foreach ($this->tableSingleOrList->data->fields as $fkey => $field) {?>
@@ -31,19 +31,32 @@ class Table
     <td>
         <ul>
             <?php
-foreach ($field as $k => $v) {
+                    foreach ($field as $k => $v) {
                         echo "<li>$k: $v</li>";
                     }?></ul>
     </td>
 </tr>
 <?php
-}
+                    }
                 }
+
+            if ($key == 'createdModified') {
+                echo "<tr><td colspan='2' class='h4'>$key</td></tr>";
+                foreach ($value as $subKey => $subValue) {
+                    if (is_object($subValue) || is_array($subValue)) {
+                        $subValue = json_encode($subValue);
+                    }
+                        echo '<tr><td>' . $subKey . '</td><td>' . $subValue . '</td></tr>';
+                    }
+                }
+                
                 if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
                         foreach ($av as $rdKey => $rdValue) {
-                            if (is_object($rdValue)) $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
+                            if (is_object($rdValue)) {
+                                $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
+                            }
                             echo "<tr><td>$rdKey</td><td>$rdValue</td></tr>";
                         }
                     }
@@ -51,6 +64,7 @@ foreach ($field as $k => $v) {
             }
         }
     }
+
 
     public function tableList()
     {
@@ -96,7 +110,7 @@ foreach ($this->tableSingleOrList as $row) {
                         $value = count($value);
                     }
                     if (is_object($value)) {
-                        $value = count($value);
+                        $value = count((array) $value);
                     }
                     echo '<td>' . $value . '</td>';
                 }

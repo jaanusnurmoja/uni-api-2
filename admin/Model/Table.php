@@ -1,14 +1,17 @@
 <?php namespace Model;
 include 'Data.php';
+
+use common\Model\CreatedModified;
 use Model\Data as DataFields;
 
 class Table
 {
 
     public $id;
-    public $name;
+    public $tableName;
     public $pk = 'id';
     public $data;
+    public CreatedModified $createdModified;
     public $relationDetails = [];
 
     public function __construct($id = null)
@@ -34,17 +37,17 @@ class Table
         $this->id = $id;
     }
 
-    public function getName()
+    public function getTableName()
     {
-        return $this->name;
+        return $this->tableName;
     }
 
     /**
      * @param $name
      */
-    public function setName($name)
+    public function setTableName($tableName)
     {
-        $this->name = $name;
+        $this->tableName = $tableName;
     }
 
     public function getPk()
@@ -63,7 +66,7 @@ class Table
     /**
      * @return Data
      */
-    public function getData(): Data
+    public function getData(): DataFields
     {
         return $this->data;
     }
@@ -71,11 +74,28 @@ class Table
     /**
      * @param Data $data
      */
-    public function setData(Data $data): void
+    public function setData(DataFields $data): void
     {
         $this->data = $data;
     }
 
+    /**
+     * Get the value of createdModified
+     */
+    public function getCreatedModified(): CreatedModified
+    {
+        return $this->createdModified;
+    }
+
+    /**
+     * Set the value of createdModified
+     */
+    public function setCreatedModified(CreatedModified $createdModified): self
+    {
+        $this->createdModified = $createdModified;
+
+        return $this;
+    }
 
     /**
     * @return array
@@ -94,4 +114,5 @@ class Table
     public function addRelationDetails(RelationDetails $relationDetails) {
         array_push($this->relationDetails, $relationDetails);
     }
+
 }
