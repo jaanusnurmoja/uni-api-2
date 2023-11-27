@@ -31,6 +31,7 @@ class EditTable
 </h1>
 <form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
     <input type="hidden" name="id" value="<?php echo $data->id ?>" id="id" />
+    <input type="hidden" name="table[createdModified][modifiedBy]" value="<?=$this->currentUser->id?>" />
     <?php
 
             foreach ($data as $key => $value) {
@@ -108,12 +109,12 @@ class EditTable
         } else {
             if ($key == 'createdModified') { ?>
     <h4><?=$key?></h4>
-    <dl class="row bg-light border border-dark">
+    <dl class="row bg-light border">
         <?php 
         $this->createdModified($value);
         ?>
-        <dt class='col-sm-4 border border-dark'>Current user</dt>
-        <dd class='col-sm-8 border border-dark'><?=$this->currentUser->id?></dd>
+        <dt class='col-sm-4 border'>Current user</dt>
+        <dd class='col-sm-8 border mb-0'><?=$this->currentUser->id?></dd>
     </dl>
     </td>
     </tr>
@@ -136,6 +137,8 @@ class EditTable
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
+                    <input type="hidden" name="table[<?=$key?>][{{row-count-placeholder}}][createdModified][modifiedBy]"
+                        value="<?=$this->currentUser->id?>" />
                     <table>
 
                         <?php $data->$key = [];
@@ -195,7 +198,9 @@ class EditTable
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
-                    <table id="<?=$key?>_{{row_count_placeholder}}">
+                    <input type="hidden" name="table[<?=$key?>][<?=$i?>][createdModified][modifiedBy]"
+                        value="<?=$this->currentUser->id?>" />
+                    <table id="<?=$key?>_<?=$i?>">
                         <?php foreach ($av as $rdKey => $rdValue) { ?>
                         <?php if ($rdKey == 'relation') { ?>
                         <tr>
@@ -224,17 +229,18 @@ class EditTable
                                 if ($rdKey == "id") {
                                     echo "<input type='hidden' name='table[$key][$i][$rdKey]'>";
                                 } else {
-                                    if ($rdKey == 'createdModified') {
+                                    if ($rdKey != 'createdModified'){
+                                        echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][$i][$rdKey]' value='$rdValue' /></td></tr>";
+                                    }       
+                                    else {
                                         echo '<h4>Created & modified</h4>';
-                                        echo '<dl class="row bg-light border border-dark">';
+                                        echo '<dl class="row bg-light border">';
                                         $this->createdModified($rdValue);
-                                        echo "<dt class='col-sm-4 border border-dark'>Current user</dt>
-                                        <dd class='col-sm-8 border border-dark'>" . $this->currentUser->id . "</dd>";
+                                        echo "<dt class='col-sm-4 border'>Current user</dt>
+                                        <dd class='col-sm-8 border mb-0'>" . $this->currentUser->id . "</dd>";
                                         echo "</dl>";
                                         echo "</td></tr>";
-                                    } else {
-                                        echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][$i][$rdKey]' value='$rdValue' /></td></tr>";
-                                    }                   
+                                    }             
                                 }
                             }
                         }
@@ -266,16 +272,18 @@ class EditTable
 }
 
 public function createdModified($value, $inner = false) {
-    if ($inner === true) echo '<dl class="row bg-light border border-dark">';
+    if ($inner === true) echo '<dl class="row bg-light border mb-0">';
     foreach ($value as $subKey => $subValue) {
-        echo "<dt class='col-sm-4 border border-dark'>$subKey</dt>";
-        echo "<dd class='col-sm-8 border border-dark'>"; 
-        if ($subKey == 'createdBy') {
-            $this->createdModified($subValue, true);
-        } else {
-            echo $subValue;
+        if (!in_array($subKey, ['tableId', 'tableName', 'id', 'email', 'social', 'role'])) {
+            echo "<dt class='col-sm-4 border'>$subKey</dt>";
+            echo "<dd class='col-sm-8 border mb-0'>"; 
+            if ($subKey == 'createdBy') {
+                $this->createdModified($subValue, true);
+            } else {
+                echo $subValue;
+            }
+            echo "</dd>";
         }
-        echo "</dd>";
     }
     if ($inner === true) echo '</dl>';
 }
