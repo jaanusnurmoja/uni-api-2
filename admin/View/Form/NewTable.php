@@ -202,7 +202,7 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
 
 <?php
 if (!empty($this->postBody)) {
-    ($this->postBody);
+    print_r($this->postBody['table']);
     $this->tableCtrl->addTable($this->postBody['table']);
 }
 }

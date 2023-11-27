@@ -1,6 +1,7 @@
 <?php namespace Service;
 
 use mysqli;
+use stdClass;
 
 include_once __DIR__ . '/../Model/RelationDetails.php';
 include_once __DIR__ . '/../Model/Relation.php';
@@ -36,6 +37,7 @@ class Create
                 $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
             }
         }
+        if (isset($input['data']['fields'])) {
         foreach ($input['data']['fields'] as $column) {
             $sqlCreate .= ",
                 `$column[name]` $column[type]";
@@ -50,6 +52,7 @@ class Create
                 }
             }
         }
+        }
         $sqlCreate .= ",
            PRIMARY KEY (`$input[pk]`),
            " . implode(',
@@ -63,6 +66,7 @@ class Create
         } catch (\mysqli_sql_exception $e) {
             $err = $e->getMessage();
             echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+            $this->addTableToList($input, $db);
         }
         $db->close();
 
@@ -82,21 +86,34 @@ class Create
         foreach ($input as $key => $value) {
             if (!is_array($value) && !is_object($value)) {
                 $props[] = \Common\Helper::uncamelize($key);
-                $vals[] = $value;
+                $vals[] = is_numeric($value) ? $value : "'$value'";
             }
             if ($key == 'data') {
                 foreach ($value['fields'] as $field) {
                     $dbFields[] = \Common\Helper::uncamelize($field["name"]);
                 }
             }
+            if ($key == 'createdModified') {
+                $creMo = $this->createdModifiedTmpl($value);
+                $props[] = $creMo->cols;
+                $vals[] = $creMo->vals;
+            }
+            
             if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsto'])) {
                 foreach ($value as $relationDetails) {
                     $rdCols = [];
                     $rdVals = [];
                     foreach ($relationDetails as $rdKey => $rdValue) {
                         if ($rdKey != 'id') {
-                            $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
-                            $rdVals[] = $rdValue;
+                            if ($rdKey == 'createdModified') {
+                                $creMoRel = $this->createdModifiedTmpl($rdValue);
+                                $rdCols[] = $creMoRel->cols;
+                                $rdVals[] = $creMoRel->vals;
+                            } else {
+                                $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
+                                $rdVals[] = is_numeric($rdValue) ? $rdValue : "'$rdValue'";
+                            }
+
                         }
                     }
                     $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
@@ -105,10 +122,11 @@ class Create
             }
         }
         $propsList = implode(", ", $props);
-        $valsList = implode("', '", $vals);
+        $valsList = implode(", ", $vals);
         $sql = "INSERT INTO `models` ($propsList)
-        VALUES ('$valsList');
+        VALUES ($valsList);
         ";
+        echo "<span class='bg-warning'>$sql</span>";
         $db->query($sql);
 
         if (!empty($db->insert_id) && !empty($dataForRdSql)) {
@@ -130,17 +148,32 @@ class Create
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
 
-        ($input);
         foreach ($input as $lists) {
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
+       }
             $keyList = implode(',', $lists['rdCols']);
-            $valList = "'" . implode("','", $lists['rdVals']) . "'";
+            $valList = implode(",", $lists['rdVals']);
             $sql = "INSERT INTO relation_details ($keyList)
                         VALUES ($valList);";
+                        print_r([$keyList, $valList]);
             $db->query($sql);
          $db->close();
-       }
+    }
+
+    public function createdModifiedTmpl($value) {
+        $res = new stdClass;
+        foreach ($value as $k => $v) {
+            if ($k == 'createdBy') {
+                $res->cols = 'created_by';
+                $res->vals = $v['id'];
+            }
+            if ($k == 'modifiedBy') {
+                $res->cols = 'modified_by';
+                $res->vals = $v;
+            }
+        }
+        return $res;
     }
     /**
      * CREATE TABLE `test`.`katseloom`
