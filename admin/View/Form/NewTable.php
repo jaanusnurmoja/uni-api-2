@@ -136,6 +136,9 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
             <tr class="template trow" style="display:none;">
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
                 <td>
+                    <input type="hidden"
+                        name="<?="table[$key][{{row-count-placeholder}}][createdModified][createdBy][id]"?>"
+                        value="<?=$this->currentUser->id?>" />
                     <table>
 
                         <?php $data->$key = [];
@@ -181,8 +184,6 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                             }
                             ?>
                     </table>
-                    <input type="hidden" name="<?="table[$key][{{row-count-placeholder}}][createdBy][id]"?>"
-                        value="<?=$this->currentUser->id?>" />
                 </td>
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
                 </td>
