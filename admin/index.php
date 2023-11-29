@@ -49,7 +49,7 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($currentFullUrl) :'';
 
 
 $api = isset($_GET['api']) ? true : false;
@@ -125,12 +125,12 @@ if (!$api) {
 					{?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
-                        ID CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Eesti
+                        ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
-                            style="max-height:16px"><span
-                            style="vertical-align:top; padding-left:2px">OTHER</span></button>
+                            style="max-height:16px"><span style="vertical-align:top; padding-left:2px">MUUL
+                            VIISIL | OTHER</span></button>
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
@@ -205,9 +205,44 @@ if (loggedIn()) {
                 <h5 class="card-title">Tuleb sisse logida</h5>
                 <div class="card-text">
                     Hea huviline! Selleks, et vaadata ringi halduskeskkonnas, peaksid olema sisse logitud.
-                    Soovitan seda teha id-kaardiga. Sotsiaalmeedia kontoga sisselogimine ei tundu hetkel töökindel
-                    olevat.
-                    Praegu ei saa sisseloginust kasutajat - sisseloginu on üksnes oma sessiooniga sees.
+                    Seda on võimalik teha
+                    <ol>
+                        <li>
+                            autentides end id-kaardiga siinsamas
+                        </li>
+                        <li>
+                            või valides mõne alljärgnevatest sotsiaalkontodest:
+                            <ul>
+                                <li>
+                                    GITHUB - seal peaks igal arendajal konto olema :)
+                                </li>
+                                <li>
+                                    Google (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Microsoft - võib arvata, et sealgi on konto igaühel, kes pole just Windowsi vihkaja
+                                </li>
+                                <li>
+                                    LinkedIn - tõenäoliselt on kõigil IT sektori inimestel sealgi konto olemas
+                                </li>
+                                <li>
+                                    OpenID: mh on see alternatiivne viis ID-kaardiga sisselogimiseks, autentides
+                                    vastu openid.ee serverit. Avanevasse vormilahtrisse tuleb kirjutada
+                                    openid.ee, sellest piisab.
+                                </li>
+                                <li>
+                                    Twitter
+                                </li>
+                                <li class="bg-warning">
+                                    Kahjuks puuduvad nende võimaluste hulgast Facebook, Instagram jt. Kui vähegi
+                                    võimalik, siis tekivad needki. Olgu veel öeldud, et olemasolev nn sotsiaalne
+                                    sisselogimine toimub tegelikult üheainsa teenuse vahendusel (OneAll).
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                    Nüüd, nagu öeldud ka esilehel, saab sisseloginust automaatselt kasutaja (varem oli nii ID-kaardiga
+                    kui ka Google vms sisseloginu lihtsalt oma sessiooniga ees).
                 </div>
             </div>
         </div>
@@ -215,12 +250,11 @@ if (loggedIn()) {
             <div class="card-body">
                 <h5 class="card-title">Need to log in</h5>
                 <div class="card-text">
-                    Dear visitor! You should be logged in to look around the administration environment.
-                    I recommend doing this with an ID card. Logging in with a social media account does not seem to be
-                    reliable
-                    at the moment.
-                    Currently, a login does not become a registered user - a login is only logged in with its own
-                    session.
+                    Dear visitor! You should be logged in to look around in the administration environment.
+                    You can do it either using Estonian ID card or any of the social accounts listed under the menu item
+                    OTHER.
+                    For now, if you are logged in, you will automatically become a registered user (earlier, a logged in
+                    user was in only with one's session and then forgotten).
                 </div>
             </div>
         </div>

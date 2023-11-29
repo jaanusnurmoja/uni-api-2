@@ -35,6 +35,19 @@ class EditTable
 <h1>
     <?php echo $data->name ?>
 </h1>
+<p>
+    Seisuga 29.11.2023 on autori fookuses sisuhaldusse kaasatavate tabelite ja nende juurde kuuluva haldamine (st
+    muutmine) üheainsa vormi vahendusel sarnaselt uue tabeli sisestamisega. Tõenäoliselt ei jää see ainsaks variandiks,
+    kuid tekib esimesena.
+</p>
+<p>
+    Oluline väljakutse - muudatuste sisestamise korral peavad $_POST andmetest käiku minema vaid need, mida tegelikult
+    soovitakse muuta (või ka lisada). Seda püüab autor lahendada javascripti abil - et vormivälja muuta, tuleb see
+    kõigepealt aktiivseks teha, sest muutmisvormis on iga väli vaikimisi 'disabled'. Sel moel kaasatakse $_POST
+    muutujasse tõepoolest vaid vajalikud, st muudetavad või lisatavad väljad. Iseküsimus, kuidas talitada vormis
+    toimetava kasutaja id-ga, sest selle jaoks ette nähtud väli on loomulikult peidetud, kuid peab samuti muutuma
+    aktiivseks, kui vähemalt üks sama tabeli väli on aktiivne.
+</p>
 <form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
     <input type="hidden" name="table[id]" id="table.id" value="<?php echo $data->id ?>" />
     <input type="hidden" name="table[createdModified][modifiedBy]" id="table.createdModified.modifiedBy"

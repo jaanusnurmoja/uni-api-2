@@ -184,18 +184,37 @@ foreach (json_decode($rel) as $table => $params) {
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
                         või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.
                     </p>
+                    <p>
+                        <mark>Seisuga 29.11.2023</mark> on autori fookuses sisuhaldusse kaasatavate tabelite ja nende
+                        juurde kuuluva
+                        haldamine (st muutmine) üheainsa vormi vahendusel sarnaselt uue tabeli sisestamisega.
+                        Tõenäoliselt ei jää see ainsaks variandiks, kuid tekib esimesena.
+                    </p>
+                    <p>
+                        Oluline väljakutse - muudatuste sisestamise korral peavad $_POST andmetest käiku minema vaid
+                        need, mida tegelikult soovitakse muuta (või ka lisada). Seda püüab autor lahendada javascripti
+                        abil - et vormivälja
+                        muuta, tuleb see kõigepealt aktiivseks teha, sest muutmisvormis on iga väli vaikimisi
+                        'disabled'. Sel moel
+                        kaasatakse $_POST muutujasse tõepoolest vaid vajalikud, st muudetavad või lisatavad väljad.
+                        Iseküsimus, kuidas
+                        talitada vormis toimetava kasutaja id-ga, sest selle jaoks ette nähtud väli on loomulikult
+                        peidetud, kuid peab
+                        samuti muutuma
+                        aktiivseks, kui vähemalt üks sama tabeli väli on aktiivne. Sama kehtib tabeli primaarvõtme
+                        väärtusega välja kohta.
+                    </p>
                 </div>
                 <div>
                     <h4>Tähtsamad erisused:</h4>
                     <ol>
                         <li>
                             json seadistusfailis <a href='api/relations.json'>relations.json</a> on defineeritud
-                            vaid
-                            tabelite nimed ning iga
-                            tabeli many-to-one või many-to-many seosed. Väljade nimedest on ära toodud vaid primaar-
-                            ja
-                            võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed. PLAANIS:
-                            andmebaasipõhine haldus json faili asemel.</li>
+                            vaid tabelite nimed ning iga tabeli many-to-one või many-to-many seosed. Väljade nimedest on
+                            ära toodud vaid primaar-
+                            ja võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed.
+                            <strong>TEOKSIL: andmebaasipõhine haldus json faili asemel.</strong>
+                        </li>
                         <li>
                             päringu väljade loetelud genereeritakse üldise seadistuse põhjal dünaamiliselt,
                             kasutades
