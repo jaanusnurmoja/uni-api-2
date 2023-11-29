@@ -62,11 +62,10 @@ foreach ($data as $key => $value) {
                 <td>
                     <fieldset>
                         <?php foreach ($f0 as $k0 => $v0) {
-                                        if ($k0 == 'id') {
-            
+                                        if ($k0 != 'id') {
                                             // $fKey
-                                            echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
-                                        } else {
+                                           // echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
+                                        // } else {
                                             echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0'";
                                             if (is_bool($v0)) {
                                                 $checked = $v0 ? ' checked="checked"' : '';
@@ -94,11 +93,11 @@ foreach ($data as $key => $value) {
                 <td>
                     <fieldset>
                         <?php foreach ($field as $k => $v) {
-                            if ($k == 'id') {
+                            if ($k != 'id') {
 
                                 // $fKey
-                                echo "<input type='hidden' name='table[data][fields][0][$k]' id='$k' value='$v' /> ";
-                            } else {
+                               // echo "<input type='hidden' name='table[data][fields][0][$k]' id='$k' value='$v' /> ";
+                            //} else {
                                 echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k'";
                                 if (is_bool($v)) {
                                     $checked = $v ? ' checked="checked"' : '';
@@ -170,12 +169,12 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
                         </tr>
                         <?php
 } else {
-                                    if (is_bool($rdValue)) {
-                                        $checked = $rdValue ? ' checked="checked"' : '';
-                                        echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
-                                    } else {
-                                        if ($rdKey == "id") {
-                                            echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
+                                    if ($rdKey != "id") {
+                                        //echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
+                                    //} else {
+                                        if (is_bool($rdValue)) {
+                                            $checked = $rdValue ? ' checked="checked"' : '';
+                                            echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
                                         } else {
                                             echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                                         }
@@ -202,7 +201,6 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
 
 <?php
 if (!empty($this->postBody)) {
-    print_r($this->postBody['table']);
     $this->tableCtrl->addTable($this->postBody['table']);
 }
 }

@@ -104,7 +104,7 @@ if (!$api) {
     </script>
 </head>
 
-<body>
+<body class="mb-5">
     <nav class="navbar sticky-top navbar-dark bg-dark">
         <div class="container-fluid">
             <ul class="navbar-nav nav-pills list-group-horizontal">
@@ -244,7 +244,6 @@ if (!$api) {
     <!-- script src="https://ajax.cloudflare.com/cdn-cgi/scripts/a2bd7673/cloudflare-static/rocket-loader.min.js"
         data-cf-settings="86dc64a4e19322c20a32dff2-|49" defer="">
     </!-->
-</body>
 
 </html>
 <?php }?>

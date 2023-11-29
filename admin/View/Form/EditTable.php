@@ -1,9 +1,12 @@
 <?php namespace View\Form;
 
+use Common\Helper;
+
 class EditTable
 {
     public $currentUser;
     public $relations;
+    public $dto;
     public $data;
     public $postBody;
 
@@ -17,6 +20,9 @@ class EditTable
         $this->data = $data;
         $forminput = file_get_contents('php://input');
         parse_str($forminput, $this->postBody);
+        $table = new \Model\Table();
+        $this->dto = new \DTO\TableDTO($table);
+
 
     }
 
@@ -30,13 +36,18 @@ class EditTable
     <?php echo $data->name ?>
 </h1>
 <form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
-    <input type="hidden" name="id" value="<?php echo $data->id ?>" id="id" />
-    <input type="hidden" name="table[createdModified][modifiedBy]" value="<?=$this->currentUser->id?>" />
-    <?php
+    <input type="hidden" name="table[id]" id="table.id" value="<?php echo $data->id ?>" />
+    <input type="hidden" name="table[createdModified][modifiedBy]" id="table.createdModified.modifiedBy"
+        value="<?=$this->currentUser->id?>" />
+    <?php 
 
             foreach ($data as $key => $value) {
                 if (!is_object($value) && !is_array($value) && $key != 'id') { ?>
-    <label> <?php echo $key?><input type="text" name="<?php echo $key?>" value="<?php echo $value?>" /></label>
+    <label>
+        <?php echo $key?>
+        <input type="checkbox" onclick="this.nextElementSibling.toggleAttribute('disabled')">
+        <input type="text" name="table[<?php echo $key?>]" value="<?php echo $value?>" disabled />
+    </label>
     <?php } else {
         if ($key == 'data') {?>
     <h2>Andmeväljad</h2>
@@ -56,12 +67,12 @@ class EditTable
                 <td>
                     <fieldset>
                         <?php foreach ($f0 as $k0 => $v0) {
-                            if ($k0 == 'id') {
+                            if ($k0 != 'id') {
 
                                 // $fKey
-                                echo "<input type='hidden' name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
-                            } else {
-                                echo "<label for='$k0'>$k0</label> <input name='table[data][fields][{{row-count-placeholder}}][$k0]' id='$k0'";
+                                //echo "<input type='hidden' name='new[data][fields][{{row-count-placeholder}}][$k0]' id='$k0' value='$v0' /> ";
+                            //} else {
+                                echo "<label for='$k0'>$k0</label> <input name='new[data][fields][{{row-count-placeholder}}][$k0]' id='$k0'";
                                 if (is_bool($v0)) {
                                     $checked = $v0 ? ' checked="checked"' : '';
                                     echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
@@ -84,16 +95,22 @@ class EditTable
                     <fieldset>
                         <?php
                         foreach ($field as $k => $v) {
+                            $elName = "table[data][fields][$fkey][$k]";
+                            $elId = "table.data.fields.$fkey.$k";
                             if ($k == 'id') {
-                                echo "<input type='hidden' name='$k' id='$k' value='$v' /> ";
+                                echo "<input type='hidden' name='$elName' id='$elId' value='$v' disabled /> ";
                             } else {
-                                echo "<label for='$k'>$k</label> <input name='table[data][fields][0][$k]' id='$k'";
+                                echo "<label for='$elId' class='row col-10 mt-1'>
+                                <div class='col col-2'>$k</div>
+                                <input class='form-switch col-1' type='checkbox' onclick=this.nextElementSibling.toggleAttribute('disabled')>
+                                <input class='col col-6'name='$elName' id='$elId' disabled";
                                 if (is_bool($v)) {
                                     $checked = $v ? ' checked="checked"' : '';
                                     echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
                                 } else {
                                     echo " type='text' value='$v' />";
                                 }
+                                echo '</label>';
                             }
                         }?>
                     </fieldset>
@@ -109,13 +126,9 @@ class EditTable
         } else {
             if ($key == 'createdModified') { ?>
     <h4><?=$key?></h4>
-    <dl class="row bg-light border">
-        <?php 
+    <?php 
         $this->createdModified($value);
         ?>
-        <dt class='col-sm-4 border'>Current user</dt>
-        <dd class='col-sm-8 border mb-0'><?=$this->currentUser->id?></dd>
-    </dl>
     </td>
     </tr>
 
@@ -137,7 +150,11 @@ class EditTable
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
-                    <input type="hidden" name="table[<?=$key?>][{{row-count-placeholder}}][createdModified][modifiedBy]"
+                    <input type="hidden" name="new[<?=$key?>][{{row-count-placeholder}}][table][id]"
+                        id="new.<?=$key?>.{{row-count-placeholder}}.table.id" value="<?=$data->id?>" />
+                    <input type="hidden"
+                        name="new[<?=$key?>][{{row-count-placeholder}}][createdModified][createdBy][id]"
+                        id="new.<?=$key?>.{{row-count-placeholder}}.createdModified.createdBy.id"
                         value="<?=$this->currentUser->id?>" />
                     <table>
 
@@ -153,7 +170,8 @@ class EditTable
                         <tr>
                             <td><?php echo $rdKey ?>
                             </td>
-                            <td><select name="table[<?=$key?>][{{row-count-placeholder}}][<?=$rdKey?>]">
+                            <td><select name="new[<?=$key?>][{{row-count-placeholder}}][<?=$rdKey?>]"
+                                    id="new.<?=$key?>.{{row-count-placeholder}}.<?=$rdKey?>">
                                     <option value=''></option>
                                     <?php echo "\n";
                         foreach ($this->relations as $r) {
@@ -163,6 +181,7 @@ class EditTable
                         ?>
 
                                 </select>
+
                                 <span><?php foreach ($rdValue as $attr => $val) {
                                     echo "$attr: $val; ";
                                 }?></span>
@@ -172,12 +191,12 @@ class EditTable
                     } else {
                         if (is_bool($rdValue)) {
                             $checked = $rdValue ? ' checked="checked"' : '';
-                            echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
+                            echo "<tr><td>$rdKey</td><td><input type='checkbox' id='new.$key.{{row-count-placeholder}}.$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value=true$checked /></td></tr>";
                         } else {
-                            if ($rdKey == "id") {
-                                echo "<input type='hidden' name='table[$key][{{row-count-placeholder}}][$rdKey]'>";
-                            } else {
-                                echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
+                            if ($rdKey != "id") {
+                                //echo "<input type='hidden' name='new[$key][{{row-count-placeholder}}][$rdKey]'>";
+                            //} else {
+                                echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                             }
                         }
                     }
@@ -198,14 +217,22 @@ class EditTable
                 <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
+                    <input type="hidden" name="table[<?=$key?>][<?=$i?>][table][id]" value="<?=$data->id?>"
+                        id="table.<?=$key?>.<?=$i?>.table.id" />
                     <input type="hidden" name="table[<?=$key?>][<?=$i?>][createdModified][modifiedBy]"
-                        value="<?=$this->currentUser->id?>" />
+                        id="table.<?=$key?>.<?=$i?>.createdModified.modifiedBy" value="<?=$this->currentUser->id?>" />
                     <table id="<?=$key?>_<?=$i?>">
-                        <?php foreach ($av as $rdKey => $rdValue) { ?>
-                        <?php if ($rdKey == 'relation') { ?>
+                        <?php foreach ($av as $rdKey => $rdValue) { 
+                            $rdName = "table[$key][$i][$rdKey]";
+                            $rdId = "table.$key.$i.$rdKey";
+                            
+                            if ($rdKey == 'relation') { ?>
                         <tr>
-                            <td><?php echo $rdKey?></td>
-                            <td><select name="<?="table[$key][$i][$rdKey]"?>">
+                            <td class="col col-2"><?=$rdKey?></td>
+                            <td>
+                                <input type="checkbox" class="col"
+                                    onclick="this.nextElementSibling.toggleAttribute('disabled')">
+                                <select name="<?=$rdName?>" id="<?=$rdId?>" disabled>
 
                                     <?php
                             foreach ($this->relations as $r) {
@@ -215,38 +242,43 @@ class EditTable
                             ?>
 
                                 </select>
+
                                 <span><?php foreach($rdValue as $attr => $val) {
                                     echo "$attr: " . json_encode($val);
                                 }?></span>
                             </td>
                         </tr>
                         <?php
-                        } else {
+                        } else { ?>
+                        <tr>
+                            <td class="col col-2"><?=$rdKey?></td>
+                            <td>
+                                <?php if (!in_array($rdKey, ['id','createdModified'])) {?>
+                                <input type="checkbox" class="col"
+                                    onclick="this.nextElementSibling.toggleAttribute('disabled')">
+                                <?php }
                             if (is_bool($rdValue)) {
                                 $checked = $rdValue ? ' checked="checked"' : '';
-                                echo "<tr><td>$rdKey</td><td><input type='checkbox' id='$rdKey' name='table[$key][$i][$rdKey]' value=true$checked /></td></tr>";
+                                echo "<input type='checkbox' id='$rdId' name='$rdName' value=true$checked disabled/>";
                             } else {
                                 if ($rdKey == "id") {
-                                    echo "<input type='hidden' name='table[$key][$i][$rdKey]'>";
+                                    echo "$rdValue <input type='hidden' id='$rdId' name='$rdName' value='$rdValue'>";
                                 } else {
                                     if ($rdKey != 'createdModified'){
-                                        echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='table[$key][$i][$rdKey]' value='$rdValue' /></td></tr>";
+                                        echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
                                     }       
                                     else {
                                         echo '<h4>Created & modified</h4>';
-                                        echo '<dl class="row bg-light border">';
                                         $this->createdModified($rdValue);
-                                        echo "<dt class='col-sm-4 border'>Current user</dt>
-                                        <dd class='col-sm-8 border mb-0'>" . $this->currentUser->id . "</dd>";
-                                        echo "</dl>";
-                                        echo "</td></tr>";
                                     }             
                                 }
-                            }
+                            } ?>
+                            </td>
+                        </tr>
+                        <?php 
                         }
                     }
-
-        ?>
+                    ?>
 
                     </table>
                 </td>
@@ -269,10 +301,24 @@ class EditTable
 </form>
 <?php 
 
+/*$d2 = Helper::toArray($data);
+    echo '<pre>';
+    print_r($data);
+    echo '</pre>';
+$diff = [];
+*/
+if (!empty($this->postBody)) {
+    //II$diff = Helper::checkMultiDiff($this->postBody['table'], $d2);
+    echo '<pre>';
+    print_r($this->postBody);
+    echo '</pre>';
+
+}
 }
 
+
 public function createdModified($value, $inner = false) {
-    if ($inner === true) echo '<dl class="row bg-light border mb-0">';
+    echo '<dl class="row bg-light border mb-0">';
     foreach ($value as $subKey => $subValue) {
         if (!in_array($subKey, ['tableId', 'tableName', 'id', 'email', 'social', 'role'])) {
             echo "<dt class='col-sm-4 border'>$subKey</dt>";
@@ -285,6 +331,13 @@ public function createdModified($value, $inner = false) {
             echo "</dd>";
         }
     }
-    if ($inner === true) echo '</dl>';
+    if ($inner === true) {
+        echo '</dl>';
+    } else {
+        echo "<dt class='col-sm-4 border'>Current user</dt>
+        <dd class='col-sm-8 border mb-0'>" . $this->currentUser->id . "</dd>";
+        echo "</dl>";
+    }
+
 }
     }

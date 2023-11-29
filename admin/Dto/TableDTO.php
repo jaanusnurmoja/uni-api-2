@@ -35,7 +35,6 @@ class TableDTO
                 array_push($this->hasManyAndBelongsTo, $rdRow);
             }
         }
-
     }
 
     /**

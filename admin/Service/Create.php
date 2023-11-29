@@ -156,7 +156,6 @@ class Create
             $valList = implode(",", $lists['rdVals']);
             $sql = "INSERT INTO relation_details ($keyList)
                         VALUES ($valList);";
-                        print_r([$keyList, $valList]);
             $db->query($sql);
          $db->close();
     }
