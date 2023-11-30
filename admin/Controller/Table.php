@@ -27,6 +27,17 @@ class Table
         }
     }
 
+    public function getUnusedTables() {
+        $read = new Read;
+        $dataForUsed = $this->getTables(true);
+        $used = [];
+        foreach($dataForUsed as $i => $d) {
+            $used[] = $d->tableName;
+        }
+        
+        return $read->getExistingTables($used);
+    }
+
     public function getTableByIdOrName($api = false)
     {
         global $request;

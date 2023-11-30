@@ -4,6 +4,7 @@ class NewTable
 {
     public $dto;
     public $relations;
+    public $unused;
     public $postBody;
     public $tableCtrl;
     private $currentUser;
@@ -15,6 +16,7 @@ class NewTable
         $this->currentUser = $_SESSION['loggedIn']['userData'];
         $tableCtrl->getRelationsList($list);
         $this->relations = $list->list;
+        $this->unused = $tableCtrl->getUnusedTables();
         $this->tableCtrl = $tableCtrl;
 
         if (empty($table)) {
@@ -41,9 +43,26 @@ class NewTable
 foreach ($data as $key => $value) {
             if ($key != "id") {
                 if (!is_object($value) && !is_array($value)) {?>
-    <label> <?php echo $key ?> <input type="text" name="table[<?php echo $key ?>]"
-            value="<?php echo $value ?>" /></label>
-    <?php } else {
+    <label> <?php echo $key ?> <input type="text" id="table.<?=$key?><?=$key == 'tableName' ? '.new' : ''?>"
+            name="table[<?=$key?>]" value="<?=$value?>" />
+        <?php 
+            if ($key == 'tableName') { ?>
+
+        <select name="table[tableName]" id="table.tableName.unused"
+            onchange="this.value.length>1?this.previousElementSibling.setAttribute('disabled', 'disabled'):this.previousElementSibling.removeAttribute('disabled');">
+            <option value=''>või vali olemasolevatest:</option>
+            <?php
+     foreach($this->unused as $t) {
+        echo "<option value='$t'>$t</option>"; 
+    } 
+           ?>
+        </select>
+        <?php    
+    }?>
+    </label>
+
+    <?php
+    } else {
                     if ($key == 'data') {?>
     <h2>Andmeväljad</h2>
     <table class="table table-warning table-striped table-sm wrapper">
@@ -133,7 +152,8 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
         </thead>
         <tbody class="repeatcontainer ui-sortable" data-rf-row-count="0">
             <tr class="template trow" style="display:none;">
-                <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span></td>
+                <td class="col"><span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
+                </td>
                 <td>
                     <input type="hidden"
                         name="<?="table[$key][{{row-count-placeholder}}][createdModified][createdBy][id]"?>"

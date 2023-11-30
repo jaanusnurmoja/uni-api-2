@@ -21,7 +21,6 @@ use \user\model\User;
 
 class Read
 {
-
     protected function cnn()
     {
         // require __DIR__ . '/../../api/config.php';
@@ -130,6 +129,19 @@ if (!empty($params) && count($rowList) == 1) {
     return new ListDTO($rowList);
  }
  
+    }
+
+    public function getExistingTables($used = []) {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+        $query = "SHOW TABLES";
+        $q = $db->query($query);
+        $r=[];
+        while ($row = $q->fetch_assoc()) {
+            $r[] = array_pop($row);
+        }
+        $diff = array_diff($r, $used);
+        return $diff;
     }
 
     public function getDefaultFields($table)
