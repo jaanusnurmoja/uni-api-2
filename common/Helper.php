@@ -65,4 +65,15 @@ class Helper
         return $new;
     }
 
+    public static function givenNamesIntoFirstAndMiddle($gn) {
+        $nameParts = explode(' ', $gn);
+        $result = new \stdClass;
+        $result->firstName = array_shift($nameParts);
+        if(!empty($nameParts)) {
+            $result->middleName = implode(' ', $nameParts);
+        }
+
+        return $result;
+    }
+
 }

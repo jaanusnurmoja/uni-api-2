@@ -2,6 +2,7 @@
 
 include_once __DIR__ . '/model/Users.php';
 
+use Common\Helper;
 use stdClass;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
@@ -48,6 +49,19 @@ class Session
             $this->userData->username = $_SESSION['currentPerson'];
             $this->userData->email = $idCardData->email;
             $this->userData->social = 'eID';
+            
+            $person = new stdClass;
+            $person->name = "$idCardData->GN $idCardData->SN";
+            $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
+            $person->firstName = $gnparts->firstName;
+            if (isset($gnparts->middleName)) $person->middleName = $gnparts->middleName;
+            $person->lastName = $idCardData->SN;
+            $person->country = $idCardData->C;
+            //$person->pno;
+            $person->pnoFull = $idCardData->serialNumber;
+            //$person->born;
+            $this->userData->Person = $person;
+
         }
         $this->checkIfUserExistsAndAdd();
     }

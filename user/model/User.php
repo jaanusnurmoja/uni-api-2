@@ -1,7 +1,8 @@
 <?php namespace user\model;
 include_once __DIR__.'/../../common/Helper.php';
-use \common\Helper;
-use \common\model\Person;
+include_once __DIR__.'/../../common/Model/Person.php';
+use \Common\Helper;
+use \Common\Model\Person;
 
 class User
 {
@@ -14,7 +15,7 @@ class User
     private $userToken;
     private $identityToken;
     public $role = 'USER';
-    //public \Person $person;
+    public \common\Model\Person $person;
 
     public function __construct($userData = []) {
         if (!empty($userData)) {
@@ -178,11 +179,11 @@ class User
      *
      * @return \Person
      */
-/*     public function getPerson(): \Person
+     public function getPerson(): \Common\Model\Person
     {
         return $this->person;
     }
- */
+
     /**
      * Set the value of person
      *
@@ -190,12 +191,12 @@ class User
      *
      * @return self
      */
-    /*
-    public function setPerson(\Person $person): self
+    
+    public function setPerson(\Common\Model\Person $person): self
     {
         $this->person = $person;
 
         return $this;
     }
- */
+
  }
