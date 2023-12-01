@@ -100,7 +100,7 @@ class Read
                 $data = new Data();
                 $data->setTable($model);
                 if ($row['field_data'] == 'default') {
-                    $fields = $this->getDefaultFields($row['table_name']);
+                    $fields = $this->getDefaultFields($row['table_name'])['dataFields'];
                     $data->setFields($fields);
                 }
 
@@ -113,10 +113,12 @@ class Read
                 $model->setCreatedModified($tableCreMod);
 
             }
-            $relationDetails->setTable($model);
-            if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+            if (!empty($relationDetails)) {
+                $relationDetails->setTable($model);
+                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
 
-                $model->addRelationDetails($relationDetails);
+                    $model->addRelationDetails($relationDetails);
+                }
             }
 
             $single = new TableDTO($model);
@@ -151,12 +153,19 @@ if (!empty($params) && count($rowList) == 1) {
         $query = "SHOW COLUMNS FROM $table";
         $q = $db->query($query);
         $fields = [];
+        $fields['indexes'] = [];
         while ($row = $q->fetch_assoc()) {
             if (empty($row['Key'])) {
                 $field = new Field();
                 $field->setName($row['Field']);
                 $field->setType($row['Type']);
-                $fields[$row['Field']] = $field;
+                $fields['dataFields'][$row['Field']] = $field;
+            } else {
+                if ($row['Key'] == 'PRI') {
+                    $fields['pk'] = $row['Field'];
+                } else {
+                    array_push($fields['indexes'], $row['Field']);
+                }
             }
         }
        return $fields;

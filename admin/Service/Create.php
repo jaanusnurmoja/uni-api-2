@@ -54,10 +54,13 @@ class Create
         }
         }
         $sqlCreate .= ",
-           PRIMARY KEY (`$input[pk]`),
-           " . implode(',
-           ', $indexes) . "
-           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
+           PRIMARY KEY (`$input[pk]`)";
+           if (!empty($indexes)) {
+            $sqlCreate .= ', ' . implode(',
+           ', $indexes); 
+           }
+           
+           $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
         ($sqlCreate);
         try {
             $db->query($sqlCreate);
@@ -68,7 +71,6 @@ class Create
             echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
             $this->addTableToList($input, $db);
         }
-        $db->close();
 
     }
 

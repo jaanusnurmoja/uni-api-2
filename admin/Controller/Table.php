@@ -69,7 +69,7 @@ class Table
             $newTable->newTableForm();
     }
 
-    public function addTable($input){
+    public function addTable($input, $existingToList = false){
 
         $create = new Create();
         foreach ($input as $k => $v) {
@@ -79,7 +79,11 @@ class Table
         }
         echo '<hr>';
         ($input);
-        $create->addTableToDB($input);
+        if ($existingToList === true) {
+            $create->addTableToList($input);
+        } else {
+            $create->addTableToDB($input);
+        }
     }
 
     public function getField()
@@ -96,6 +100,11 @@ class Table
         }
     }
 
+    public function getPk($tableName) {
+        $read = new Read();
+        return $read->getDefaultFields($tableName)['pk'];
+    }
+    
     public function getRelationsList(ListDTO $listDTO) {
         $read = new Read();
         $listDTO->__construct($read->getRelations());

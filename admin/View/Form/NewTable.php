@@ -44,12 +44,13 @@ foreach ($data as $key => $value) {
             if ($key != "id") {
                 if (!is_object($value) && !is_array($value)) {?>
     <label> <?php echo $key ?> <input type="text" id="table.<?=$key?><?=$key == 'tableName' ? '.new' : ''?>"
-            name="table[<?=$key?>]" value="<?=$value?>" />
+            name="table[<?=$key?>]" value="<?=$value?>"
+            <?=$key == 'tableName' ? 'onchange="this.value.length>0?this.nextElementSibling.setAttribute(\'disabled\', \'disabled\'):this.nextElementSibling.removeAttribute(\'disabled\')"':''?> />
         <?php 
             if ($key == 'tableName') { ?>
 
         <select name="table[tableName]" id="table.tableName.unused"
-            onchange="this.value.length>1?this.previousElementSibling.setAttribute('disabled', 'disabled'):this.previousElementSibling.removeAttribute('disabled');">
+            onchange="this.value.length>0?this.previousElementSibling.setAttribute('disabled', 'disabled'):this.previousElementSibling.removeAttribute('disabled');this.value.length>0?this.nextElementSibling.value='':this.nextElementSibling.value='id'">
             <option value=''>või vali olemasolevatest:</option>
             <?php
      foreach($this->unused as $t) {
@@ -218,10 +219,19 @@ $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
         ?>
     <input type="submit" value="Lisa" />
 </form>
+<script>
+function existingOrNot() {
 
+}
+</script>
 <?php
 if (!empty($this->postBody)) {
-    $this->tableCtrl->addTable($this->postBody['table']);
+    $unused = false;
+    if (in_array($this->postBody['table']['tableName'], $this->unused)) {
+        $this->postBody['table']['pk'] = $this->tableCtrl->getPk($this->postBody['table']['tableName']);
+        $unused = true;
+    }
+    $this->tableCtrl->addTable($this->postBody['table'], $unused);
 }
 }
 }
