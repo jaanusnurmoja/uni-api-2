@@ -128,7 +128,6 @@ class Create
         $sql = "INSERT INTO `models` ($propsList)
         VALUES ($valsList);
         ";
-        echo "<span class='bg-warning'>$sql</span>";
         $db->query($sql);
 
         if (!empty($db->insert_id) && !empty($dataForRdSql)) {

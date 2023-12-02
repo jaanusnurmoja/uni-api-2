@@ -124,7 +124,6 @@ class Read
             $single = new TableDTO($model);
             $rowList[$row['rowid']] =$single; 
         }
-        //print_r($rowsDebug);
 if (!empty($params) && count($rowList) == 1) {
     return $single;
  } else {

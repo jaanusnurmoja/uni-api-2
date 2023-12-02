@@ -46,13 +46,11 @@ class Db
             foreach ($props as $name => $value) {
                 $ws[] = " $name = '$value'";
             }
-            $debug = 'props:';
             $singleRow = in_array('id', array_keys($props));
             $where = " WHERE" . implode(" AND ", $ws);
         }
         $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u 
         LEFT JOIN persons p ON p.id = u.persons_id$where;";
-        echo "<p>$debug getAllUsersOrFindByProps: $sql</p>";
         $q = $cnn->query($sql);
         while ($row = $q->fetch_assoc()) {
             unset($row["id"]);
@@ -91,7 +89,6 @@ class Db
         $vals = "'" . implode("','", array_values($kvs)) . "'";
         $sql = "INSERT INTO users ($cols) values ($vals)";
         if ($cnn->query($sql)) {
-            echo "<p>addNewUser: $sql</p>";
             $newUser = $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
             if (!empty($personData)) {
                 return $this->addPerson($personData, $newUser['id']);
@@ -115,12 +112,9 @@ class Db
         }
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($kvs)) . "'";
-        print_r($cols);
-        print_r($vals);
         $sql = "INSERT INTO persons ($cols) values ($vals)";
         if ($cnn->query($sql)) {
             $personId = $cnn->insert_id;
-            echo "<p>addPerson: $sql</p>";
             if (!empty($user)) {
                 $this->addPersonToUser($personId, $user);
             }
@@ -142,7 +136,6 @@ class Db
         $where = " WHERE" . implode(" AND ", $ws);
         $sql = "SELECT * FROM persons $where";
         $q = $cnn->query($sql);
-        echo "<p>findPerson: $sql</p>";
         $person = new Person();
         while ($row = $q->fetch_assoc()) {
             foreach ($row as $dbKey => $dbValue) {
@@ -163,8 +156,7 @@ class Db
         $cnn = $this->cnn();
         $sql = "UPDATE users SET persons_id = $p WHERE id = $u->id";
         if ($cnn->query($sql)) {
-            echo "<p>findPerson: $sql</p>";
+            return $u;
         }
-        return $u;
     }
 }

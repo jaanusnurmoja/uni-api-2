@@ -320,13 +320,14 @@ class EditTable
     echo '</pre>';
 $diff = [];
 */
+/*
 if (!empty($this->postBody)) {
     //II$diff = Helper::checkMultiDiff($this->postBody['table'], $d2);
     echo '<pre>';
     print_r($this->postBody);
     echo '</pre>';
-
 }
+*/
 }
 
 

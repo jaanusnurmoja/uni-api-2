@@ -94,7 +94,6 @@ class Session
             $this->users->list[0]->setPerson($this->userData->person);
             $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
         }
-        print_r($this->users->list[0]);
         $this->userData = $this->users->list[0];
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
@@ -127,7 +126,6 @@ class Session
     public function checkPersonAndAddIfMissing($user, $person) {
         $db = new Db();        
         $checkPerson = $db->findPerson(['PNO' => $person->pno]);
-        print_r($checkPerson);
         if (!$checkPerson) {
                 echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>'; 
                 $db->addPerson($person, $user);
