@@ -115,6 +115,8 @@ class Db
         }
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($kvs)) . "'";
+        print_r($cols);
+        print_r($vals);
         $sql = "INSERT INTO persons ($cols) values ($vals)";
         if ($cnn->query($sql)) {
             $personId = $cnn->insert_id;

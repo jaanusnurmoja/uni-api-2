@@ -3,16 +3,15 @@
 class Person
 {
     public $id;
-    public $name;
     public $firstName;
     public $middleName;
     public $lastName;
     public $country = 'EE';
-    private $pno;
-    private $pnoCode;
-    public $born;
-    public bool $isAlive = true;
-    public $deceased = null;
+    public $pno;
+    //private $pnoCode;
+    //public $born;
+    //public bool $isAlive = true;
+    //public $deceased = null;
 
     /**
      * Get the value of id
@@ -32,23 +31,6 @@ class Person
         return $this;
     }
 
-    /**
-     * Get the value of name
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set the value of name
-     */
-    public function setName($name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
 
     /**
      * Get the value of firstName
@@ -125,7 +107,9 @@ class Person
     /**
      * Get the value of pno
      */
-    public function getPnoCode()
+ 
+ /*
+     public function getPnoCode()
     {
         return $this->pnoCode;
     }
@@ -133,7 +117,7 @@ class Person
     /**
      * Set the value of pno
      */
-    public function setPnoCode($pnoCode = null): self
+ /*   public function setPnoCode($pnoCode = null): self
     {
         if ($pnoCode == null && !empty($this->pno)) {
             $pnoArr = explode('-', $this->getPno());
@@ -160,10 +144,6 @@ class Person
      */
     public function setPno($pno=null): self
     {
-        if ( $pno === null && !empty($this->pnoCode) && !empty($this->country)) {
-            $pno = 'PNO' . $this->getCountry() . '-' . $this->getPnoCode();
-        }
-            
         $this->pno = $pno;
 
         return $this;
@@ -172,7 +152,7 @@ class Person
     /**
      * Get the value of born
      */
-    public function getBorn()
+/*    public function getBorn()
     {
         return $this->born;
     }
@@ -180,7 +160,7 @@ class Person
     /**
      * Set the value of born
      */
-    public function setBorn($born): self
+ /*   public function setBorn($born): self
     {
         $this->born = $born;
 
@@ -192,7 +172,7 @@ class Person
      *
      * @return bool
      */
-    public function getIsAlive(): bool
+/*    public function getIsAlive(): bool
     {
         return $this->isAlive;
     }
@@ -204,7 +184,7 @@ class Person
      *
      * @return self
      */
-    public function setIsAlive(bool $isAlive = true): self
+  /*  public function setIsAlive(bool $isAlive = true): self
     {
         if ($isAlive === true) {
             $this->setDeceased(null);
@@ -217,7 +197,7 @@ class Person
     /**
      * Get the value of deceased
      */
-    public function getDeceased()
+/*    public function getDeceased()
     {
         return $this->deceased;
     }
@@ -225,10 +205,11 @@ class Person
     /**
      * Set the value of deceased
      */
-    public function setDeceased($deceased): self
+/*    public function setDeceased($deceased): self
     {
         $this->deceased = $deceased;
 
         return $this;
     }
+    */
 }

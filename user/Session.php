@@ -3,7 +3,9 @@
 include_once __DIR__ . '/model/Users.php';
 
 use Common\Helper;
+use Common\Model\Person;
 use stdClass;
+use user\model\User;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
 use \user\Service\Db;
@@ -36,7 +38,8 @@ class Session
     public function setUserData() {
         $this->currentPerson = $_SESSION['currentPerson'];
         if (isset($_SESSION['userData'])) {
-            $this->userData = (object) $_SESSION['userData'];
+            $user = new User($_SESSION['userData']);
+            $this->userData = $user;
         }
         /*Array ( [serialNumber] => PNOEE-36706230305 
         [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\ 
@@ -44,70 +47,54 @@ class Session
 
         if (isset($_SESSION['idCardData'])) {
             $idCardData = (object) $_SESSION['idCardData'];
-            $this->userData = new stdClass;
-            $this->userData->firstName = $idCardData->GN;
-            $this->userData->lastName = $idCardData->SN;
-            $this->userData->username = $_SESSION['currentPerson'];
-            $this->userData->email = $idCardData->email;
-            $this->userData->social = 'eID';
+            $user = new User();
+            $user->setUsername($_SESSION['currentPerson']);
+            $user->setEmail($idCardData->email);
+            $user->setSocial('eID');
             
-            $person = new stdClass;
+            $person = new Person;
             //$person->name = "$idCardData->GN $idCardData->SN";
             $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
-            $person->firstName = $gnparts->firstName;
-            if (isset($gnparts->middleName)) $person->middleName = $gnparts->middleName;
-            $person->lastName = $idCardData->SN;
-            $person->country = $idCardData->C;
+            $person->setFirstName($gnparts->firstName);
+            if (isset($gnparts->middleName)) $person->setMiddleName($gnparts->middleName);
+            $person->setLastName($idCardData->SN);
+            $person->setCountry($idCardData->C);
             //$person->pnoCode;
-            $person->pno = $idCardData->serialNumber;
+            $person->setPno($idCardData->serialNumber);
             //$person->born;
-            $this->userData->Person = $person;
-
+            $user->setPerson($person);
+            $this->userData = $user;
         }
-        $this->checkIfUserExistsAndAdd();
+        $this->checkIfUserExistsAndAdd($user);
     }
 
 
-    public function checkIfUserExistsAndAdd() {
+    public function checkIfUserExistsAndAdd($user) {
         $db = new Db();
-        if (!empty($this->userData)) {
-            $this->users = $db->getAllUsersOrFindByProps(
-                [
-                    'username' => $this->userData->username,
-                    'email' => $this->userData->email,
-                    'social' => $this->userData->social
-                ]
-            );
-            if ($this->users->count > 0) {
-                if ($this->users->count > 1) {
-                    echo '<div class="bg-warning">Nende tunnustega on rohkem kui üks kasutajakonto. Seda ei tohiks olla, teavitage saidi haldajaid. Loeme teid selle loetelu esimeseks kasutajaks.</div>';
-                }
-                $this->setConfirmedUser();
-            } else {
-                $this->addNewIfNotUser();
+        $this->users = $db->getAllUsersOrFindByProps(
+            [
+                'username' => $user->username,
+                'email' => $user->email,
+                'social' => $user->social
+            ]
+        );
+        if ($this->users->count > 0) {
+            if ($this->users->count > 1) {
+                echo '<div class="bg-warning">Nende tunnustega on rohkem kui üks kasutajakonto. Seda ei tohiks olla, teavitage saidi haldajaid. Loeme teid selle loetelu esimeseks kasutajaks.</div>';
             }
+            $this->setConfirmedUser();
+        } else {
+            $this->addNewIfNotUser();
         }
-    }
-
-    public function checkPersonAndAddIfMissing($user = null) {
-        $db = new Db();        
-                 $checkPerson = $db->findPerson(['PNO' => $user->Person->pno]);
-                    print_r($checkPerson);
-                if (!$checkPerson) {
-                        echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>'; 
-                        $db->addPerson($user->Person, $user);
-                } else {
-                    $db->addPersonToUser($checkPerson->id, $user->id);
-                }
- 
     }
 
     public function setConfirmedUser() {
         $this->setIsUser(true);
-        if (isset($this->userData->Person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->Person))) {
-            $this->users->list[0]->setPerson($this->userData->Person);
-            $this->checkPersonAndAddIfMissing($this->users->list[0]);
+        if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->getPerson()->getId()))) {
+            $this->users->list[0]->setPerson($this->userData->person);
+            $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
         }
+        print_r($this->users->list[0]);
         $this->userData = $this->users->list[0];
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
@@ -135,6 +122,19 @@ class Session
                 echo 'Kahjuks jäi uus kasutaja lisamata';
             }
         }
+    }
+
+    public function checkPersonAndAddIfMissing($user, $person) {
+        $db = new Db();        
+        $checkPerson = $db->findPerson(['PNO' => $person->pno]);
+        print_r($checkPerson);
+        if (!$checkPerson) {
+                echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>'; 
+                $db->addPerson($person, $user);
+        } else {
+            $db->addPersonToUser($checkPerson->id, $user);
+        }
+ 
     }
 
     /**
