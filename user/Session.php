@@ -41,6 +41,7 @@ class Session
         /*Array ( [serialNumber] => PNOEE-36706230305 
         [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\ 
         [C] => EE [email] => 36706230305@eesti.ee )*/
+
         if (isset($_SESSION['idCardData'])) {
             $idCardData = (object) $_SESSION['idCardData'];
             $this->userData = new stdClass;
@@ -51,20 +52,21 @@ class Session
             $this->userData->social = 'eID';
             
             $person = new stdClass;
-            $person->name = "$idCardData->GN $idCardData->SN";
+            //$person->name = "$idCardData->GN $idCardData->SN";
             $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
             $person->firstName = $gnparts->firstName;
             if (isset($gnparts->middleName)) $person->middleName = $gnparts->middleName;
             $person->lastName = $idCardData->SN;
             $person->country = $idCardData->C;
-            //$person->pno;
-            $person->pnoFull = $idCardData->serialNumber;
+            //$person->pnoCode;
+            $person->pno = $idCardData->serialNumber;
             //$person->born;
             $this->userData->Person = $person;
 
         }
         $this->checkIfUserExistsAndAdd();
     }
+
 
     public function checkIfUserExistsAndAdd() {
         $db = new Db();
@@ -76,25 +78,41 @@ class Session
                     'social' => $this->userData->social
                 ]
             );
-            if (
-                $this->users->count > 0
-            ) {
-                $this->setConfirmedUser();
+            if ($this->users->count > 0) {
                 if ($this->users->count > 1) {
                     echo '<div class="bg-warning">Nende tunnustega on rohkem kui üks kasutajakonto. Seda ei tohiks olla, teavitage saidi haldajaid. Loeme teid selle loetelu esimeseks kasutajaks.</div>';
                 }
+                $this->setConfirmedUser();
             } else {
                 $this->addNewIfNotUser();
             }
         }
     }
 
+    public function checkPersonAndAddIfMissing($user = null) {
+        $db = new Db();        
+                 $checkPerson = $db->findPerson(['PNO' => $user->Person->pno]);
+                    print_r($checkPerson);
+                if (!$checkPerson) {
+                        echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>'; 
+                        $db->addPerson($user->Person, $user);
+                } else {
+                    $db->addPersonToUser($checkPerson->id, $user->id);
+                }
+ 
+    }
+
     public function setConfirmedUser() {
         $this->setIsUser(true);
+        if (isset($this->userData->Person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->Person))) {
+            $this->users->list[0]->setPerson($this->userData->Person);
+            $this->checkPersonAndAddIfMissing($this->users->list[0]);
+        }
         $this->userData = $this->users->list[0];
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
         }
+        
         $this->loggedIn = [];
         $this->loggedIn['userData'] = $this->userData;
         $this->loggedIn['currentPerson'] = $this->currentPerson;

@@ -9,7 +9,7 @@ class Person
     public $lastName;
     public $country = 'EE';
     private $pno;
-    private $pnoFull;
+    private $pnoCode;
     public $born;
     public bool $isAlive = true;
     public $deceased = null;
@@ -125,46 +125,46 @@ class Person
     /**
      * Get the value of pno
      */
-    public function getPno()
+    public function getPnoCode()
     {
-        return $this->pno;
+        return $this->pnoCode;
     }
 
     /**
      * Set the value of pno
      */
-    public function setPno($pno = null): self
+    public function setPnoCode($pnoCode = null): self
     {
-        if ($pno == null && !empty($this->pnoFull)) {
-            $pnoArr = explode('-', $this->getPnoFull());
-            $pno = $pnoArr[1];
+        if ($pnoCode == null && !empty($this->pno)) {
+            $pnoArr = explode('-', $this->getPno());
+            $pnoCode = $pnoArr[1];
             $country = str_replace('PNO', '', $pnoArr[0]);
             if ($this->country != $country) {
                 $this->setCountry($country);
             }
         }
-        $this->pno = $pno;
+        $this->pnoCode = $pnoCode;
         return $this;
     }
 
     /**
      * Get the value of pnoFull
      */
-    public function getPnoFull()
+    public function getPno()
     {
-        return $this->pnoFull;
+        return $this->pno;
     }
 
     /**
      * Set the value of pnoFull
      */
-    public function setPnoFull($pnoFull=null): self
+    public function setPno($pno=null): self
     {
-        if ( $pnoFull === null && !empty($this->pno)) {
-            $pnoFull = 'PNO' . $this->getCountry() . '-' . $this->getPno();
+        if ( $pno === null && !empty($this->pnoCode) && !empty($this->country)) {
+            $pno = 'PNO' . $this->getCountry() . '-' . $this->getPnoCode();
         }
             
-        $this->pnoFull = $pnoFull;
+        $this->pno = $pno;
 
         return $this;
     }
