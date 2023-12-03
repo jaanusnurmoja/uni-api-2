@@ -13,33 +13,30 @@ $request = !empty($path) ? explode('/', $path) : [];
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 
-
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $current = str_replace(['/index.php'], '', $_SERVER['PHP_SELF']);
 
-$currentFullUrl = $http.$_SERVER['HTTP_HOST'].$current.$path;
+$currentFullUrl = $http . $_SERVER['HTTP_HOST'] . $current . $path;
 
 $_SESSION['urlComingFrom'] = $uri;
 
 $siteBase = str_replace(['/admin', $path], '', $current);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF'] . $path);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
-include_once __DIR__. '/../user/Session.php';
+include_once __DIR__ . '/../user/Session.php';
 
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
     function loggedIn()
     {
-        if (isset($_SESSION['loggedIn']))
-        {
+        if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
             return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
         }
@@ -49,14 +46,12 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($currentFullUrl) :'';
-
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($currentFullUrl) : '';
 
 $api = isset($_GET['api']) ? true : false;
-include_once __DIR__ .'/Controller/Table.php';
+include_once __DIR__ . '/Controller/Table.php';
 
 $tc = new \Controller\Table();
-
 
 if (!$api) {
     ?>
@@ -115,17 +110,14 @@ if (!$api) {
                     <a class="navbar-brand" href="<?=$siteBaseUrl?>/admin/tables">Tabelid</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?php echo $siteBaseUrl?>/user/logout'"><?=loggedIn()?> |
+                        onclick="window.location.href='<?php echo $siteBaseUrl ?>/user/logout'"><?=loggedIn()?> |
                         LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Eesti
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Eesti
                         ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
@@ -134,10 +126,10 @@ if (!$api) {
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
-                        'twitter'
+                    _oneall.push(['social_login', 'set_providers', ['google', 'facebook', 'twitter', 'github',
+                        'linkedin', 'windowslive', 'openid'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'

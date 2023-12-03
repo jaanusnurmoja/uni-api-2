@@ -109,8 +109,8 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     _oneall.push(['social_login', 'set_callback_uri',
                         '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
-                        'twitter'
+                    _oneall.push(['social_login', 'set_providers', 'google', 'facebook', 'twitter', 'github',
+                    'linkedin', 'windowslive', 'openid'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'
