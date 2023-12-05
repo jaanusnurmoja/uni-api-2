@@ -42,7 +42,6 @@ class Db
         $where = '';
         $singleRow = false;
         $ws = [];
-        $debug = '';
         if (!empty($props)) {
             foreach ($props as $name => $value) {
                 $ws[] = " $name = '$value'";
@@ -53,7 +52,6 @@ class Db
         }
         $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u
         LEFT JOIN persons p ON p.id = u.persons_id$where;";
-        echo "<p>$debug getAllUsersOrFindByProps: $sql</p>";
         $q = $cnn->query($sql);
         while ($row = $q->fetch_assoc()) {
             unset($row["id"]);
@@ -72,9 +70,6 @@ class Db
             }
             $users->addUserToList($user);
         }
-        echo '<pre>';
-        print_r($users);
-        echo '</pre>';
         return $singleRow ? $user : $users;
     }
 

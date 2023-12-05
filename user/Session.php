@@ -4,7 +4,6 @@ include_once __DIR__ . '/model/Users.php';
 
 use Common\Helper;
 use Common\Model\Person;
-use stdClass;
 use user\model\User;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
@@ -21,7 +20,6 @@ class Session
     public $userData;
     public $users;
 
-
     public function __construct()
     {
         $db = new Db();
@@ -33,16 +31,15 @@ class Session
         //return $this;
     }
 
-    
-
-    public function setUserData() {
+    public function setUserData()
+    {
         $this->currentPerson = $_SESSION['currentPerson'];
         if (isset($_SESSION['userData'])) {
             $user = new User($_SESSION['userData']);
             $this->userData = $user;
         }
-        /*Array ( [serialNumber] => PNOEE-36706230305 
-        [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\ 
+        /*Array ( [serialNumber] => PNOEE-36706230305
+        [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
         [C] => EE [email] => 36706230305@eesti.ee )*/
 
         if (isset($_SESSION['idCardData'])) {
@@ -51,12 +48,15 @@ class Session
             $user->setUsername($_SESSION['currentPerson']);
             $user->setEmail($idCardData->email);
             $user->setSocial('eID');
-            
+
             $person = new Person;
             //$person->name = "$idCardData->GN $idCardData->SN";
             $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
             $person->setFirstName($gnparts->firstName);
-            if (isset($gnparts->middleName)) $person->setMiddleName($gnparts->middleName);
+            if (isset($gnparts->middleName)) {
+                $person->setMiddleName($gnparts->middleName);
+            }
+
             $person->setLastName($idCardData->SN);
             $person->setCountry($idCardData->C);
             //$person->pnoCode;
@@ -68,14 +68,14 @@ class Session
         $this->checkIfUserExistsAndAdd($user);
     }
 
-
-    public function checkIfUserExistsAndAdd($user) {
+    public function checkIfUserExistsAndAdd($user)
+    {
         $db = new Db();
         $this->users = $db->getAllUsersOrFindByProps(
             [
                 'username' => $user->username,
                 'email' => $user->email,
-                'social' => $user->social
+                'social' => $user->social,
             ]
         );
         if ($this->users->count > 0) {
@@ -88,9 +88,10 @@ class Session
         }
     }
 
-    public function setConfirmedUser() {
+    public function setConfirmedUser()
+    {
         $this->setIsUser(true);
-        if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->getPerson()->getId()))) {
+        if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->person->id))) {
             $this->users->list[0]->setPerson($this->userData->person);
             $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
         }
@@ -99,14 +100,15 @@ class Session
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
         }
-        
+
         $this->loggedIn = [];
         $this->loggedIn['userData'] = $this->userData;
         $this->loggedIn['currentPerson'] = $this->currentPerson;
         $_SESSION['loggedIn'] = $this->loggedIn;
     }
 
-    public function addNewIfNotUser() {
+    public function addNewIfNotUser()
+    {
         $db = new Db();
         if ($this->isLoggedIn() && !$this->isUser()) {
             $addNew = $db->addNewUser($this->userData);
@@ -124,17 +126,18 @@ class Session
         }
     }
 
-    public function checkPersonAndAddIfMissing($user, $person) {
-        $db = new Db();        
+    public function checkPersonAndAddIfMissing($user, $person)
+    {
+        $db = new Db();
         $checkPerson = $db->findPerson(['PNO' => $person->pno]);
         print_r($checkPerson);
         if (!$checkPerson) {
-                echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>'; 
-                $db->addPerson($person, $user);
+            echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>';
+            $db->addPerson($person, $user);
         } else {
             $db->addPersonToUser($checkPerson->id, $user);
         }
- 
+
     }
 
     /**
@@ -208,6 +211,5 @@ class Session
 
         return $this;
     }
-
 
 }
