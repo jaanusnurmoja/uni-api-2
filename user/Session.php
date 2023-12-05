@@ -116,6 +116,7 @@ class Session
         print_r($this->userData);
         $db = new Db();
         $addNew = $db->addNewUser($this->userData);
+        unset($db);
         if ($addNew !== false) {
             /*
             $this->setIsUser(true);
