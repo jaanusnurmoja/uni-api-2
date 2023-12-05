@@ -106,9 +106,12 @@ class Db
         $vals = "'" . implode("','", array_values($newKvs)) . "'";
         $vals = str_replace("'last_insert_id()'", "last_insert_id()", $vals);
         $sql .= "INSERT INTO users ($cols) values ($vals);";
+        $sql .= "SELECT last_insert_id() as lastId;";
         $r = new stdClass;
         $r->sql = $cnn->multi_query($sql);
-        $r->lastId = $cnn->insert_id;
+        $res = $cnn->store_result();
+        $row = $res->fetch_object();
+        $r->lastId = $row->lastId;
         return $r;
     }
 

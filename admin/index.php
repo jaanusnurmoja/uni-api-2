@@ -49,6 +49,7 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
+$_SESSION['idCardAuthService'] = $idCardAuthService;
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($currentFullUrl) : '';
 
 $api = isset($_GET['api']) ? true : false;

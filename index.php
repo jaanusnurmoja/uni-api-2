@@ -21,6 +21,7 @@ $_SESSION['urlComingFrom'] = $uri;
 $socialIni = parse_ini_file('config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
+$_SESSION['idCardAuthService'] = $idCardAuthService;
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 include_once 'user/Session.php';
