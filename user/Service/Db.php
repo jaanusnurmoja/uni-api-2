@@ -3,6 +3,7 @@
 include_once __DIR__ . '/../model/User.php';
 include_once __DIR__ . '/../../common/Model/Person.php';
 use mysqli;
+use stdClass;
 use \Common\Helper;
 use \Common\Model\Person;
 use \user\model\User;
@@ -105,12 +106,10 @@ class Db
         $vals = "'" . implode("','", array_values($newKvs)) . "'";
         $vals = str_replace("'last_insert_id()'", "last_insert_id()", $vals);
         $sql .= "INSERT INTO users ($cols) values ($vals);";
-        if ($cnn->multi_query($sql)) {
-            echo "<p>addNewUser: $sql</p>";
-            return $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
-        } else {
-            return false;
-        }
+        $r = new stdClass;
+        $r->sql = $cnn->multi_query($sql);
+        $r->lastId = $cnn->insert_id;
+        return $r;
     }
 
     public function addPerson($personData, $user)

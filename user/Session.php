@@ -91,10 +91,13 @@ class Session
     public function setConfirmedUser($user = null)
     {
         $this->setIsUser(true);
-        if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->person->id))) {
-            $this->users->list[0]->setPerson($this->userData->person);
-            $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
+        if (empty($this->users->list[0]->person->id)) {
+            if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID')) {
+                $this->users->list[0]->setPerson($this->userData->person);
+                $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
+            }
         }
+
         print_r($this->users->list[0]);
         if (!isset($user)) {
             $user = $this->users->list[0];
@@ -115,9 +118,9 @@ class Session
         echo '<p>hakkame uut kasutajat lisama</p>';
         print_r($this->userData);
         $db = new Db();
-        $addNew = $db->addNewUser($this->userData);
-        unset($db);
-        if ($addNew !== false) {
+        $addUser = $db->addNewUser($this->userData);
+        if ($addUser->sql) {
+            $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
             /*
             $this->setIsUser(true);
             $this->userData = $addNew;
@@ -127,7 +130,7 @@ class Session
              */
             //$this->searchedUser = $this->userData;
             echo 'Lisasime teid uue kasutajana ja asume nüüd seda kinnitama';
-            $this->setConfirmedUser($addNew);
+            $this->setConfirmedUser();
         } else {
             echo 'Kahjuks jäi uus kasutaja lisamata';
         }
