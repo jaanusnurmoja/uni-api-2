@@ -83,25 +83,36 @@ class Db
         $personData = null;
         foreach ($kvs as $k => $v) {
             $k = Helper::uncamelize($k);
-            if ($k == 'person') {
-                if (!empty($v)) {
+            if ($kvs['social'] == 'eId' && $k == 'person') {
+                if (!empty($v->pno)) {
                     $personData = $v;
                 }
             } else {
                 $newKvs[$k] = $v;
             }
         }
+        if (isset($personData)) {
+            $pkvs = get_object_vars($personData);
+            foreach ($pkvs as $pKey => $pVal) {
+                unset($pkvs[$pKey]);
+                $pKey = Helper::uncamelize($pKey);
+                $pkvs[$pKey] = $pVal;
+            }
+            $pcols = implode(', ', array_keys($pkvs));
+            $pvals = "'" . implode("','", array_values($pkvs)) . "'";
+            $psql = "INSERT INTO persons ($pcols) values ($pvals)";
+            if ($cnn->query($psql)) {
+                echo "<p>kõigepealt isik: $psql</p>";
+                $newKvs['persons_id'] = $cnn->insert_id;
+            }
+
+        }
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($newKvs)) . "'";
         $sql = "INSERT INTO users ($cols) values ($vals)";
         if ($cnn->query($sql)) {
             echo "<p>addNewUser: $sql</p>";
-            $newUser = $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
-            if (!empty($personData)) {
-                return $this->addPerson($personData, $newUser['id']);
-            } else {
-                return $newUser;
-            }
+            return $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
         } else {
             return false;
         }

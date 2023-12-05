@@ -116,7 +116,7 @@ class Session
         print_r($this->userData);
         $db = new Db();
         $addNew = $db->addNewUser($this->userData);
-        unset($db);
+        //unset($db); // vist pole vaja
         if ($addNew !== false) {
             /*
             $this->setIsUser(true);
