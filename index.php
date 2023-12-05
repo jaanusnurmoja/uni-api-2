@@ -9,20 +9,19 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $siteBase = str_replace(['/admin', $path, '/index.php'], '', $_SERVER['PHP_SELF']);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF']);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
 $_SESSION['urlComingFrom'] = $uri;
 $socialIni = parse_ini_file('config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 include_once 'user/Session.php';
 
@@ -30,10 +29,14 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
     new \user\Session();
     function loggedIn()
     {
-        if (isset($_SESSION['loggedIn']))
-        {
+        if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
-            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+            $sId = '';
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
+
         }
     }
 }
@@ -89,16 +92,13 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     <a class="navbar-brand" href="/uni-api">Avaleht</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
                         onclick="window.location.href='user/logout'"><?=loggedIn()?> | LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Estonian
                         ID CARD</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
@@ -107,7 +107,7 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
                     _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
                         'twitter'
