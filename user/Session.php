@@ -88,7 +88,7 @@ class Session
         }
     }
 
-    public function setConfirmedUser()
+    public function setConfirmedUser($user = null)
     {
         $this->setIsUser(true);
         if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID' && empty($this->users->list[0]->person->id))) {
@@ -96,7 +96,10 @@ class Session
             $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
         }
         print_r($this->users->list[0]);
-        $this->userData = $this->users->list[0];
+        if (!isset($user)) {
+            $user = $this->users->list[0];
+        }
+        $this->userData = $user;
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
         }
@@ -109,17 +112,21 @@ class Session
 
     public function addNewIfNotUser()
     {
+        echo '<p>hakkame uut kasutajat lisama</p>';
         $db = new Db();
         if ($this->isLoggedIn() && !$this->isUser()) {
             $addNew = $db->addNewUser($this->userData);
             if ($addNew !== false) {
+                /*
                 $this->setIsUser(true);
                 $this->userData = $addNew;
                 $this->loggedIn['userData'] = $this->userData;
                 $this->loggedIn['currentPerson'] = $this->currentPerson;
                 $_SESSION['loggedIn'] = $this->loggedIn;
+                 */
                 //$this->searchedUser = $this->userData;
-                echo 'Lisasime teid uue kasutajana';
+                echo 'Lisasime teid uue kasutajana ja asume nüüd seda kinnitama';
+                $this->setConfirmedUser($addNew);
             } else {
                 echo 'Kahjuks jäi uus kasutaja lisamata';
             }
