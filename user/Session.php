@@ -113,23 +113,22 @@ class Session
     public function addNewIfNotUser()
     {
         echo '<p>hakkame uut kasutajat lisama</p>';
+        print_r($this->userData);
         $db = new Db();
-        if ($this->isLoggedIn() && !$this->isUser()) {
-            $addNew = $db->addNewUser($this->userData);
-            if ($addNew !== false) {
-                /*
-                $this->setIsUser(true);
-                $this->userData = $addNew;
-                $this->loggedIn['userData'] = $this->userData;
-                $this->loggedIn['currentPerson'] = $this->currentPerson;
-                $_SESSION['loggedIn'] = $this->loggedIn;
-                 */
-                //$this->searchedUser = $this->userData;
-                echo 'Lisasime teid uue kasutajana ja asume nüüd seda kinnitama';
-                $this->setConfirmedUser($addNew);
-            } else {
-                echo 'Kahjuks jäi uus kasutaja lisamata';
-            }
+        $addNew = $db->addNewUser($this->userData);
+        if ($addNew !== false) {
+            /*
+            $this->setIsUser(true);
+            $this->userData = $addNew;
+            $this->loggedIn['userData'] = $this->userData;
+            $this->loggedIn['currentPerson'] = $this->currentPerson;
+            $_SESSION['loggedIn'] = $this->loggedIn;
+             */
+            //$this->searchedUser = $this->userData;
+            echo 'Lisasime teid uue kasutajana ja asume nüüd seda kinnitama';
+            $this->setConfirmedUser($addNew);
+        } else {
+            echo 'Kahjuks jäi uus kasutaja lisamata';
         }
     }
 

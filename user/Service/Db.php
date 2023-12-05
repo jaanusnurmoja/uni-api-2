@@ -92,7 +92,7 @@ class Db
             }
         }
         $cols = implode(', ', array_keys($newKvs));
-        $vals = "'" . implode("','", array_values($kvs)) . "'";
+        $vals = "'" . implode("','", array_values($newKvs)) . "'";
         $sql = "INSERT INTO users ($cols) values ($vals)";
         if ($cnn->query($sql)) {
             echo "<p>addNewUser: $sql</p>";
