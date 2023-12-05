@@ -80,28 +80,34 @@ class Db
         $user = new User($userData);
         $kvs = get_object_vars($user);
         $newKvs = [];
-        $personData = null;
+        $personData = [];
+        $sql = '';
         foreach ($kvs as $k => $v) {
             $k = Helper::uncamelize($k);
-            if ($k == 'person') {
-                if (!empty($v)) {
-                    $personData = $v;
+            if ($k == 'person' && !empty($v->pno)) {
+                //$personData = $v;
+                $perKvs = get_object_vars($v);
+                foreach ($perKvs as $perK => $perV) {
+                    $perK = Helper::uncamelize($perK);
+                    $personData[$perK] = $perV;
                 }
+                $pcls = implode(', ', array_keys($personData));
+                $pvals = "'" . implode("','", array_values($personData)) . "'";
+                $sql .= "INSERT INTO persons ($pcls) values ($pvals);";
+
+                $newKvs['persons_id'] = 'last_insert_id()';
+
             } else {
                 $newKvs[$k] = $v;
             }
         }
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($newKvs)) . "'";
-        $sql = "INSERT INTO users ($cols) values ($vals)";
-        if ($cnn->query($sql)) {
+        $vals = str_replace("'last_insert_id()'", "last_insert_id()", $vals);
+        $sql .= "INSERT INTO users ($cols) values ($vals);";
+        if ($cnn->multi_query($sql)) {
             echo "<p>addNewUser: $sql</p>";
-            $newUser = $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
-            if (!empty($personData)) {
-                return $this->addPerson($personData, $newUser['id']);
-            } else {
-                return $newUser;
-            }
+            return $this->getAllUsersOrFindByProps(['id' => $cnn->insert_id]);
         } else {
             return false;
         }
