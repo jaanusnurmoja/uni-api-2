@@ -1,20 +1,21 @@
 <?php namespace user\Service;
-include_once __DIR__ .'/../model/User.php';
-include_once __DIR__ .'/../../common/Model/Person.php';
+
+include_once __DIR__ . '/../model/User.php';
+include_once __DIR__ . '/../../common/Model/Person.php';
+use mysqli;
+use \Common\Helper;
+use \Common\Model\Person;
 use \user\model\User;
 use \user\model\Users;
-use \Common\Helper;
-use mysqli;
-use \Common\Model\Person;
 
 class Db
 {
     /*
     protected function db() {
-        $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
-        return new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+    $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+    return new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
     }
-    */
+     */
     protected function cnn()
     {
         $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
@@ -28,7 +29,7 @@ class Db
         $users = new Users();
         $person = new Person();
         $personVars = get_object_vars($person);
-        unset($personVars['name'],$personVars['born'],$personVars['isAlive'],$personVars['deceased']);
+        unset($personVars['name'], $personVars['born'], $personVars['isAlive'], $personVars['deceased']);
         $pQueryVars = [];
 
         foreach ($personVars as $pKey => $pValue) {
@@ -50,22 +51,30 @@ class Db
             $singleRow = in_array('id', array_keys($props));
             $where = " WHERE" . implode(" AND ", $ws);
         }
-        $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u 
+        $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u
         LEFT JOIN persons p ON p.id = u.persons_id$where;";
         echo "<p>$debug getAllUsersOrFindByProps: $sql</p>";
         $q = $cnn->query($sql);
         while ($row = $q->fetch_assoc()) {
             unset($row["id"]);
-            if (!empty($row['p:id'])) {
-                while(strpos(key($row), ':')) {
-                    $newKey = str_replace('p:', '', key($row));
-                    $person->{'set' . ucfirst($newKey)}(current($row));
-                }
-            }
             $user = new User($row);
-            $user->setPerson($person);
+            if (!empty($row['p:id'])) {
+                $person = new Person();
+                foreach ($row as $col => $val) {
+                    if (strpos($col, ':')) {
+                        $newKey = str_replace('p:', '', $col);
+                        $setField = 'set' . ucfirst($newKey);
+                        $person->$setField($val);
+                    }
+                }
+                $user->setPerson($person);
+
+            }
             $users->addUserToList($user);
         }
+        echo '<pre>';
+        print_r($users);
+        echo '</pre>';
         return $singleRow ? $user : $users;
     }
 
