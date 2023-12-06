@@ -136,11 +136,12 @@ class Session
     public function addNewIfNotUser()
     {
         $db = new Db();
+        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
         $db->addNewUser($this->userData);
+        echo '<p>Kui siin ka midagi näeks, oleks tore</p>';
         print_r($this->users->list[0]);
         $this->setConfirmedUser();
         //header("Refresh:10");
-        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
 
     }
 
