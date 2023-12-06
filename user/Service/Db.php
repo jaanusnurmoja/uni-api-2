@@ -3,6 +3,7 @@
 include_once __DIR__ . '/../model/User.php';
 include_once __DIR__ . '/../../common/Model/Person.php';
 use mysqli;
+use stdClass;
 use \Common\Helper;
 use \Common\Model\Person;
 use \user\model\User;
@@ -106,13 +107,12 @@ class Db
         $vals = str_replace("'last_insert_id()'", "last_insert_id()", $vals);
         $sql .= "INSERT INTO users ($cols) values ($vals);";
         $sql .= "SELECT last_insert_id() as lastId;";
-        $cnn->multi_query($sql);
+        $r = new stdClass;
+        $r->sql = $cnn->multi_query($sql);
         $res = $cnn->store_result();
         $row = $res->fetch_object();
-        echo 'Uus id: ';
-        print_r($row);
-        //return $row->lastId;
-
+        $r->lastId = $row->lastId;
+        return $r;
     }
 
     public function addPerson($personData, $user)

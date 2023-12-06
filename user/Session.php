@@ -2,9 +2,9 @@
 
 include_once __DIR__ . '/model/Users.php';
 
-use \Common\Helper;
-use \Common\Model\Person;
-use \user\model\User;
+use Common\Helper;
+use Common\Model\Person;
+use user\model\User;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
 use \user\Service\Db;
@@ -27,11 +27,7 @@ class Session
         if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson'])) {
             $this->setIsLoggedIn(true);
             echo '<p>Algab sisselogija kontroll / kasutajaks tegemine</p>';
-            if (!empty($this->userData->id)) {
-                $this->setConfirmedUser();
-            } else {
-                $this->setUserData();
-            }
+            $this->setUserData();
         }
         //return $this;
     }
@@ -39,47 +35,40 @@ class Session
     public function setUserData()
     {
         $this->currentPerson = $_SESSION['currentPerson'];
-        if (empty($this->userData)) {
-            if (isset($_SESSION['userData'])) {
-                $user = new User($_SESSION['userData']);
-                echo '<p>Kui sess ütleb userdata, luuakse kasutaja objekt</p>';
-            }
-/*Array ( [serialNumber] => PNOEE-36706230305
-[GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
-[C] => EE [email] => 36706230305@eesti.ee )*/
-
-            if (isset($_SESSION['idCardData'])) {
-                $idCardData = (object) $_SESSION['idCardData'];
-                $user = new User();
-                $user->setUsername($_SESSION['currentPerson']);
-                $user->setEmail($idCardData->email);
-                $user->setSocial('eID');
-
-                $person = new Person;
-                //$person->name = "$idCardData->GN $idCardData->SN";
-                $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
-                $person->setFirstName($gnparts->firstName);
-                if (isset($gnparts->middleName)) {
-                    $person->setMiddleName($gnparts->middleName);
-                }
-
-                $person->setLastName($idCardData->SN);
-                $person->setCountry($idCardData->C);
-                //$person->pnoCode;
-                $person->setPno($idCardData->serialNumber);
-                //$person->born;
-                $user->setPerson($person);
-                echo '<p>Kasutaja objekt on loodud id kaardi andmetest</p>';
-            }
+        if (isset($_SESSION['userData'])) {
+            $user = new User($_SESSION['userData']);
             $this->userData = $user;
-            $this->checkIfUserExistsAndAdd($user);
-        } else {
-            echo '<p>Kasutaja objekt on ammu olemas, seega jäi esimene samm vahele</p>';
-            if (!empty($this->userData->id)) {
-                echo '<p>Isegi id on olemas. Kinnitama!</p>';
-                $this->setConfirmedUser();
-            }
+            echo '<p>Kui sess ütleb userdata, luuakse kasutaja objekt</p>';
         }
+        /*Array ( [serialNumber] => PNOEE-36706230305
+        [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
+        [C] => EE [email] => 36706230305@eesti.ee )*/
+
+        if (isset($_SESSION['idCardData'])) {
+            $idCardData = (object) $_SESSION['idCardData'];
+            $user = new User();
+            $user->setUsername($_SESSION['currentPerson']);
+            $user->setEmail($idCardData->email);
+            $user->setSocial('eID');
+
+            $person = new Person;
+            //$person->name = "$idCardData->GN $idCardData->SN";
+            $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
+            $person->setFirstName($gnparts->firstName);
+            if (isset($gnparts->middleName)) {
+                $person->setMiddleName($gnparts->middleName);
+            }
+
+            $person->setLastName($idCardData->SN);
+            $person->setCountry($idCardData->C);
+            //$person->pnoCode;
+            $person->setPno($idCardData->serialNumber);
+            //$person->born;
+            $user->setPerson($person);
+            $this->userData = $user;
+            echo '<p>Kasutaja objekt on loodud id kaardi andmetest</p>';
+        }
+        $this->checkIfUserExistsAndAdd($user);
     }
 
     public function checkIfUserExistsAndAdd($user)
@@ -135,31 +124,25 @@ class Session
 
     public function addNewIfNotUser()
     {
+        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
+        print_r($this->userData);
         $db = new Db();
-        //echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
-        echo '
-                        <h5 class="card-title">Tere tulemast ametliku identiteediga kasutajate hulka,
-                            ' . $this->userData->person->firstName . ' ' . $this->userData->person->middleName ? $this->userData->person->middleName . ' ' : '' . $this->userData->person->lastName . '!
-                        </h5>
-                        <div class="card-text">
-                            Kuna olete esimest korda sisse logimas, siis lõime teie jaoks automaatselt kasutajakonto.
-                            Kuna sisenete Id-kaardiga autentides, siis tekib lisaks kasutajakontole ka teie isikukirje. Hiljem võite
-                            soovi korral siduda sellesama isikukirjega ka oma teisi kontosid.<br>
-                            Kui kasutajakonto on seotud igati ametlikult eksisteeriva isikuga, siis lisab see kasutajale piisavalt
-                            usaldusväärsust, et anda talle teatud eeliseid ligipääsuks sisule. See funktsonaalsus pole küll veel
-                            valmis (ligipääsuõiguste haldamine), kuid on kindlasti plaanis.<br>
-                            <button class="btn btn-warning btn-lg" onclick="window.location.href=\'\';">
-                                Sain aru, jätkan
-                            </button>
-                        </div>
-            ';
-        print_r($this->users->list[0]);
-
-        $db->addNewUser($this->userData);
-        echo '<p>Kui siin ka midagi näeks, oleks tore</p>';
-        $this->setConfirmedUser();
-        //header("Refresh:10");
-
+        $addUser = $db->addNewUser($this->userData);
+        if ($addUser->sql) {
+            $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
+            /*
+            $this->setIsUser(true);
+            $this->userData = $addNew;
+            $this->loggedIn['userData'] = $this->userData;
+            $this->loggedIn['currentPerson'] = $this->currentPerson;
+            $_SESSION['loggedIn'] = $this->loggedIn;
+             */
+            //$this->searchedUser = $this->userData;
+            echo '<p>Lisasime teid uue kasutajana ja asume nüüd seda kinnitama</p>';
+            $this->setConfirmedUser();
+        } else {
+            echo '<p>Kahjuks jäi uus kasutaja lisamata, aga ei tea, miks</p>';
+        }
     }
 
     public function checkPersonAndAddIfMissing($user, $person)

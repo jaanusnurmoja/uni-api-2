@@ -31,12 +31,9 @@ if (!empty($_SERVER['QUERY_STRING'])) {
 }
 
 include_once __DIR__ . '/../user/Session.php';
-$sessActions = null;
 
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
-    if (empty($sessActions)) {
-        $sessActions = new \user\Session();
-    }
+    new \user\Session();
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {
