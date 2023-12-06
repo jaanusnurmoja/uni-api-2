@@ -99,19 +99,19 @@ if (loggedIn()) {?>
                 <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Estonian
-                        ID CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Eesti
+                        ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
-                            style="max-height:16px"><span
-                            style="vertical-align:top; padding-left:2px">OTHER</span></button>
+                            style="max-height:16px"><span style="vertical-align:top; padding-left:2px">MUUL VIISIL |
+                            OTHER</span></button>
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
                         '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
-                        'twitter'
+                    _oneall.push(['social_login', 'set_providers', [
+                        'google', 'facebook', 'twitter', 'windowslive', 'openid', 'github'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'

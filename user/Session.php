@@ -123,14 +123,6 @@ class Session
         $addUser = $db->addNewUser($this->userData);
         if ($addUser->sql) {
             $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
-            /*
-            $this->setIsUser(true);
-            $this->userData = $addNew;
-            $this->loggedIn['userData'] = $this->userData;
-            $this->loggedIn['currentPerson'] = $this->currentPerson;
-            $_SESSION['loggedIn'] = $this->loggedIn;
-             */
-            //$this->searchedUser = $this->userData;
             echo '<p>Lisasime teid uue kasutajana ja asume nüüd seda kinnitama</p>';
             $this->setConfirmedUser();
         } else {
