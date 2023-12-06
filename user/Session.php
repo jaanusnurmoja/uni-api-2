@@ -27,7 +27,11 @@ class Session
         if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson'])) {
             $this->setIsLoggedIn(true);
             echo '<p>Algab sisselogija kontroll / kasutajaks tegemine</p>';
-            $this->setUserData();
+            if (!empty($this->userData->id)) {
+                $this->setConfirmedUser();
+            } else {
+                $this->setUserData();
+            }
         }
         //return $this;
     }
