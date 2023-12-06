@@ -181,6 +181,10 @@ foreach (json_decode($rel) as $table => $params) {
                         ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
                         isikuprofiili ning seostada sellega kõik oma kasutajakontod.
                     </p>
+                    <p><i class="bi bi-exclamation-triangle"></i> Esmasel sisselogimisel ID kaardiga tuleb pärast
+                        autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse registreerumise
+                        peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili kirje. Igatahes
+                        on see "jätka" ajutine lahendus.</p>
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
                         või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.

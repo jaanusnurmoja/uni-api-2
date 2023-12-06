@@ -234,6 +234,13 @@ if (loggedIn()) {
                                     võimalik, siis tekivad needki. Olgu veel öeldud, et olemasolev nn sotsiaalne
                                     sisselogimine toimub tegelikult üheainsa teenuse vahendusel (OneAll).
                                 </li>
+                                <li><i class="bi bi-exclamation-triangle"></i> Esmasel sisselogimisel ID kaardiga tuleb
+                                    pärast
+                                    autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse
+                                    registreerumise
+                                    peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili
+                                    kirje. Igatahes
+                                    on see "jätka" ajutine lahendus.</li>
                             </ul>
                         </li>
                     </ol>
