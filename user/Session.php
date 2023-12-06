@@ -135,11 +135,9 @@ class Session
 
     public function addNewIfNotUser()
     {
-        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
         $db = new Db();
         $addUser = $db->addNewUser($this->userData);
-        print_r($addUser);
-        header("Refresh:10");
+        print_r($this->users->list[0]);
 
         if ($addUser->sql) {
             $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
@@ -156,6 +154,9 @@ class Session
         } else {
             echo '<p>Kahjuks jäi uus kasutaja lisamata, aga ei tea, miks</p>';
         }
+        header("Refresh:10");
+        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
+
     }
 
     public function checkPersonAndAddIfMissing($user, $person)
