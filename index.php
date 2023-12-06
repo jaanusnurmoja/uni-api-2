@@ -25,9 +25,12 @@ $_SESSION['idCardAuthService'] = $idCardAuthService;
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 include_once 'user/Session.php';
+$sessActions = null;
 
 if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
-    new \user\Session();
+    if (empty($sessActions)) {
+        $sessActions = new \user\Session();
+    }
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {
