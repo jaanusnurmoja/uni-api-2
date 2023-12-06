@@ -26,6 +26,7 @@ class Session
         $this->users = $db->getAllUsersOrFindByProps();
         if (isset($_SESSION['currentPerson']) && !empty($_SESSION['currentPerson'])) {
             $this->setIsLoggedIn(true);
+            echo '<p>Algab sisselogija kontroll / kasutajaks tegemine</p>';
             $this->setUserData();
         }
         //return $this;
@@ -37,6 +38,7 @@ class Session
         if (isset($_SESSION['userData'])) {
             $user = new User($_SESSION['userData']);
             $this->userData = $user;
+            echo '<p>Kui sess ütleb userdata, luuakse kasutaja objekt</p>';
         }
         /*Array ( [serialNumber] => PNOEE-36706230305
         [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
@@ -64,12 +66,14 @@ class Session
             //$person->born;
             $user->setPerson($person);
             $this->userData = $user;
+            echo '<p>Kasutaja objekt on loodud id kaardi andmetest</p>';
         }
         $this->checkIfUserExistsAndAdd($user);
     }
 
     public function checkIfUserExistsAndAdd($user)
     {
+        echo '<p>Kontrollime, kas kasutaja on olemas</p>';
         $db = new Db();
         $this->users = $db->getAllUsersOrFindByProps(
             [
@@ -82,8 +86,10 @@ class Session
             if ($this->users->count > 1) {
                 echo '<div class="bg-warning">Nende tunnustega on rohkem kui üks kasutajakonto. Seda ei tohiks olla, teavitage saidi haldajaid. Loeme teid selle loetelu esimeseks kasutajaks.</div>';
             }
+            echo '<p>Vist on, läheme kinnitama!</p>';
             $this->setConfirmedUser();
         } else {
+            echo '<p>Vist ei ole, kasutaja tuleb luua</p>';
             $this->addNewIfNotUser();
         }
     }
@@ -91,8 +97,10 @@ class Session
     public function setConfirmedUser($user = null)
     {
         $this->setIsUser(true);
+        echo '<p>Kinnitatud :) aga on veel asju</p>';
         if (empty($this->users->list[0]->person->id)) {
             if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID')) {
+                echo '<p>Näiteks kui miskipärast pole id kaardi omanikul isikukirjet küljes</p>';
                 $this->users->list[0]->setPerson($this->userData->person);
                 $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
             }
@@ -111,11 +119,12 @@ class Session
         $this->loggedIn['userData'] = $this->userData;
         $this->loggedIn['currentPerson'] = $this->currentPerson;
         $_SESSION['loggedIn'] = $this->loggedIn;
+        echo '<p>Sessiooni muutuja loggedin kah tehtud</p>';
     }
 
     public function addNewIfNotUser()
     {
-        echo '<p>hakkame uut kasutajat lisama</p>';
+        echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
         print_r($this->userData);
         $db = new Db();
         $addUser = $db->addNewUser($this->userData);
@@ -129,10 +138,10 @@ class Session
             $_SESSION['loggedIn'] = $this->loggedIn;
              */
             //$this->searchedUser = $this->userData;
-            echo 'Lisasime teid uue kasutajana ja asume nüüd seda kinnitama';
+            echo '<p>Lisasime teid uue kasutajana ja asume nüüd seda kinnitama</p>';
             $this->setConfirmedUser();
         } else {
-            echo 'Kahjuks jäi uus kasutaja lisamata';
+            echo '<p>Kahjuks jäi uus kasutaja lisamata, aga ei tea, miks</p>';
         }
     }
 
@@ -145,6 +154,7 @@ class Session
             echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>';
             $db->addPerson($person, $user);
         } else {
+            echo '<p>Siinkohal tuleb vaid lisada isik kasutajale</p>';
             $db->addPersonToUser($checkPerson->id, $user);
         }
 
