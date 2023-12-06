@@ -124,7 +124,7 @@ class Session
 
     public function addNewIfNotUser()
     {
-        echo '<h1>Hea ' . $this->userData->person->firstName . ', hakkame lisama teie kasutajakontot ja isikuprofiili. <a href="">Jätka</a></h1>';
+        echo '<h1>Hea ' . $this->userData->person->firstName . ' ' . !empty($this->userData->person->middleName) ? $this->userData->person->middleName : '' . ' ' . $this->userData->person->lastName . ', hakkame lisama teie kasutajakontot ja isikuprofiili. <a href="">Jätka</a></h1>';
         print_r($this->userData);
         $db = new Db();
         $addUser = $db->addNewUser($this->userData);
