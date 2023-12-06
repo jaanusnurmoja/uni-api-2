@@ -70,7 +70,9 @@ class Session
             $this->userData = $user;
             $this->checkIfUserExistsAndAdd($user);
         } else {
+            echo '<p>Kasutaja objekt on ammu olemas, seega jäi esimene samm vahele</p>';
             if (!empty($this->userData->id)) {
+                echo '<p>Isegi id on olemas. Kinnitama!</p>';
                 $this->setConfirmedUser();
             }
         }
