@@ -86,17 +86,24 @@ class Db
         foreach ($kvs as $k => $v) {
             $k = Helper::uncamelize($k);
             if ($k == 'person' && !empty($v->pno)) {
-                //$personData = $v;
-                $perKvs = get_object_vars($v);
-                foreach ($perKvs as $perK => $perV) {
-                    $perK = Helper::uncamelize($perK);
-                    $personData[$perK] = $perV;
-                }
-                $pcls = implode(', ', array_keys($personData));
-                $pvals = "'" . implode("','", array_values($personData)) . "'";
-                $sql .= "INSERT INTO persons ($pcls) values ($pvals);";
+                if (empty($v->id)) {
+                    //$personData = $v;
+                    {
+                        $perKvs = get_object_vars($v);
+                    }
 
-                $newKvs['persons_id'] = 'last_insert_id()';
+                    foreach ($perKvs as $perK => $perV) {
+                        $perK = Helper::uncamelize($perK);
+                        $personData[$perK] = $perV;
+                    }
+                    $pcls = implode(', ', array_keys($personData));
+                    $pvals = "'" . implode("','", array_values($personData)) . "'";
+                    $sql .= "INSERT INTO persons ($pcls) values ($pvals);";
+
+                    $newKvs['persons_id'] = 'last_insert_id()';
+                } else {
+                    $newKvs['persons_id'] = $v->id;
+                }
 
             } else {
                 $newKvs[$k] = $v;
@@ -134,7 +141,7 @@ class Db
             $personId = $cnn->insert_id;
             echo "<p>addPerson: $sql</p>";
             if (!empty($user)) {
-                $this->addPersonToUser($personId, $user);
+                return $this->addPersonToUser($personId, $user)->person;
             }
             return $this->findPerson(['id' => $personId]);
         } else {
