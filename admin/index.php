@@ -30,25 +30,6 @@ if (!empty($_SERVER['QUERY_STRING'])) {
     $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
-include_once __DIR__ . '/../user/Session.php';
-$sessActions = null;
-
-if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
-    if (empty($sessActions)) {
-        $sessActions = new \user\Session();
-    }
-    function loggedIn()
-    {
-        if (isset($_SESSION['loggedIn'])) {
-            $u = $_SESSION['loggedIn']['userData'];
-            if (isset($u->person->id)) {
-                $sId = ': ' . $u->person->id;
-            }
-            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
-        }
-    }
-}
-
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
@@ -279,4 +260,24 @@ if (!$api) {
     </!-->
 
 </html>
-<?php }?>
+<?php }
+include_once __DIR__ . '/../user/Session.php';
+$sessActions = null;
+
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
+    if (empty($sessActions)) {
+        $sessActions = new \user\Session();
+    }
+    function loggedIn()
+    {
+        if (isset($_SESSION['loggedIn'])) {
+            $u = $_SESSION['loggedIn']['userData'];
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
+        }
+    }
+}
+
+?>
