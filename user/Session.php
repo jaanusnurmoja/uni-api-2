@@ -100,7 +100,7 @@ class Session
             }
         }
 
-        print_r($this->users->list[0]);
+        //print_r($this->users->list[0]);
         if (!isset($user)) {
             $user = $this->users->list[0];
         }
