@@ -210,27 +210,27 @@ if (loggedIn()) {
                             või valides mõne alljärgnevatest sotsiaalkontodest:
                             <ul>
                                 <li>
-                                    GITHUB - seal peaks igal arendajal konto olema :)
+                                    Google (kommentaare ei vaja)
                                 </li>
                                 <li>
-                                    Google (kommentaare ei vaja)
+                                    Facebook (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Twitter (kommentaare ei vaja)
                                 </li>
                                 <li>
                                     Microsoft - võib arvata, et sealgi on konto igaühel, kes pole just Windowsi vihkaja
                                 </li>
                                 <li>
-                                    LinkedIn - tõenäoliselt on kõigil IT sektori inimestel sealgi konto olemas
+                                    GITHUB - seal peaks igal arendajal konto olema :)
                                 </li>
                                 <li>
                                     OpenID: mh on see alternatiivne viis ID-kaardiga sisselogimiseks, autentides
                                     vastu openid.ee serverit. Avanevasse vormilahtrisse tuleb kirjutada
                                     openid.ee, sellest piisab.
                                 </li>
-                                <li>
-                                    Twitter
-                                </li>
                                 <li class="bg-warning">
-                                    Kahjuks puuduvad nende võimaluste hulgast Facebook, Instagram jt. Kui vähegi
+                                    Kahjuks puuduvad nende võimaluste hulgast Linkedin, Instagram jt. Kui vähegi
                                     võimalik, siis tekivad needki. Olgu veel öeldud, et olemasolev nn sotsiaalne
                                     sisselogimine toimub tegelikult üheainsa teenuse vahendusel (OneAll).
                                 </li>
