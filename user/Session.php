@@ -138,9 +138,6 @@ class Session
         $db = new Db();
         //echo '<p>hakkame uut kasutajat lisama. Kui jäime siia toppama, klikka <a href="">siia</a></p>';
         echo '
-            <div class="container">
-                <div class="card w-75">
-                    <div class="card-body">
                         <h5 class="card-title">Tere tulemast ametliku identiteediga kasutajate hulka,
                             ' . $this->userData->person->firstName . ' ' . $this->userData->person->middleName ? $this->userData->person->middleName . ' ' : '' . $this->userData->person->lastName . '!
                         </h5>
@@ -155,14 +152,11 @@ class Session
                                 Sain aru, jätkan
                             </button>
                         </div>
-                    </div>
-                </div>
-            </div>
             ';
+        print_r($this->users->list[0]);
 
         $db->addNewUser($this->userData);
         echo '<p>Kui siin ka midagi näeks, oleks tore</p>';
-        print_r($this->users->list[0]);
         $this->setConfirmedUser();
         //header("Refresh:10");
 
