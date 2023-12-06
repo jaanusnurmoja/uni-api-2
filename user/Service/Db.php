@@ -111,7 +111,7 @@ class Db
         $row = $res->fetch_object();
         echo 'Uus id: ';
         print_r($row);
-        return $row->lastId;
+        //return $row->lastId;
 
     }
 
