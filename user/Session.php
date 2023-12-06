@@ -2,9 +2,9 @@
 
 include_once __DIR__ . '/model/Users.php';
 
-use Common\Helper;
-use Common\Model\Person;
-use user\model\User;
+use \Common\Helper;
+use \Common\Model\Person;
+use \user\model\User;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
 use \user\Service\Db;
@@ -35,40 +35,45 @@ class Session
     public function setUserData()
     {
         $this->currentPerson = $_SESSION['currentPerson'];
-        if (isset($_SESSION['userData'])) {
-            $user = new User($_SESSION['userData']);
-            $this->userData = $user;
-            echo '<p>Kui sess ütleb userdata, luuakse kasutaja objekt</p>';
-        }
-        /*Array ( [serialNumber] => PNOEE-36706230305
-        [GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
-        [C] => EE [email] => 36706230305@eesti.ee )*/
-
-        if (isset($_SESSION['idCardData'])) {
-            $idCardData = (object) $_SESSION['idCardData'];
-            $user = new User();
-            $user->setUsername($_SESSION['currentPerson']);
-            $user->setEmail($idCardData->email);
-            $user->setSocial('eID');
-
-            $person = new Person;
-            //$person->name = "$idCardData->GN $idCardData->SN";
-            $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
-            $person->setFirstName($gnparts->firstName);
-            if (isset($gnparts->middleName)) {
-                $person->setMiddleName($gnparts->middleName);
+        if (empty($this->userData)) {
+            if (isset($_SESSION['userData'])) {
+                $user = new User($_SESSION['userData']);
+                echo '<p>Kui sess ütleb userdata, luuakse kasutaja objekt</p>';
             }
+/*Array ( [serialNumber] => PNOEE-36706230305
+[GN] => JAANUS [SN] => NURMOJA [CN] => NURMOJA\
+[C] => EE [email] => 36706230305@eesti.ee )*/
 
-            $person->setLastName($idCardData->SN);
-            $person->setCountry($idCardData->C);
-            //$person->pnoCode;
-            $person->setPno($idCardData->serialNumber);
-            //$person->born;
-            $user->setPerson($person);
+            if (isset($_SESSION['idCardData'])) {
+                $idCardData = (object) $_SESSION['idCardData'];
+                $user = new User();
+                $user->setUsername($_SESSION['currentPerson']);
+                $user->setEmail($idCardData->email);
+                $user->setSocial('eID');
+
+                $person = new Person;
+                //$person->name = "$idCardData->GN $idCardData->SN";
+                $gnparts = Helper::givenNamesIntoFirstAndMiddle($idCardData->GN);
+                $person->setFirstName($gnparts->firstName);
+                if (isset($gnparts->middleName)) {
+                    $person->setMiddleName($gnparts->middleName);
+                }
+
+                $person->setLastName($idCardData->SN);
+                $person->setCountry($idCardData->C);
+                //$person->pnoCode;
+                $person->setPno($idCardData->serialNumber);
+                //$person->born;
+                $user->setPerson($person);
+                echo '<p>Kasutaja objekt on loodud id kaardi andmetest</p>';
+            }
             $this->userData = $user;
-            echo '<p>Kasutaja objekt on loodud id kaardi andmetest</p>';
+            $this->checkIfUserExistsAndAdd($user);
+        } else {
+            if (!empty($this->userData->id)) {
+                $this->setConfirmedUser();
+            }
         }
-        $this->checkIfUserExistsAndAdd($user);
     }
 
     public function checkIfUserExistsAndAdd($user)
