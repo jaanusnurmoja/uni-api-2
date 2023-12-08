@@ -1,11 +1,9 @@
 <?php namespace Admin;
 
 /**
- * Sisuhaldussüsteemi uniapiplus halduskeskkond
- * 
  * @package uniapiplusadmin
  * 
- * Ligipääs keskkonnale ainult id kaardiga või sotsiaalkontoga sisselogimisel
+ * Sisuhaldussüsteemi uniapiplus halduskeskkond
  * 
  * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
