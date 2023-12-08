@@ -138,6 +138,9 @@ if (loggedIn()) {?>
                     </script>
                 </li>
                 <?php }?>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="/uni-api/docs">Hetkeseisu dokumentatsioon</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="/uni-api/admin">Admin</a>
 
