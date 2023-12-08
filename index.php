@@ -2,8 +2,6 @@
 /**
  * @package uniapiplus
  *
- * Sisuhaldussüsteemi uniapiplus dokumentatsioon
- *
  * @see api
  * @see https://github.com/darioTecchia/uni-api
  * 1) frontend
