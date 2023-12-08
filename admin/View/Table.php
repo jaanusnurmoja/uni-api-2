@@ -1,28 +1,39 @@
 <?php namespace View;
 
 use View\Form\EditTable;
-include_once __DIR__.'/Form/EditTable.php';
 
+include_once __DIR__ . '/Form/EditTable.php';
+
+/**
+ * Table
+ *
+ * Hallatavate tabelite loetelu ja üksikasjade vaade
+ */
 class Table
 {
     public $tableSingleOrList;
     public $edit;
     public $new;
-    
+
     public function __construct($tableSingleOrList)
     {
         $this->tableSingleOrList = $tableSingleOrList;
         $this->edit = new EditTable($tableSingleOrList);
     }
+    /**
+     * tableDetails näitab valitud kirje üksikasju
+     *
+     * @return void
+     */
     public function tableDetails()
     {
-    echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
-    echo '<table class="table table-warning table-striped">';
+        echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
+        echo '<table class="table table-warning table-striped">';
 
-    foreach ($this->tableSingleOrList as $key => $value) {
-        if (!is_object($value) && !is_array($value)) {
-            echo '<tr><td>' . $key . '</td><td>' . $value . '</td></tr>';
-        } else {
+        foreach ($this->tableSingleOrList as $key => $value) {
+            if (!is_object($value) && !is_array($value)) {
+                echo '<tr><td>' . $key . '</td><td>' . $value . '</td></tr>';
+            } else {
                 if ($key == 'data') {
                     echo '<tr><td colspan = "2"><h2>Andmeväljad</h2></td></tr>';
                     foreach ($this->tableSingleOrList->data->fields as $fkey => $field) {?>
@@ -31,25 +42,25 @@ class Table
     <td>
         <ul>
             <?php
-                    foreach ($field as $k => $v) {
+foreach ($field as $k => $v) {
                         echo "<li>$k: $v</li>";
                     }?></ul>
     </td>
 </tr>
 <?php
-                    }
+}
                 }
 
-            if ($key == 'createdModified') {
-                echo "<tr><td colspan='2' class='h4'>$key</td></tr>";
-                foreach ($value as $subKey => $subValue) {
-                    if (is_object($subValue) || is_array($subValue)) {
-                        $subValue = json_encode($subValue);
-                    }
+                if ($key == 'createdModified') {
+                    echo "<tr><td colspan='2' class='h4'>$key</td></tr>";
+                    foreach ($value as $subKey => $subValue) {
+                        if (is_object($subValue) || is_array($subValue)) {
+                            $subValue = json_encode($subValue);
+                        }
                         echo '<tr><td>' . $subKey . '</td><td>' . $subValue . '</td></tr>';
                     }
                 }
-                
+
                 if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
@@ -65,7 +76,11 @@ class Table
         }
     }
 
-
+    /**
+     * tableList näitab hallatavate tabelite loetelu
+     *
+     * @return void
+     */
     public function tableList()
     {
         if (is_array($this->tableSingleOrList)) {
@@ -74,10 +89,10 @@ class Table
 <h1>Tabelid</h1>
 <table class="table table-success table-striped">
     <caption class="caption-top"><a class="btn btn-sm btn-success"
-            href="<?php echo isset($request[1]) ? '' : 'tables';?>/new">
+            href="<?php echo isset($request[1]) ? '' : 'tables'; ?>/new">
             <i class="bi bi-plus-warning bi-plus-lg"></i> Lisa uus</a></caption>
     <caption class="caption-bottom"><a class="btn btn-sm btn-success"
-            href="<?php echo isset($request[1]) ? '' : 'tables';?>/new">
+            href="<?php echo isset($request[1]) ? '' : 'tables'; ?>/new">
             <i class="bi bi-plus-warning bi-plus-lg"></i> Lisa uus
         </a>
     </caption>

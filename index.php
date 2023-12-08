@@ -26,8 +26,9 @@ $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($sit
 
 include_once 'user/Session.php';
 
-if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {
