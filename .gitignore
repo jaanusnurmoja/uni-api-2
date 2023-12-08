@@ -1,3 +1,4 @@
 config/connection.ini
 config/social.ini
 api/config.php
+/nbproject/private/
