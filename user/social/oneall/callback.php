@@ -1,4 +1,7 @@
 <?php
+/**
+ * Callback suhlemiseks sotsiaalkontodega
+ */
 if (!isset($_SESSION)) {
     session_start();
 }

@@ -9,15 +9,12 @@ use \Common\Model\Person;
 use \user\model\User;
 use \user\model\Users;
 
+/**
+ * Kasutajatega seotud toimingud andmebaasis
+ */
 class Db
 {
-    /*
-    protected function db() {
-    $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
-    return new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
-    }
-     */
-    protected function cnn()
+     protected function cnn()
     {
         $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
         return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -73,7 +70,11 @@ class Db
         }
         return $singleRow ? $user : $users;
     }
-
+/**
+ * Lisame uue kasutaja. Kui isikuobjekt on olemas, siis kõigepealt uue isiku
+ * @param type $userData
+ * @return stdClass ('sql' => bool, 'lastId' => int)
+ */
     public function addNewUser($userData)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -85,6 +86,10 @@ class Db
         $sql = '';
         foreach ($kvs as $k => $v) {
             $k = Helper::uncamelize($k);
+            /**
+             * Kui andmete hulgas on isikuobjekt ja isikukoodi väli pole tühi, lisatakse kõigepealt kirje isikutabelisse
+             * $v->pno = 'PNOEE-36706230305'
+             */
             if ($k == 'person' && !empty($v->pno)) {
                 //$personData = $v;
                 $perKvs = get_object_vars($v);
@@ -115,6 +120,12 @@ class Db
         return $r;
     }
 
+    /**
+     * Kui on vaja lisada ainult isik
+     * @param type $personData
+     * @param type $user
+     * @return bool
+     */
     public function addPerson($personData, $user)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -127,8 +138,6 @@ class Db
         }
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($kvs)) . "'";
-        print_r($cols);
-        print_r($vals);
         $sql = "INSERT INTO persons ($cols) values ($vals)";
         if ($cnn->query($sql)) {
             $personId = $cnn->insert_id;
@@ -143,6 +152,11 @@ class Db
 
     }
 
+    /**
+     * Leia isik etteantud tunnuste järgi
+     * @param type $props
+     * @return bool|Person
+     */
     public function findPerson($props)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -169,6 +183,12 @@ class Db
         }
     }
 
+    /**
+     * Lisa kasutajale isik
+     * @param type $p
+     * @param type $u
+     * @return User
+     */
     public function addPersonToUser($p, $u)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

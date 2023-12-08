@@ -4,14 +4,16 @@ include_once __DIR__.'/../Service/Read.php';
 include_once __DIR__.'/../Service/Create.php';
 include_once __DIR__.'/../View/Table.php';
 include_once __DIR__.'/../View/Form/NewTable.php';
-use \DTO\ListDTO;
+use \Dto\ListDTO;
 use \Dto\TableDTO;
 use \Service\Create;
 use \Service\Read;
 use \View\Form\NewTable;
 use \View\Table as TableListOrDetails;
 
-//use function View\tableDetails;
+/**
+ * Tabelite haldamisega seotud toimingud
+ */
 
 class Table
 {

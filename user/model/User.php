@@ -5,6 +5,14 @@ include_once __DIR__ . '/../../common/Model/Person.php';
 use \Common\Helper;
 use \Common\Model\Person;
 
+/**
+ * Kasutaja 
+ * @property string $userName 
+ * @property string $email
+ * @property string $social
+ * @property Person $person  
+
+*/
 class User
 {
     // User class

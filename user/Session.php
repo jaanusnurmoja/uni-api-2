@@ -9,6 +9,14 @@ use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
 use \user\Service\Db;
 
+/**
+ * Sisselogija sotsiaalkonto / Id-kaardi andmete kokkuviimine olemasoleva kasutajakontoga
+ * Esmase sisselogija automaatne registreerimine kasutajana (users)
+ * Id-kaardiga esmase sisselogija kandmine isikute tabelisse (persons)
+ * Isikukirje ja kasutajatunnuse vahelise seose loomine (Id-kaardiga  automaatselt esmasel sisselogimisel)
+ * Sotsiaalkonto / ID-kaardiga sisselogija kasutajakonto olemasolu kinnitamine ning tema tunnistamine sisseloginud kasutajaks (vastava sessioonimuutuja loomine)
+ * @todo Id-kaardi andmete kokkuviimine isikukirjega juhul, kui isikukirje on juba varem loodud
+ */
 class Session
 {
     public $isUser = false;
@@ -31,6 +39,10 @@ class Session
         //return $this;
     }
 
+    /**
+     * Sisselogija andmed sobitatakse kasutaja objekti
+     * Id-kaart: luuakse ka objekt Person
+     */
     public function setUserData()
     {
         $this->currentPerson = $_SESSION['currentPerson'];
@@ -67,7 +79,10 @@ class Session
         }
         $this->checkIfUserExistsAndAdd($user);
     }
-
+/**
+ * Kontrollib, kas kasutaja on olemas, et see puudumise korral lisada
+ * @param User $user
+ */
     public function checkIfUserExistsAndAdd($user)
     {
         $db = new Db();
@@ -82,13 +97,24 @@ class Session
             if ($this->users->count > 1) {
                 echo '<div class="bg-warning">Nende tunnustega on rohkem kui üks kasutajakonto. Seda ei tohiks olla, teavitage saidi haldajaid. Loeme teid selle loetelu esimeseks kasutajaks.</div>';
             }
+            /**
+             *  Kasutaja on olemas, läheb kinnitamisele
+             */
             $this->setConfirmedUser();
         } else {
             echo '<p>Seda kasutajat vist veel ei ole, järelikult tuleb luua</p>';
+            /**
+             * Kasutajat pole, läheb loomisele
+             */
             $this->addNewIfNotUser();
         }
     }
 
+    /**
+     * Kasutajakonto olemasolu kinnitamine ja vastava sessioonimuutuja loomine
+     * 
+     * @param type $user
+     */
     public function setConfirmedUser($user = null)
     {
         $this->setIsUser(true);
@@ -114,12 +140,24 @@ class Session
         $this->loggedIn['currentPerson'] = $this->currentPerson;
         $_SESSION['loggedIn'] = $this->loggedIn;
     }
-
+/**
+ * Lisa uus kasutaja, kui sisselogija pole kasutaja
+ * 
+ * @todo BUG: ID-kaardi omaniku kasutajaks registreerimine jääb siin seisma. Soovimatu funktsionaalsus - jätkamiseks tuleb leht uuesti laadida. Dialog element on ajutine lahendus kuni probleemi lahenemiseni.
+ * 
+ */
     public function addNewIfNotUser()
     {
         echo '<dialog open><h1>Hea ' . $this->userData->person->firstName . ', hakkame lisama teie kasutajakontot ja isikuprofiili. <a href="">Jätka</a></h1></dialog>';
         echo str_replace(['"', '{', '}', '[', ']'], '', json_encode($this->userData));
         $db = new Db();
+        /**
+         * Pöördumine kasutaja sisestamise päringuga funktsiooni poole.
+         * Kui kasutaja lisamine toimus, PEAKS $addUser->lastId olema äsja lisatud kasutaja id
+         * ning pärast kasutaja andmete värskendamist suunatama tegevus funktsiooni setConfirmedUser()
+         * AGA praegu sunnitakse kasutajat lehte uuesti laadima ning siis toimub kasutaja olemasolu kontroll otsast peale,
+         * alates funktsioonist setUserData(), kus kasutaja olemasolu saab kinnitust ning ta viiakse edasi funktsiooni setConfirmedUser()
+         */
         $addUser = $db->addNewUser($this->userData);
         if ($addUser->sql) {
             $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
@@ -130,6 +168,12 @@ class Session
         }
     }
 
+    /**
+     * Algselt mõeldud isikukirje kontrolliks ja selle lisamiseks puudumise korral
+     * @todo Funktsiooni saab kasutada isikuprofiili sidumisel teiste kasutajakontodega, mis on loodud sotsiaalkontodega sisselogimisel
+     * @param type $user
+     * @param type $person
+     */
     public function checkPersonAndAddIfMissing($user, $person)
     {
         $db = new Db();
@@ -147,6 +191,7 @@ class Session
 
     /**
      * Get the value of isUser
+     * @return bool kas on kasutaja või ei (vaikimisi mitte)
      */
     public function isUser(): bool
     {
@@ -164,7 +209,7 @@ class Session
     }
 
     /**
-     * Get the value of isLoggedIn
+     * Sotsiaalkonto või id-kaardi andmed on olemas, kuid ei pruugi veel olla kasutaja
      */
     public function isLoggedIn(): bool
     {
@@ -200,7 +245,7 @@ class Session
     }
 
     /**
-     * Get the value of loggedIn
+     * loggedIn muutuja sisaldab kinnitatud sisseloginud kasutaja andmeid
      */
     public function getLoggedIn()
     {

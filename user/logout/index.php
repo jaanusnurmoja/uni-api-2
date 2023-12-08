@@ -1,4 +1,7 @@
 <?php
+/**
+ * Väljalogimine. Id-kaardi puhul käiakse korraks ära ka autentimisteenuses
+ */
 // Initialize the session
 session_start();
 $comingFrom = $_SERVER['HTTP_REFERER'];

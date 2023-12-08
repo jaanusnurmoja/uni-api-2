@@ -1,4 +1,16 @@
 <?php
+/**
+ * Sisuhaldussüsteemi tutvustus
+ *
+ * 1) frontend
+ * 2) rest api
+ * @see api
+ * @see https://github.com/darioTecchia/uni-api
+ * 3) halduskeskkond - @see admin
+ * 4) kasutajate autentimine ainult id-kaardi või sotsiaalkontodega
+
+ */
+
 session_start();
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
@@ -28,7 +40,11 @@ include_once 'user/Session.php';
 
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
-
+    /**
+     * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+     *
+     * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+     */
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {

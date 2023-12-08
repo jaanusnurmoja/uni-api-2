@@ -2,6 +2,12 @@
 
 use Common\Model\CreatedModified;
 
+/**
+ * Andmeseose täiendavad üksikasjad
+ *
+ * @todo osa üksikasju võiksid tegelikult pärineda Relation relation mudelist
+ *
+ */
 class RelationDetails
 {
 

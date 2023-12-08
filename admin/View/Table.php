@@ -8,6 +8,11 @@ include_once __DIR__ . '/Form/EditTable.php';
  * Table
  *
  * Hallatavate tabelite loetelu ja üksikasjade vaade
+ *
+ *     @var mixed $tableSingleOrList readonly vaates kas loetelu või üksikasjad
+ *     @var mixed $edit
+ *     @var mixed $new
+
  */
 class Table
 {

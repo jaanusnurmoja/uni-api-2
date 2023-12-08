@@ -11,6 +11,9 @@ include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
 include_once __DIR__ . '/../../common/Helper.php';
 
+/**
+ * Andmete / tabelite loomine (create table, insert into)
+ */
 class Create
 {
     protected function cnn()
@@ -38,29 +41,29 @@ class Create
             }
         }
         if (isset($input['data']['fields'])) {
-        foreach ($input['data']['fields'] as $column) {
-            $sqlCreate .= ",
+            foreach ($input['data']['fields'] as $column) {
+                $sqlCreate .= ",
                 `$column[name]` $column[type]";
-            if (empty($column['defOrNull'])) {
-                $sqlCreate .= " NOT NULL";
-            }
-            if (!empty($column['defaultValue'])) {
-                $sqlCreate .= " DEFAULT '$column[defaultValue]'";
-            } else {
-                if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
-                    $sqlCreate .= " DEFAULT NULL";
+                if (empty($column['defOrNull'])) {
+                    $sqlCreate .= " NOT NULL";
+                }
+                if (!empty($column['defaultValue'])) {
+                    $sqlCreate .= " DEFAULT '$column[defaultValue]'";
+                } else {
+                    if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
+                        $sqlCreate .= " DEFAULT NULL";
+                    }
                 }
             }
         }
-        }
         $sqlCreate .= ",
            PRIMARY KEY (`$input[pk]`)";
-           if (!empty($indexes)) {
+        if (!empty($indexes)) {
             $sqlCreate .= ', ' . implode(',
-           ', $indexes); 
-           }
-           
-           $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
+           ', $indexes);
+        }
+
+        $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
         ($sqlCreate);
         try {
             $db->query($sqlCreate);
@@ -100,7 +103,7 @@ class Create
                 $props[] = $creMo->cols;
                 $vals[] = $creMo->vals;
             }
-            
+
             if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsto'])) {
                 foreach ($value as $relationDetails) {
                     $rdCols = [];
@@ -141,7 +144,7 @@ class Create
 
         //$stmt = $db->prepare($sql);
         //$stmt->execute();
-                $db->close();
+        $db->close();
     }
 
     public function addRelation($input, $tableId)
@@ -153,16 +156,17 @@ class Create
         foreach ($input as $lists) {
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
-       }
-            $keyList = implode(',', $lists['rdCols']);
-            $valList = implode(",", $lists['rdVals']);
-            $sql = "INSERT INTO relation_details ($keyList)
+        }
+        $keyList = implode(',', $lists['rdCols']);
+        $valList = implode(",", $lists['rdVals']);
+        $sql = "INSERT INTO relation_details ($keyList)
                         VALUES ($valList);";
-            $db->query($sql);
-         $db->close();
+        $db->query($sql);
+        $db->close();
     }
 
-    public function createdModifiedTmpl($value) {
+    public function createdModifiedTmpl($value)
+    {
         $res = new stdClass;
         foreach ($value as $k => $v) {
             if ($k == 'createdBy') {

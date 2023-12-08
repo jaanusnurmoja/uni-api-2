@@ -5,6 +5,9 @@ include 'Data.php';
 use Common\Model\CreatedModified;
 use Model\Data as DataFields;
 
+/**
+ * Halduskeskkonna peamine mudel
+ */
 class Table
 {
 

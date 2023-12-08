@@ -19,6 +19,9 @@ use \Model\RelationDetails;
 use \Model\Table;
 use \user\model\User;
 
+/**
+ * Andmete lugemine andmebaasitabelitest
+ */
 class Read
 {
     protected function cnn()

@@ -1,5 +1,8 @@
 <?php namespace Admin;
 
+/**
+ * Sisuhaldussüsteemi halduskeskkond
+ */
 //require_once 'Autoload.php';
 
 //use \Controller\Table;
@@ -34,6 +37,13 @@ include_once __DIR__ . '/../user/Session.php';
 
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+/**
+ * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+ *
+ * @return string
+ *
+ * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+ */
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {

@@ -1,17 +1,23 @@
 <?php namespace Common\Model;
 
+/**
+ * Põhilised isikuandmed. Tabelisse persons kantakse automaatselt need, kes sisenevad esmakordselt süsteemi id-kaardiga.
+ *
+ * @todo Laiendusklass detailsemate isikuandmetega, nt sünnikuupäev (isikukoodi põhjal)
+ */
 class Person
 {
     public $id;
     public $firstName;
     public $middleName;
     public $lastName;
+    /**
+     * Riik, vaikimisi Eesti
+     *
+     * @var mixed country
+     */
     public $country = 'EE';
     public $pno;
-    //private $pnoCode;
-    //public $born;
-    //public bool $isAlive = true;
-    //public $deceased = null;
 
     /**
      * Get the value of id
@@ -30,7 +36,6 @@ class Person
 
         return $this;
     }
-
 
     /**
      * Get the value of firstName
@@ -105,34 +110,7 @@ class Person
     }
 
     /**
-     * Get the value of pno
-     */
- 
- /*
-     public function getPnoCode()
-    {
-        return $this->pnoCode;
-    }
-
-    /**
-     * Set the value of pno
-     */
- /*   public function setPnoCode($pnoCode = null): self
-    {
-        if ($pnoCode == null && !empty($this->pno)) {
-            $pnoArr = explode('-', $this->getPno());
-            $pnoCode = $pnoArr[1];
-            $country = str_replace('PNO', '', $pnoArr[0]);
-            if ($this->country != $country) {
-                $this->setCountry($country);
-            }
-        }
-        $this->pnoCode = $pnoCode;
-        return $this;
-    }
-
-    /**
-     * Get the value of pnoFull
+     * Get  the value of pno
      */
     public function getPno()
     {
@@ -140,76 +118,13 @@ class Person
     }
 
     /**
-     * Set the value of pnoFull
+     * Set the value of pno
      */
-    public function setPno($pno=null): self
+    public function setPno($pno = null): self
     {
         $this->pno = $pno;
 
         return $this;
     }
 
-    /**
-     * Get the value of born
-     */
-/*    public function getBorn()
-    {
-        return $this->born;
-    }
-
-    /**
-     * Set the value of born
-     */
- /*   public function setBorn($born): self
-    {
-        $this->born = $born;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of isAlive
-     *
-     * @return bool
-     */
-/*    public function getIsAlive(): bool
-    {
-        return $this->isAlive;
-    }
-
-    /**
-     * Set the value of isAlive
-     *
-     * @param bool $isAlive
-     *
-     * @return self
-     */
-  /*  public function setIsAlive(bool $isAlive = true): self
-    {
-        if ($isAlive === true) {
-            $this->setDeceased(null);
-        }
-        $this->isAlive = $isAlive;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of deceased
-     */
-/*    public function getDeceased()
-    {
-        return $this->deceased;
-    }
-
-    /**
-     * Set the value of deceased
-     */
-/*    public function setDeceased($deceased): self
-    {
-        $this->deceased = $deceased;
-
-        return $this;
-    }
-    */
 }
