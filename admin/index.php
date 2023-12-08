@@ -1,12 +1,15 @@
 <?php namespace Admin;
 
 /**
- * Sisuhaldussüsteemi halduskeskkond
- */
-//require_once 'Autoload.php';
+ * Sisuhaldussüsteemi uniapiplus halduskeskkond
+ * 
+ * @package uniapiplusadmin
+ * 
+ * Ligipääs keskkonnale ainult id kaardiga või sotsiaalkontoga sisselogimisel
+ * 
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
-//use \Controller\Table;
-//include_once __DIR__ .'/Controller/Table.php';
+ */
 
 session_start();
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);

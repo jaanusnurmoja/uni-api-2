@@ -1,6 +1,8 @@
 <?php
 /**
- * Sisuhaldussüsteemi tutvustus
+ * Sisuhaldussüsteemi uniapiplus dokumentatsioon
+ * 
+ * @package uniapiplus
  *
  * 1) frontend
  * 2) rest api
@@ -8,6 +10,8 @@
  * @see https://github.com/darioTecchia/uni-api
  * 3) halduskeskkond - @see admin
  * 4) kasutajate autentimine ainult id-kaardi või sotsiaalkontodega
+ * 
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
  */
 
