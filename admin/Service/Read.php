@@ -1,15 +1,15 @@
 <?php namespace Service;
 
 use mysqli;
-include_once __DIR__.'/../Model/RelationDetails.php';
-include_once __DIR__.'/../Model/Relation.php';
-include_once __DIR__.'/../Model/Table.php';
-include_once __DIR__.'/../Model/Field.php';
-include_once __DIR__.'/../Dto/TableDTO.php';
-include_once __DIR__.'/../Dto/ListDTO.php';
-include_once __DIR__.'/../../common/Model/CreatedModified.php';
+include_once __DIR__ . '/../Model/RelationDetails.php';
+include_once __DIR__ . '/../Model/Relation.php';
+include_once __DIR__ . '/../Model/Table.php';
+include_once __DIR__ . '/../Model/Field.php';
+include_once __DIR__ . '/../Dto/TableDTO.php';
+include_once __DIR__ . '/../Dto/ListDTO.php';
+include_once __DIR__ . '/../../common/Model/CreatedModified.php';
 
-use \common\Model\CreatedModified;
+use \Common\Model\CreatedModified;
 use \Dto\ListDTO;
 use \Dto\TableDTO;
 use \Model\Data;
@@ -25,12 +25,13 @@ class Read
     {
         // require __DIR__ . '/../../api/config.php';
         // return new mysqli($host, $user, $pass, $dbname);
-    	$cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
-		return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+        $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+        return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
 
     }
 
-    protected function getCurrentUser() {
+    protected function getCurrentUser()
+    {
         if (isset($_SESSION['userData'])) {
             return new User($_SESSION['userData']);
         }
@@ -49,13 +50,13 @@ class Read
             $where = ' WHERE' . implode(' AND', $w);
         }
 
-        $query = "SELECT t.id as rowid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when, 
-        f.id as fid, f.name as field, 
-        rd.id as rd_id, rd.role as rd_role, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when, 
+        $query = "SELECT t.id as rowid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
+        f.id as fid, f.name as field,
+        rd.id as rd_id, rd.role as rd_role, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when,
         r.id as rid, r.*,
-        tcu.id as tcu_id, tcu.username as tcu_name, tcu.email as tcu_email, tcu.password as tcu_password, tcu.social as tcu_social, tcu.user_token as tcu_usertoken, tcu.identity_token as tcu_id_token, tcu.role as tcu_role, 
+        tcu.id as tcu_id, tcu.username as tcu_name, tcu.email as tcu_email, tcu.password as tcu_password, tcu.social as tcu_social, tcu.user_token as tcu_usertoken, tcu.identity_token as tcu_id_token, tcu.role as tcu_role,
         rcu.id as rcu_id, rcu.username as rcu_name, rcu.email as rcu_email, rcu.password as rcu_password, rcu.social as rcu_social, rcu.user_token as rcu_usertoken, rcu.identity_token as rcu_id_token, rcu.role as rcu_role
-        
+
         FROM models t
         LEFT JOIN fields f ON f.models_id = t.id
         LEFT JOIN relation_details rd ON rd.models_id = t.id
@@ -68,7 +69,7 @@ class Read
         $rowList = [];
         $rowsDebug = [];
         $single = null;
-        
+
         while ($row = $q->fetch_assoc()) {
             unset($row['id'], $row['role'], $row['created_by'], $row['created_when'], $row['modified_by'], $row['modified_when']);
             $rowsDebug[] = $row;
@@ -85,12 +86,12 @@ class Read
 
                 $relDetailsCreMod = new CreatedModified($row['rd_id'], 'relation_details');
                 $relDetailsCreMod->setCreatedBy($rcUser)
-                ->setCreatedWhen($row['rc_when'])
-                ->setModifiedBy($row['rm_who'])
-                ->setModifiedWhen($row['rm_when']);
+                    ->setCreatedWhen($row['rc_when'])
+                    ->setModifiedBy($row['rm_who'])
+                    ->setModifiedWhen($row['rm_when']);
 
                 $relationDetails->setCreatedModified($relDetailsCreMod)
-                ->setId($row['rd_id'])->setRelation($rel)->setRole($row['rd_role'])->setKeyField($row['key_field'])->setHasMany((bool)$row['hasMany'])->setOtherTable($row['other_table']);
+                    ->setId($row['rd_id'])->setRelation($rel)->setRole($row['rd_role'])->setKeyField($row['key_field'])->setHasMany((bool) $row['hasMany'])->setOtherTable($row['other_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
@@ -122,23 +123,24 @@ class Read
             }
 
             $single = new TableDTO($model);
-            $rowList[$row['rowid']] =$single; 
+            $rowList[$row['rowid']] = $single;
         }
         //print_r($rowsDebug);
-if (!empty($params) && count($rowList) == 1) {
-    return $single;
- } else {
-    return new ListDTO($rowList);
- }
- 
+        if (!empty($params) && count($rowList) == 1) {
+            return $single;
+        } else {
+            return new ListDTO($rowList);
+        }
+
     }
 
-    public function getExistingTables($used = []) {
+    public function getExistingTables($used = [])
+    {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
         $query = "SHOW TABLES";
         $q = $db->query($query);
-        $r=[];
+        $r = [];
         while ($row = $q->fetch_assoc()) {
             $r[] = array_pop($row);
         }
@@ -168,12 +170,13 @@ if (!empty($params) && count($rowList) == 1) {
                 }
             }
         }
-       return $fields;
+        return $fields;
     }
 
- public function getRelations() {
-    $relations = [];
-            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    public function getRelations()
+    {
+        $relations = [];
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
 
         $query = "SELECT * FROM relations";
@@ -189,11 +192,11 @@ if (!empty($params) && count($rowList) == 1) {
             array_push($relations, $rel);
 
         }
-    return $relations;
- }
+        return $relations;
+    }
 
     /**See https: //www.barattalo.it/coding/php-to-get-enum-set-values-from-mysql-field/
- */
+     */
     public function setAndEnumValues($table, $field)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -217,14 +220,25 @@ if (!empty($params) && count($rowList) == 1) {
         return $arOut;
     }
 
-
- public function req($r = [])
+    public function req($r = [])
     {
         $new = [];
-        if (isset($r[1])) $new['type'] = $r[1];
-        if (isset($r[2])) $new['item'] = $r[2];
-        if (isset($r[3])) $new['subtype'] = $r[3];
-        if (isset($r[4])) $new['subitem']= $r[4];
+        if (isset($r[1])) {
+            $new['type'] = $r[1];
+        }
+
+        if (isset($r[2])) {
+            $new['item'] = $r[2];
+        }
+
+        if (isset($r[3])) {
+            $new['subtype'] = $r[3];
+        }
+
+        if (isset($r[4])) {
+            $new['subitem'] = $r[4];
+        }
+
         $new['debug'] = 'ohoohhooi';
         return $new;
     }

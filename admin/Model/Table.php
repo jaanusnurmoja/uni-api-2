@@ -1,7 +1,8 @@
 <?php namespace Model;
+
 include 'Data.php';
 
-use common\Model\CreatedModified;
+use Common\Model\CreatedModified;
 use Model\Data as DataFields;
 
 class Table
@@ -17,7 +18,7 @@ class Table
     public function __construct($id = null)
     {
         if ($id == $this->id || $id == 0) {
-            if ( $id == 0 && empty($this->data)) {
+            if ($id == 0 && empty($this->data)) {
                 $this->data = new DataFields();
             }
             if (empty($this->createdModified)) {
@@ -101,20 +102,23 @@ class Table
     }
 
     /**
-    * @return array
-    */
-    public function getRelationDetails(): array {
-    	return $this->relationDetails;
+     * @return array
+     */
+    public function getRelationDetails(): array
+    {
+        return $this->relationDetails;
     }
 
     /**
-    * @param array $relationDetails
-    */
-    public function setRelationDetails(array $relationDetails): void {
-    	$this->relationDetails = $relationDetails;
+     * @param array $relationDetails
+     */
+    public function setRelationDetails(array $relationDetails): void
+    {
+        $this->relationDetails = $relationDetails;
     }
 
-    public function addRelationDetails(RelationDetails $relationDetails) {
+    public function addRelationDetails(RelationDetails $relationDetails)
+    {
         array_push($this->relationDetails, $relationDetails);
     }
 

@@ -1,6 +1,7 @@
 <?php namespace user\model;
-include_once __DIR__.'/../../common/Helper.php';
-include_once __DIR__.'/../../common/Model/Person.php';
+
+include_once __DIR__ . '/../../common/Helper.php';
+include_once __DIR__ . '/../../common/Model/Person.php';
 use \Common\Helper;
 use \Common\Model\Person;
 
@@ -15,12 +16,16 @@ class User
     private $userToken;
     private $identityToken;
     public $role = 'USER';
-    public \common\Model\Person $person;
+    public \Common\Model\Person $person;
 
-    public function __construct($userData = []) {
+    public function __construct($userData = [])
+    {
         if (!empty($userData)) {
             foreach ($userData as $key => $value) {
-                if ($key == 'ID') $key = 'id';
+                if ($key == 'ID') {
+                    $key = 'id';
+                }
+
                 $key = Helper::camelize($key, true);
                 if (property_exists($this, $key)) {
                     $this->$key = $value;
@@ -172,14 +177,12 @@ class User
         return $this;
     }
 
-    
-
 /**
-     * Get the value of person
-     *
-     * @return \Person
-     */
-     public function getPerson(): \Common\Model\Person
+ * Get the value of person
+ *
+ * @return \Person
+ */
+    public function getPerson(): \Common\Model\Person
     {
         return $this->person;
     }
@@ -191,7 +194,7 @@ class User
      *
      * @return self
      */
-    
+
     public function setPerson(\Common\Model\Person $person): self
     {
         $this->person = $person;
@@ -199,4 +202,4 @@ class User
         return $this;
     }
 
- }
+}

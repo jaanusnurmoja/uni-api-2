@@ -1,4 +1,4 @@
-<?php namespace common\Model;
+<?php namespace Common\Model;
 use \user\model\User;
 
 class CreatedModified {
