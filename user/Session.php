@@ -2,9 +2,9 @@
 
 include_once __DIR__ . '/model/Users.php';
 
-use Common\Helper;
-use Common\Model\Person;
-use user\model\User;
+use \Common\Helper;
+use \Common\Model\Person;
+use \user\model\User;
 use \user\model\Users;
 include_once __DIR__ . '/Service/Db.php';
 use \user\Service\Db;
