@@ -2,9 +2,9 @@
 
 /**
  * @package uniapiplusadmin
- * 
+ *
  * Sisuhaldussüsteemi uniapiplus halduskeskkond
- * 
+ *
  * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
  */
@@ -36,6 +36,13 @@ if (!empty($_SERVER['QUERY_STRING'])) {
 
 include_once __DIR__ . '/../user/Session.php';
 
+if (file_exists(__DIR__ . '/../config/testuser.ini')) {
+    $testUser = parse_ini_file(__DIR__ . '/../config/testuser.ini', true);
+    $_SESSION['idCardData'] = $testUser['idCardData'];
+    $_SESSION['currentPerson'] = $testUser['currentPerson']['currentPerson'];
+
+}
+
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
 /**
@@ -47,6 +54,7 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
  */
     function loggedIn()
     {
+        $sId = '';
         if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
             if (isset($u->person->id)) {
