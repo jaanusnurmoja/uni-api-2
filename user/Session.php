@@ -102,7 +102,7 @@ class Session
              */
             $this->setConfirmedUser();
         } else {
-            echo '<p>Seda kasutajat vist veel ei ole, järelikult tuleb luua</p>';
+            //echo '<p>Seda kasutajat vist veel ei ole, järelikult tuleb luua</p>';
             /**
              * Kasutajat pole, läheb loomisele
              */
@@ -118,18 +118,18 @@ class Session
     public function setConfirmedUser($user = null)
     {
         $this->setIsUser(true);
-        if (empty($this->users->list[0]->person->id)) {
-            if (isset($this->userData->person) && ($this->users->list[0]->social == 'eID')) {
-                echo '<p>Näiteks kui miskipärast pole id kaardi omanikul isikukirjet küljes</p>';
-                $this->users->list[0]->setPerson($this->userData->person);
-                $this->checkPersonAndAddIfMissing($this->users->list[0], $this->userData->person);
+        if (empty($user)) {
+            $user = $this->users->list[0];
+        }
+        if (empty($user->person->id)) {
+            if (isset($this->userData->person) && ($user->social == 'eID')) {
+                echo '<p>Miskipärast pole id kaardi omanikul isikukirjet konto küljes</p>';
+                $user->setPerson($this->userData->person);
+                $this->checkPersonAndAddIfMissing($user, $this->userData->person);
             }
         }
 
         //print_r($this->users->list[0]);
-        if (!isset($user)) {
-            $user = $this->users->list[0];
-        }
         $this->userData = $user;
         if ($this->userData->role == 'ADMIN') {
             $this->setIsAdmin(true);
@@ -142,27 +142,23 @@ class Session
     }
 /**
  * Lisa uus kasutaja, kui sisselogija pole kasutaja
- * 
- * @todo BUG: ID-kaardi omaniku kasutajaks registreerimine jääb siin seisma. Soovimatu funktsionaalsus - jätkamiseks tuleb leht uuesti laadida. Dialog element on ajutine lahendus kuni probleemi lahenemiseni.
- * 
  */
     public function addNewIfNotUser()
     {
-        echo '<dialog open><h1>Hea ' . $this->userData->person->firstName . ', hakkame lisama teie kasutajakontot ja isikuprofiili. <a href="">Jätka</a></h1></dialog>';
-        echo str_replace(['"', '{', '}', '[', ']'], '', json_encode($this->userData));
+        //echo '<dialog open><h1>Hea ' . $this->userData->person->firstName . ', hakkame lisama teie kasutajakontot ja isikuprofiili. <a href="">Jätka</a></h1></dialog>';
+        //echo str_replace(['"', '{', '}', '[', ']'], '', json_encode($this->userData));
         $db = new Db();
         /**
          * Pöördumine kasutaja sisestamise päringuga funktsiooni poole.
-         * Kui kasutaja lisamine toimus, PEAKS $addUser->lastId olema äsja lisatud kasutaja id
+         * Kui kasutaja lisamine toimus, peab $addUser->lastId olema äsja lisatud kasutaja id
          * ning pärast kasutaja andmete värskendamist suunatama tegevus funktsiooni setConfirmedUser()
-         * AGA praegu sunnitakse kasutajat lehte uuesti laadima ning siis toimub kasutaja olemasolu kontroll otsast peale,
-         * alates funktsioonist setUserData(), kus kasutaja olemasolu saab kinnitust ning ta viiakse edasi funktsiooni setConfirmedUser()
+         * Nüüd PEAKS olema lahendatud probleem, kus kasutaja oli sunnitud lehte uuesti laadima, et registreerumine saaks lõpule viidud. 
          */
         $addUser = $db->addNewUser($this->userData);
-        if ($addUser->sql) {
-            $this->users->list[0] = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
-            echo '<p>Lisasime teid uue kasutajana ja asume nüüd seda kinnitama</p>';
-            $this->setConfirmedUser();
+        if ($addUser->lastId) {
+            $addedUser = $db->getAllUsersOrFindByProps(['u.id' => $addUser->lastId]);
+            //echo '<p>Lisasime teid uue kasutajana ja asume nüüd seda kinnitama</p>';
+            $this->setConfirmedUser($addedUser);
         } else {
             echo '<p>Kahjuks jäi uus kasutaja lisamata, aga ei tea, miks</p>';
         }
@@ -178,6 +174,7 @@ class Session
     {
         $db = new Db();
         $checkPerson = $db->findPerson(['PNO' => $person->pno]);
+        //print_r($checkPerson);
         if (!$checkPerson) {
             echo '<div class="bg-success">Kuna olete sisenenud ID-kaardiga, siis on teie andmed nüüd talletatud ka isikuprofiilide loetellu. Kui mitte juba praegu, siis tulevikus annab kasutajakonto sidumine tuvasatatud isiku profiiliga eeliseid süsteemi kasutamisel.</div>';
             $db->addPerson($person, $user);

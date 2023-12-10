@@ -44,7 +44,7 @@ class Db
             foreach ($props as $name => $value) {
                 $ws[] = " $name = '$value'";
             }
-            $singleRow = in_array('id', array_keys($props));
+            $singleRow = in_array('u.id', array_keys($props));
             $where = " WHERE" . implode(" AND ", $ws);
         }
         $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u
@@ -112,10 +112,14 @@ class Db
         $sql .= "INSERT INTO users ($cols) values ($vals);";
         $sql .= "SELECT last_insert_id() as lastId;";
         $r = new stdClass;
-        $r->sql = $cnn->multi_query($sql);
-        $res = $cnn->store_result();
-        $row = $res->fetch_object();
-        $r->lastId = $row->lastId;
+        $cnn->multi_query($sql);
+        while($cnn->next_result()){
+            $res = $cnn->store_result();
+            if (is_object($res)){
+                $row = $res->fetch_object();
+                $r->lastId = $row->lastId;
+            }
+        }
         return $r;
     }
 
