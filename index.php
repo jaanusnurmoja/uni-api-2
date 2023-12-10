@@ -1,4 +1,21 @@
 <?php
+/**
+ * @package uniapiplus
+ *
+ * @see api
+ * @see https://github.com/darioTecchia/uni-api
+ * 1) frontend
+ *
+ * 2) rest api
+ *
+ * 3) halduskeskkond - @see admin
+ *
+ * 4) kasutajate autentimine ainult id-kaardi või sotsiaalkontodega
+ *
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
+
+ */
+
 session_start();
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
@@ -9,31 +26,40 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $siteBase = str_replace(['/admin', $path, '/index.php'], '', $_SERVER['PHP_SELF']);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF']);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
 $_SESSION['urlComingFrom'] = $uri;
 $socialIni = parse_ini_file('config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
+$_SESSION['idCardAuthService'] = $idCardAuthService;
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 include_once 'user/Session.php';
 
-if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+    /**
+     * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+     *
+     * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+     */
     function loggedIn()
     {
-        if (isset($_SESSION['loggedIn']))
-        {
+        if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
-            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+            $sId = '';
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
+
         }
     }
 }
@@ -89,28 +115,25 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     <a class="navbar-brand" href="/uni-api">Avaleht</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
                         onclick="window.location.href='user/logout'"><?=loggedIn()?> | LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
-                        ID CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Eesti
+                        ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
-                            style="max-height:16px"><span
-                            style="vertical-align:top; padding-left:2px">OTHER</span></button>
+                            style="max-height:16px"><span style="vertical-align:top; padding-left:2px">MUUL VIISIL |
+                            OTHER</span></button>
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', 'google', 'facebook', 'twitter', 'github',
-                    'linkedin', 'windowslive', 'openid'
+                    _oneall.push(['social_login', 'set_providers', [
+                        'google', 'facebook', 'twitter', 'windowslive', 'openid', 'github'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'
@@ -120,6 +143,9 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     </script>
                 </li>
                 <?php }?>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="/uni-api/docs/php">Hetkeseisu dokumentatsioon</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="/uni-api/admin">Admin</a>
 
@@ -180,6 +206,10 @@ foreach (json_decode($rel) as $table => $params) {
                         ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
                         isikuprofiili ning seostada sellega kõik oma kasutajakontod.
                     </p>
+                    <p> &#xF33B; Esmasel sisselogimisel ID kaardiga tuleb pärast
+                        autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse registreerumise
+                        peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili kirje. Igatahes
+                        on see "jätka" ajutine lahendus.</p>
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
                         või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.

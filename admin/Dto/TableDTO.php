@@ -2,6 +2,9 @@
 
 use \Model\Table;
 
+/**
+ * Põhimudeli töötleja, sh on seosed teiste tabelitega jaotatud vastavalt tüübile
+ */
 class TableDTO
 {
     public $id;
@@ -96,7 +99,7 @@ class TableDTO
         return $this->data;
     }
 
-        /**
+    /**
      * Get the value of createdModified
      */
     public function getCreatedModified()

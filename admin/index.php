@@ -1,9 +1,13 @@
 <?php namespace Admin;
 
-//require_once 'Autoload.php';
+/**
+ * @package uniapiplusadmin
+ * 
+ * Sisuhaldussüsteemi uniapiplus halduskeskkond
+ * 
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
-//use \Controller\Table;
-//include_once __DIR__ .'/Controller/Table.php';
+ */
 
 session_start();
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
@@ -34,11 +38,21 @@ include_once __DIR__ . '/../user/Session.php';
 
 if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+/**
+ * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+ *
+ * @return string
+ *
+ * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+ */
     function loggedIn()
     {
         if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
-            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
         }
     }
 }
@@ -46,6 +60,7 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
+$_SESSION['idCardAuthService'] = $idCardAuthService;
 $cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($currentFullUrl) : '';
 
 $api = isset($_GET['api']) ? true : false;
@@ -128,8 +143,8 @@ if (loggedIn()) {?>
                     _oneall.push(['social_login', 'set_callback_uri',
                         '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['google', 'facebook', 'twitter', 'github',
-                        'linkedin', 'windowslive', 'openid'
+                    _oneall.push(['social_login', 'set_providers', [
+                        'google', 'facebook', 'twitter', 'windowslive', 'openid', 'github'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'
@@ -139,6 +154,9 @@ if (loggedIn()) {?>
                     </script>
                 </li>
                 <?php }?>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="/uni-api/docs/php">Hetkeseisu dokumentatsioon</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="<?=$siteBaseUrl?>">Sait</a>
 
@@ -206,30 +224,37 @@ if (loggedIn()) {
                             või valides mõne alljärgnevatest sotsiaalkontodest:
                             <ul>
                                 <li>
-                                    GITHUB - seal peaks igal arendajal konto olema :)
+                                    Google (kommentaare ei vaja)
                                 </li>
                                 <li>
-                                    Google (kommentaare ei vaja)
+                                    Facebook (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Twitter (kommentaare ei vaja)
                                 </li>
                                 <li>
                                     Microsoft - võib arvata, et sealgi on konto igaühel, kes pole just Windowsi vihkaja
                                 </li>
                                 <li>
-                                    LinkedIn - tõenäoliselt on kõigil IT sektori inimestel sealgi konto olemas
+                                    GITHUB - seal peaks igal arendajal konto olema :)
                                 </li>
                                 <li>
                                     OpenID: mh on see alternatiivne viis ID-kaardiga sisselogimiseks, autentides
                                     vastu openid.ee serverit. Avanevasse vormilahtrisse tuleb kirjutada
                                     openid.ee, sellest piisab.
                                 </li>
-                                <li>
-                                    Twitter
-                                </li>
                                 <li class="bg-warning">
-                                    Kahjuks puuduvad nende võimaluste hulgast Facebook, Instagram jt. Kui vähegi
+                                    Kahjuks puuduvad nende võimaluste hulgast Linkedin, Instagram jt. Kui vähegi
                                     võimalik, siis tekivad needki. Olgu veel öeldud, et olemasolev nn sotsiaalne
                                     sisselogimine toimub tegelikult üheainsa teenuse vahendusel (OneAll).
                                 </li>
+                                <li><i class="bi bi-exclamation-triangle"></i> Esmasel sisselogimisel ID kaardiga tuleb
+                                    pärast
+                                    autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse
+                                    registreerumise
+                                    peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili
+                                    kirje. Igatahes
+                                    on see "jätka" ajutine lahendus.</li>
                             </ul>
                         </li>
                     </ol>
