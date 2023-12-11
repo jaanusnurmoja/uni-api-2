@@ -1,4 +1,5 @@
 <?php namespace Model;
+include_once 'Reuse/CreatedModifiedWhoWhen.php';
 class Data
 {
     public $table;
