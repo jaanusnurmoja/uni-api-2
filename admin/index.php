@@ -1,4 +1,4 @@
-<?php 
+<?php namespace Admin;
 
 /**
  * @package uniapiplusadmin
@@ -10,8 +10,6 @@
  */
 
 session_start();
-require_once __DIR__.'/Autoload.php';
-require_once __DIR__.'/../Autoload.php';
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';

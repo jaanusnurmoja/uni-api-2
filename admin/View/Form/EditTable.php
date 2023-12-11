@@ -52,7 +52,7 @@ class EditTable
         }
         ?>
 <h1>
-    <?php echo $data->tableName ?>
+    <?php echo $data->name ?>
 </h1>
 <p>
     Seisuga 29.11.2023 on autori fookuses sisuhaldusse kaasatavate tabelite ja nende juurde kuuluva haldamine (st
