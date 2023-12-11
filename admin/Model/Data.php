@@ -1,5 +1,5 @@
 <?php namespace Model;
-
+include_once __DIR__.'/../../common/Reuse/CreatedModifiedWhoWhen.php';
 class Data
 {
     public $table;
