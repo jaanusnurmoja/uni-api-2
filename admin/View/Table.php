@@ -54,7 +54,14 @@ foreach ($field as $k => $v) {
 </tr>
 <?php
 }
-                }
+/* 
+$dataWithStandard = get_object_vars($this->tableSingleOrList->data);
+foreach ($dataWithStandard as $stdKey => $stdValue) {
+    if (!is_iterable($stdValue)) {
+        echo "<p>$stdKey</p>";
+    }
+}
+ */                }
 
                 if ($key == 'createdModified') {
                     echo "<tr><td colspan='2' class='h4'>$key</td></tr>";
