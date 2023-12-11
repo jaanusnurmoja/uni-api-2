@@ -16,7 +16,10 @@
 
  */
 
+use \Model\Data;
+
 session_start();
+require_once './admin/Autoload.php';
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];
@@ -180,6 +183,31 @@ foreach (json_decode($rel) as $table => $params) {
                         <td><a href="api/events/1/beers">/api/events/1/beers</a></td>
                     </tr>
                 </table>
+                <p>Siin nähtavad nimeruumid</p>
+                <?php 
+                $namespaces = array();
+                foreach (get_declared_classes() as $name) {
+                    if (preg_match_all("@[^\\\]+(?=\\\)@iU", $name, $matches)) {
+                        $matches = $matches[0];
+                        $parent = &$namespaces;
+                        while (count($matches)) {
+                            $match = array_shift($matches);
+                            if (!isset($parent[$match]) && count($matches)) {
+                                $parent[$match] = array();
+                            }
+
+                            $parent = &$parent[$match];
+
+                        }
+                    }
+                }
+                echo '<pre>';
+                print_r($namespaces);
+                echo '</pre>';
+                $data = new Data;
+                print_r(get_object_vars($data));
+
+                ?>
             </div>
             <div class="col-md">
                 <p>Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes

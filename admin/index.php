@@ -1,4 +1,4 @@
-<?php namespace Admin;
+<?php 
 
 /**
  * @package uniapiplusadmin
