@@ -1,10 +1,9 @@
 <?php namespace Model;
-include_once __DIR__.'/../../common/Reuse/CreatedModifiedWhoWhen.php';
 class Data
 {
     public $table;
     public $fields = [];
-use \Common\Reuse\CreatedModifiedWhoWhen;
+    use Reuse\CreatedModifiedWhoWhen;
 
     /**
      * Get the value of table
