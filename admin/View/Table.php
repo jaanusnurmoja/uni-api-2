@@ -1,5 +1,6 @@
 <?php namespace View;
 
+use Common\Model\CreatedModified;
 use View\Form\EditTable;
 
 include_once __DIR__ . '/Form/EditTable.php';
@@ -54,6 +55,22 @@ foreach ($field as $k => $v) {
 </tr>
 <?php
 }
+?>
+<tr>
+    <td colspan="2">
+        <h2>Kes ja millal lisas või muutis</h2>
+    </td>
+</tr>
+
+<?php
+ $cmf= new CreatedModified();
+ $cmf->setTableId($this->tableSingleOrList->id);
+ $cmf->setTableName($this->tableSingleOrList->tableName);
+$this->tableSingleOrList->data->createdModified = $cmf;
+foreach ($this->tableSingleOrList->data->createdModified as $cmKey => $cmValue ) {
+    echo "<tr><td>$cmKey</td><td>$cmValue</td></tr>";
+}
+
                 }
 
                 if ($key == 'createdModified') {
