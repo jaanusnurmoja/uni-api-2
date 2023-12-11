@@ -19,7 +19,8 @@
 use \Model\Data;
 
 session_start();
-require_once './admin/Autoload.php';
+require_once __DIR__.'/Autoload.php';
+require_once __DIR__.'/admin/Autoload.php';
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];

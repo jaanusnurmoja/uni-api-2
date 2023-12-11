@@ -10,6 +10,7 @@
  */
 
 session_start();
+require_once __DIR__.'/Autoload.php';
 require_once __DIR__.'/../Autoload.php';
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
 

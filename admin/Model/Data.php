@@ -4,7 +4,7 @@ class Data
 {
     public $table;
     public $fields = [];
-use \Common\Trait\CreatedModifiedWhoWhen;
+use \Common\Reuse\CreatedModifiedWhoWhen;
 
     /**
      * Get the value of table
