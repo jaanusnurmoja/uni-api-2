@@ -201,7 +201,9 @@ foreach (json_decode($rel) as $table => $params) {
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
                         pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
-                        automaatselt ka saidi kasutajaks, kui ta seda juba ei ole. Traditsioonilist
+                        automaatselt ka saidi kasutajaks, kui ta seda juba ei ole. <span class="bg-warning">ID-kaardiga
+                            sisseloginu kohta moodustatakse lisaks isikuprofiil, millega saab see kasutaja hiljem
+                            seostada ka kõik oma teised kontod. </span>Traditsioonilist
                         "kasutajanimi:parool" tüüpi sisselogimist ning vormi kaudu kasutajaks registreerumist ma hetkel
                         ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
                         isikuprofiili ning seostada sellega kõik oma kasutajakontod.
