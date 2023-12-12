@@ -94,7 +94,6 @@ class Create
         }
 
         $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
-        ($sqlCreate);
         try {
             $db->query($sqlCreate);
             echo "<span class='bg-success'>Uus tabel " . $input['tableName'] . " on loodud!</span>";
@@ -134,7 +133,7 @@ class Create
                 $vals[] = $creMo->vals;
             }
 
-            if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsto'])) {
+            if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
                 foreach ($value as $relationDetails) {
                     $rdCols = [];
                     $rdVals = [];
@@ -151,9 +150,8 @@ class Create
 
                         }
                     }
-                    $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
-                    //$this->addRelation(current($input), $db->insert_id);
                 }
+                $dataForRdSql[$key][$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
             }
         }
         $propsList = implode(", ", $props);
@@ -164,15 +162,10 @@ class Create
         $db->query($sql);
 
         if (!empty($db->insert_id) && !empty($dataForRdSql)) {
-            $this->addRelation($dataForRdSql, $db->insert_id);
+            foreach ($dataForRdSql as $relGroup => $rdDetailsList) {
+                $this->addRelation($rdDetailsList, $db->insert_id);
+            }
         }
-        //$read = new Read();
-        //$newTable = $read->getTables(null,['t.id' => $db->insert_id]);
-
-        // ($db->insert_id);
-
-        //$stmt = $db->prepare($sql);
-        //$stmt->execute();
         $db->close();
     }
 
@@ -185,12 +178,12 @@ class Create
         foreach ($input as $lists) {
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
+            $keyList = implode(',', $lists['rdCols']);
+            $valList = implode(",", $lists['rdVals']);
+            $sql = "INSERT INTO relation_details ($keyList)
+                            VALUES ($valList);";
+            $db->query($sql);
         }
-        $keyList = implode(',', $lists['rdCols']);
-        $valList = implode(",", $lists['rdVals']);
-        $sql = "INSERT INTO relation_details ($keyList)
-                        VALUES ($valList);";
-        $db->query($sql);
         $db->close();
     }
 
