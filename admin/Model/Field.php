@@ -13,7 +13,9 @@ class Field
     public function __construct($name = null, $type = null)
     {
         $this->name = $name;
-        $this->type = $type;
+        if (!empty($type)) {
+            $this->type = $type;
+        }
 
         if (in_array($name, ['createdBy', 'createdWhen', 'modifiedBy', 'modifiedWhen'])) {
             $this->defOrNull = in_array($name, ['modifiedBy', 'modifiedWhen']) ? true : false;
