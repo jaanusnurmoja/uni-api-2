@@ -1,5 +1,7 @@
 <?php namespace View\Form;
 
+use Common\Model\DataCreatedModified;
+
 /**
  * NewTable - uue tabeli lisamise vorm
  */
@@ -123,6 +125,9 @@ foreach ($this->unused as $t) {
                                 $checked = $v0 ? ' checked="checked"' : '';
                                 echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
                             } else {
+if (is_iterable($v0)) {
+    $v0 = json_encode($v0);
+}
                                 echo " type='text' value='$v0' />";
                             }
                         }
@@ -155,6 +160,7 @@ $data->data->fields[] = new \Model\Field();
                                         $checked = $v ? ' checked="checked"' : '';
                                         echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
                                     } else {
+                                        if (is_iterable($v)) $v = json_encode($v);
                                         echo " type='text' value='$v' />";
                                     }
                                 }
@@ -166,7 +172,62 @@ $data->data->fields[] = new \Model\Field();
             <?php
 }
                         ?>
+
         </tbody>
+    </table>
+    <table class="table table-warning table-striped table-sm wrapper">
+        <?php
+
+$data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
+
+        <tr>
+            <td colspan="2">Lisamine ja muutmine (andmetabelid)</td>
+        </tr>
+        <?php
+foreach ($data->data->dataCreatedModified as $cmKey => $cmField) {
+    if (is_object($cmField)) {
+        ?>
+        <tr class="trow">
+            <td>
+                <?=$cmKey?>
+            </td>
+            <td colspan="2">
+                <fieldset>
+                    <?php
+foreach ($cmField as $cmk => $cmv) {
+            $elName = "table[data][dataCreatedModified][$cmKey][$cmk]";
+            $elId = "table.data.dataCreatedModified.$cmKey.$cmk";
+            if ($cmk == 'id') {
+                echo "<input type='hidden' name='$elName' id='$elId' value='$cmv' disabled /> ";
+            } else {
+                echo "<label for='$elId' class='row col-10 mt-1'>
+                                                            <div class='col col-2'>$cmk</div>
+                                                            <input class='form-switch col-1' type='checkbox' onclick=this.nextElementSibling.toggleAttribute('disabled')>
+                                                            <input class='col col-6'name='$elName' id='$elId' disabled";
+                if (is_bool($cmv)) {
+                    $checked = $cmv ? ' checked="checked"' : '';
+                    echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                } else {
+                    if (is_iterable($cmv)) {
+                        $cmv = json_encode($cmv);
+                    }
+
+                    echo " type='text' value='$cmv' />";
+                }
+                echo '</label>';
+            }
+        }
+
+        ?>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+}
+
+}
+?>
+
     </table>
     <?php
 } else {

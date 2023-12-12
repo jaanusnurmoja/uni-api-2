@@ -1,9 +1,11 @@
 <?php namespace View;
 
 use Common\Model\CreatedModified;
+use Common\Model\DataCreatedModified;
 use View\Form\EditTable;
 
 include_once __DIR__ . '/Form/EditTable.php';
+include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
 
 /**
  * Table
@@ -49,6 +51,10 @@ class Table
         <ul>
             <?php
 foreach ($field as $k => $v) {
+
+    if (is_iterable($v)) {
+        $v = json_encode($v);
+    }
                         echo "<li>$k: $v</li>";
                     }?></ul>
     </td>
@@ -63,13 +69,12 @@ foreach ($field as $k => $v) {
 </tr>
 
 <?php
- $cmf= new CreatedModified();
- $cmf->setTableId($this->tableSingleOrList->id);
- $cmf->setTableName($this->tableSingleOrList->tableName);
-$this->tableSingleOrList->data->createdModified = $cmf;
-foreach ($this->tableSingleOrList->data->createdModified as $cmKey => $cmValue ) {
-    echo "<tr><td>$cmKey</td><td>$cmValue</td></tr>";
-}
+ //$cmf= new CreatedModified();
+ $cmf = new DataCreatedModified();
+ $this->tableSingleOrList->data->dataCreatedModified = $cmf;
+foreach ($cmf as $cmKey => $cmValue) {
+    echo "<tr><td>$cmKey</td><td>".json_encode($cmValue)."</td></tr>";
+ }
 
                 }
 

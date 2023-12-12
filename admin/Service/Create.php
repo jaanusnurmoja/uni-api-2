@@ -56,6 +56,11 @@ class Create
                 }
             }
         }
+        /*
+        if (isset($input['data']['dataCreatedModified'])) {
+            
+        }
+        */
         $sqlCreate .= ",
            PRIMARY KEY (`$input[pk]`)";
         if (!empty($indexes)) {
