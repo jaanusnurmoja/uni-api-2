@@ -1,11 +1,10 @@
 <?php namespace Controller;
 
-include_once __DIR__.'/../Service/Read.php';
-include_once __DIR__.'/../Service/Create.php';
-include_once __DIR__.'/../View/Table.php';
-include_once __DIR__.'/../View/Form/NewTable.php';
+include_once __DIR__ . '/../Service/Read.php';
+include_once __DIR__ . '/../Service/Create.php';
+include_once __DIR__ . '/../View/Table.php';
+include_once __DIR__ . '/../View/Form/NewTable.php';
 use \Dto\ListDTO;
-use \Dto\TableDTO;
 use \Service\Create;
 use \Service\Read;
 use \View\Form\NewTable;
@@ -29,14 +28,15 @@ class Table
         }
     }
 
-    public function getUnusedTables() {
+    public function getUnusedTables()
+    {
         $read = new Read;
         $dataForUsed = $this->getTables(true);
         $used = [];
-        foreach($dataForUsed as $i => $d) {
+        foreach ($dataForUsed as $i => $d) {
             $used[] = $d->tableName;
         }
-        
+
         return $read->getExistingTables($used);
     }
 
@@ -45,33 +45,34 @@ class Table
         global $request;
         $read = new Read;
         if ($request[2] != 'new') {
-        $key = is_numeric($request[2]) ? 'rowid' : 'table_name';
-        // $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
-        ([$key => $request[2]]);
-        $table = $read->getTables(null, [$key => $request[2]]);
-        $tableDetails = new TableListOrDetails($table);
-        if ($api === true) {
-            return $table;
-        } else {
-            if (isset($request[3]) && $request[3] == 'edit') {
-                $tableDetails->edit->editTableForm();
+            $key = is_numeric($request[2]) ? 't.id' : 't.table_name';
+            // $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
+            ([$key => $request[2]]);
+            $table = $read->getTables(null, [$key => $request[2]]);
+            $tableDetails = new TableListOrDetails($table);
+            if ($api === true) {
+                return $table;
+            } else {
+                if (isset($request[3]) && $request[3] == 'edit') {
+                    $tableDetails->edit->editTableForm();
+                } else {
+                    $tableDetails->tableDetails();
+                }
             }
-            else {
-                $tableDetails->tableDetails();
-            }
-        }
-            
+
         }
     }
 
-    public function newTable(){
+    public function newTable()
+    {
         $t = new \Model\Table();
         $t->setId(0);
-            $newTable = new NewTable($t);
-            $newTable->newTableForm();
+        $newTable = new NewTable($t);
+        $newTable->newTableForm();
     }
 
-    public function addTable($input, $existingToList = false){
+    public function addTable($input, $existingToList = false)
+    {
 
         $create = new Create();
         foreach ($input as $k => $v) {
@@ -102,16 +103,18 @@ class Table
         }
     }
 
-    public function getPk($tableName) {
+    public function getPk($tableName)
+    {
         $read = new Read();
         return $read->getDefaultFields($tableName)['pk'];
     }
-    
-    public function getRelationsList(ListDTO $listDTO) {
+
+    public function getRelationsList(ListDTO $listDTO)
+    {
         $read = new Read();
         $listDTO->__construct($read->getRelations());
     }
-    
+
     public function pathParams()
     {
         global $request;
