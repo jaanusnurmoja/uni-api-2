@@ -94,6 +94,7 @@ class Create
         }
 
         $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
+        print_r($sqlCreate);
         try {
             $db->query($sqlCreate);
             echo "<span class='bg-success'>Uus tabel " . $input['tableName'] . " on loodud!</span>";
