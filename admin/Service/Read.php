@@ -168,7 +168,7 @@ class Read
                 $fields['dataCreatedModified'] = new DataCreatedModified();
                 if (in_array($row['Field'], ['created_by', 'created_when', 'modified_by', 'modified_when'])) {
                     $setField = 'set' . Helper::camelize($row['Field']);
-                    $fields['dataCreatedModified']->$setField($fieldName, $row['Type']);
+                    $fields['dataCreatedModified']->$setField($field);
                 } else {
                     $field->setDefOrNull($row['Null'] == 'YES' ? true : false);
                     $field->setDefaultValue($row['Default']);
