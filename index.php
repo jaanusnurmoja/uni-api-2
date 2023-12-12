@@ -205,8 +205,7 @@ foreach (json_decode($rel) as $table => $params) {
                             sisseloginu kohta moodustatakse lisaks isikuprofiil, millega saab see kasutaja hiljem
                             seostada ka kõik oma teised kontod. </span>Traditsioonilist
                         "kasutajanimi:parool" tüüpi sisselogimist ning vormi kaudu kasutajaks registreerumist ma hetkel
-                        ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
-                        isikuprofiili ning seostada sellega kõik oma kasutajakontod.
+                        ei plaani.
                     </p>
                     <p> &#xF33B; Lahenduse sai hiljaaegu probleem, kus esmasel sisselogimisel ID kaardiga tuli pärast
                         autentimist veel ühele "Jätka" lingile klikata, sest kasutaja moodustamise protsess seiskus. See
