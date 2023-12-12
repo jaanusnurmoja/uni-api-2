@@ -1,5 +1,6 @@
 <?php namespace Service;
 
+use Common\Helper;
 use mysqli;
 use stdClass;
 
@@ -42,13 +43,17 @@ class Create
         }
         if (isset($input['data']['fields'])) {
             foreach ($input['data']['fields'] as $column) {
+                $column['name'] = Helper::uncamelize($column['name']);
                 $sqlCreate .= ",
                 `$column[name]` $column[type]";
                 if (empty($column['defOrNull'])) {
                     $sqlCreate .= " NOT NULL";
                 }
                 if (!empty($column['defaultValue'])) {
-                    $sqlCreate .= " DEFAULT '$column[defaultValue]'";
+                    if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
+                        $column['defaultValue'] = "'$column[defaultValue]'";
+                    }
+                    $sqlCreate .= " DEFAULT $column[defaultValue]";
                 } else {
                     if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
                         $sqlCreate .= " DEFAULT NULL";
@@ -61,15 +66,20 @@ class Create
          */
         if (isset($input['data']['dataCreatedModified'])) {
             foreach ($input['data']['dataCreatedModified'] as $cmColumn) {
+                $cmColumn['name'] = Helper::uncamelize($cmColumn['name']);
                 $sqlCreate .= ",
                 `$cmColumn[name]` $cmColumn[type]";
                 if (empty($cmColumn['defOrNull'])) {
-                    $sqlCreate .= " NOT NULL";
+                    $sqlCreate .= " NOT";
                 }
+                $sqlCreate .= " NULL";
                 if (!empty($cmColumn['defaultValue'])) {
-                    $sqlCreate .= " DEFAULT '$cmColumn[defaultValue]'";
+                    if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
+                        $column['defaultValue'] = "'$column[defaultValue]'";
+                    }
+                    $sqlCreate .= " DEFAULT $cmColumn[defaultValue]";
                 } else {
-                    if (isset($cmColumn['defOrNull']) && $cmColumn['defOrNull'] === true) {
+                    if (isset($cmColumn['defOrNull']) && (bool) $cmColumn['defOrNull'] === true) {
                         $sqlCreate .= " DEFAULT NULL";
                     }
                 }
@@ -84,15 +94,15 @@ class Create
         }
 
         $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
-        ($sqlCreate);
+        print_r($sqlCreate);
         try {
             $db->query($sqlCreate);
-            echo "<span class='bg-success'>Uus tabel $input[tableName] on loodud!</span>";
+            echo "<span class='bg-success'>Uus tabel " . $input['tableName'] . " on loodud!</span>";
             $this->addTableToList($input, $db);
         } catch (\mysqli_sql_exception $e) {
             $err = $e->getMessage();
-            echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
-            $this->addTableToList($input, $db);
+            echo "<span class='bg-warning'>$err: Tabel " . $input['tableName'] . " näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+            //$this->addTableToList($input, $db);
         }
 
     }
