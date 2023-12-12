@@ -1,69 +1,51 @@
 <?php namespace Common\Model;
+
+use \Model\Field;
 use \user\model\User;
 
 /**
- * Lisamis- ja muutmisinfot kandev väljade rühm halduskeskkonna jaoks
+ * Lisamis- ja muutmisinfot kandev väljade rühm kasutaja loodavate andmetabelite jaoks
  */
-class CreatedModified {
+class DataCreatedModified
+{
 
-    public int $tableId = 0;
-    public string $tableName;
-    public User $createdBy;
-    public string $createdWhen;
-    public ?int $modifiedBy = null;
-    public ?string $modifiedWhen = null;
-    
-    public function __construct($tableId=null, $tableName=null){
-        
-        if (!empty($tableId)) {
-            if ($this->tableId == $tableId && $this->tableName == $tableName) {
+    public string $tableName = '';
+    public Field $createdBy;
+    public Field $createdWhen;
+    public Field $modifiedBy;
+    public Field $modifiedWhen;
+
+    public function __construct($tableName = null)
+    {
+
+        if (!empty($tableName)) {
+            if ($this->tableName == $tableName) {
                 return $this;
             } else {
-                $this->setTableId($tableId);
                 $this->setTableName($tableName);
             }
-        } 
-    }
-      
-        /**
-     * Get the value of tableId
-     *
-     * @return int
-     */
-    public function getTableId(): int
-    {
-        return $this->tableId;
+        }
+        $this->setCreatedBy(new Field('createdBy', 'int'));
+        $this->setCreatedWhen(new Field('createdWhen', 'timestamp'));
+        $this->setModifiedBy(new Field('modifiedBy', 'int'));
+        $this->setModifiedWhen(new Field('modifiedWhen', 'timestamp on update current_timestamp'));
     }
 
-    /**
-     * Set the value of tableId
-     *
-     * @param int $tableId
-     *
-     * @return self
-     */
-    public function setTableId(int $tableId): self
-    {
-        $this->tableId = $tableId;
-
-        return $this;
-    }
-    
     /**
      * Get the value of tableName
-     * 
-     * @return string 
+     *
+     * @return string
      */
-  
-     public function getTableName(): string
+
+    public function getTableName(): string
     {
         return $this->tableName;
     }
 
     /**
      * Set the value of tableName
-     * 
-     * @param string  $tableName 
+     *
+     * @param string  $tableName
      */
     public function setTableName($tableName): self
     {
@@ -74,20 +56,20 @@ class CreatedModified {
 
     /**
      * Get the value of createdBy
-     * 
-     * @return User 
+     *
+     * @return User
      */
-    public function getCreatedBy(): User
+    public function getCreatedBy(): Field
     {
         return $this->createdBy;
     }
 
     /**
      * Set the value of createdBy
-     * 
+     *
      * @param User $createdBy
      */
-    public function setCreatedBy(User $createdBy): self
+    public function setCreatedBy(Field $createdBy): self
     {
         $this->createdBy = $createdBy;
 
@@ -96,20 +78,20 @@ class CreatedModified {
 
     /**
      * Get the value of createdWhen
-     * 
+     *
      * @return string  (mysql: timestamp)
      */
-    public function getCreatedWhen()
+    public function getCreatedWhen(): Field
     {
         return $this->createdWhen;
     }
 
     /**
      * Set the value of createdWhen
-     * 
+     *
      * @param string  $createdWhen ('Y-m-d H:i:s')
      */
-    public function setCreatedWhen($createdWhen): self
+    public function setCreatedWhen(Field $createdWhen): self
     {
         $this->createdWhen = $createdWhen;
 
@@ -118,20 +100,20 @@ class CreatedModified {
 
     /**
      * Get the value of modifiedBy
-     * 
+     *
      * @return int (user id)
      */
-    public function getModifiedBy()
+    public function getModifiedBy(): Field
     {
         return $this->modifiedBy;
     }
 
     /**
      * Set the value of modifiedBy
-     * 
+     *
      * $param int $modifiedBy
      */
-    public function setModifiedBy($modifiedBy): self
+    public function setModifiedBy(Field $modifiedBy): self
     {
         $this->modifiedBy = $modifiedBy;
 
@@ -140,25 +122,24 @@ class CreatedModified {
 
     /**
      * Get the value of modifiedWhen
-     * 
+     *
      *   @return string  (mysql: timestamp)
      */
-    public function getModifiedWhen()
+    public function getModifiedWhen(): Field
     {
         return $this->modifiedWhen;
     }
 
     /**
      * Set the value of modifiedWhen
-     * 
+     *
      * @param string  $modifiedWhen ('Y-m-d H:i:s')
-    */
-    public function setModifiedWhen($modifiedWhen): self
+     */
+    public function setModifiedWhen(Field $modifiedWhen): self
     {
         $this->modifiedWhen = $modifiedWhen;
 
         return $this;
     }
-
 
 }
