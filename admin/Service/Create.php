@@ -56,11 +56,26 @@ class Create
                 }
             }
         }
-        /*
+        /**
+         * @todo Ilmselgelt tuleb luua ühisfunktsioon tavaliste ja loomis/muutmisinfo väljade loomiseks, vt koodi kordumist
+         */
         if (isset($input['data']['dataCreatedModified'])) {
-            
+            foreach ($input['data']['dataCreatedModified'] as $cmColumn) {
+                $sqlCreate .= ",
+                `$cmColumn[name]` $cmColumn[type]";
+                if (empty($cmColumn['defOrNull'])) {
+                    $sqlCreate .= " NOT NULL";
+                }
+                if (!empty($cmColumn['defaultValue'])) {
+                    $sqlCreate .= " DEFAULT '$cmColumn[defaultValue]'";
+                } else {
+                    if (isset($cmColumn['defOrNull']) && $cmColumn['defOrNull'] === true) {
+                        $sqlCreate .= " DEFAULT NULL";
+                    }
+                }
+            }
+
         }
-        */
         $sqlCreate .= ",
            PRIMARY KEY (`$input[pk]`)";
         if (!empty($indexes)) {
