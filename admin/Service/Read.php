@@ -1,6 +1,7 @@
 <?php namespace Service;
 
-use mysqli;
+use Common\Helper;
+use Common\Model\DataCreatedModified;
 include_once __DIR__ . '/../Model/RelationDetails.php';
 include_once __DIR__ . '/../Model/Relation.php';
 include_once __DIR__ . '/../Model/Table.php';
@@ -9,6 +10,7 @@ include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
 include_once __DIR__ . '/../../common/Model/CreatedModified.php';
 
+use mysqli;
 use \Common\Model\CreatedModified;
 use \Dto\ListDTO;
 use \Dto\TableDTO;
@@ -103,10 +105,11 @@ class Read
                 $model->setPk($row['pk']);
                 $data = new Data();
                 $data->setTable($model);
+                $fields = $this->getDefaultFields($row['table_name']);
                 if ($row['field_data'] == 'default') {
-                    $fields = $this->getDefaultFields($row['table_name'])['dataFields'];
-                    $data->setFields($fields);
+                    $data->setFields($fields['dataFields']);
                 }
+                $data->setDataCreatedModified($fields['dataCreatedModified']);
 
                 $tcUser = new User;
                 $tcUser->setId($row['tcu_id'])->setUsername($row['tcu_name'])->setEmail($row['tcu_email'])->setPassword($row['tcu_password'])->setSocial($row['tcu_social'])->setUserToken($row['tcu_usertoken'])->setIdentityToken($row['tcu_id_token'])->setRole($row['tcu_role']);
@@ -160,10 +163,17 @@ class Read
         $fields['indexes'] = [];
         while ($row = $q->fetch_assoc()) {
             if (empty($row['Key'])) {
-                $field = new Field();
-                $field->setName($row['Field']);
-                $field->setType($row['Type']);
-                $fields['dataFields'][$row['Field']] = $field;
+                $fieldName = Helper::camelize($row['Field'], true);
+                $field = new Field($fieldName, $row['Type']);
+                $fields['dataCreatedModified'] = new DataCreatedModified();
+                if (in_array($row['Field'], ['created_by', 'created_when', 'modified_by', 'modified_when'])) {
+                    $setField = 'set' . Helper::camelize($row['Field']);
+                    $fields['dataCreatedModified']->$setField($fieldName, $row['Type']);
+                } else {
+                    $field->setDefOrNull($row['Null'] == 'YES' ? true : false);
+                    $field->setDefaultValue($row['Default']);
+                    $fields['dataFields'][$fieldName] = $field;
+                }
             } else {
                 if ($row['Key'] == 'PRI') {
                     $fields['pk'] = $row['Field'];

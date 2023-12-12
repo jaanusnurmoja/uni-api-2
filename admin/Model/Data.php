@@ -47,7 +47,7 @@ class Data
     /**
      * Get the value of createdModified
      */
-    public function getCreatedModified(): DataCreatedModified
+    public function getDataCreatedModified(): DataCreatedModified
     {
         return $this->dataCreatedModified;
     }
@@ -55,7 +55,7 @@ class Data
     /**
      * Set the value of createdModified
      */
-    public function setCreatedModified(DataCreatedModified $dataCreatedModified): self
+    public function setDataCreatedModified(DataCreatedModified $dataCreatedModified): self
     {
         $this->dataCreatedModified = $dataCreatedModified;
 

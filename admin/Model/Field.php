@@ -10,7 +10,8 @@ class Field
     public $defaultValue = null;
     public $htmlDefaults = [];
 
-    public function __construct($name = null, $type = null) {
+    public function __construct($name = null, $type = null)
+    {
         $this->name = $name;
         $this->type = $type;
 
@@ -26,7 +27,7 @@ class Field
             }
         }
     }
-    
+
     public function getId()
     {
         return $this->id;
@@ -87,7 +88,6 @@ class Field
         return $this;
     }
 
-    
     /**
      * Get the value of defaultValue
      */

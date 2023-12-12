@@ -202,11 +202,11 @@ foreach ($cmField as $cmk => $cmv) {
             } else {
                 echo "<label for='$elId' class='row col-10 mt-1'>
                                                             <div class='col col-2'>$cmk</div>
-                                                            <input class='form-switch col-1' type='checkbox' onclick=this.nextElementSibling.toggleAttribute('disabled')>
-                                                            <input class='col col-6'name='$elName' id='$elId' disabled";
+                                                            <input class='col col-6'name='$elName' id='$elId' readonly";
                 if (is_bool($cmv)) {
                     $checked = $cmv ? ' checked="checked"' : '';
-                    echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                    echo " type='checkbox' value=true$checked disabled />";
+                    echo "<input type='hidden' name='$elName' value='$cmv'>";
                 } else {
                     if (is_iterable($cmv)) {
                         $cmv = json_encode($cmv);

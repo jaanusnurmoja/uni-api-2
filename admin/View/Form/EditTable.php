@@ -161,15 +161,15 @@ foreach ($field as $k => $v) {
             </tr>
             <?php
 }
-$data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
+                    $data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
 
             <tr>
                 <td colspan="2">Lisamine ja muutmine (andmetabelid)</td>
             </tr>
             <?php
-                    foreach ($data->data->dataCreatedModified as $cmKey => $cmField) {
+foreach ($data->data->dataCreatedModified as $cmKey => $cmField) {
                         if (is_object($cmField)) {
-    ?>
+                            ?>
             <tr class="trow">
                 <td>
                     <?=$cmKey?>
@@ -177,7 +177,7 @@ $data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
                 <td colspan="2">
                     <fieldset>
                         <?php
-                            foreach ($cmField as $cmk => $cmv) {
+foreach ($cmField as $cmk => $cmv) {
                                 $elName = "table[data][dataCreatedModified][$cmKey][$cmk]";
                                 $elId = "table.data.dataCreatedModified.$cmKey.$cmk";
                                 if ($cmk == 'id') {
@@ -185,11 +185,10 @@ $data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
                                 } else {
                                     echo "<label for='$elId' class='row col-10 mt-1'>
                                                             <div class='col col-2'>$cmk</div>
-                                                            <input class='form-switch col-1' type='checkbox' onclick=this.nextElementSibling.toggleAttribute('disabled')>
                                                             <input class='col col-6'name='$elName' id='$elId' disabled";
                                     if (is_bool($cmv)) {
                                         $checked = $cmv ? ' checked="checked"' : '';
-                                        echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                                        echo " type='checkbox' value=true$checked disabled/>";
                                     } else {
                                         if (is_iterable($cmv)) {
                                             $cmv = json_encode($cmv);
@@ -200,16 +199,16 @@ $data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
                                     echo '</label>';
                                 }
                             }
-                            
-?>
+
+                            ?>
                     </fieldset>
                 </td>
             </tr>
             <?php
-                        }
-
 }
-?>
+
+                    }
+                    ?>
         </tbody>
     </table>
     <?php

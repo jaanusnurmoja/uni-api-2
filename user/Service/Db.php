@@ -14,7 +14,7 @@ use \user\model\Users;
  */
 class Db
 {
-     protected function cnn()
+    protected function cnn()
     {
         $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
         return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -113,9 +113,9 @@ class Db
         $sql .= "SELECT last_insert_id() as lastId;";
         $r = new stdClass;
         $cnn->multi_query($sql);
-        while($cnn->next_result()){
+        while ($cnn->next_result()) {
             $res = $cnn->store_result();
-            if (is_object($res)){
+            if (is_object($res)) {
                 $row = $res->fetch_object();
                 $r->lastId = $row->lastId;
             }
@@ -173,7 +173,7 @@ class Db
         $person = new Person();
         while ($row = $q->fetch_assoc()) {
             foreach ($row as $dbKey => $dbValue) {
-                $setKey = 'set' . Helper::camelize($dbKey, true);
+                $setKey = 'set' . Helper::camelize($dbKey);
                 $person->$setKey($dbValue);
             }
         }
