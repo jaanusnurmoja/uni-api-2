@@ -197,7 +197,7 @@ foreach (json_decode($rel) as $table => $params) {
                     lihtsamaid vahendeid ning ka vajalikke php-teeke.
                 </p>
                 <div>
-                    <h4 class="bg-warning">Valmimas: halduskeskkond ja kasutajate automaatne registreerimine</h4>
+                    <h4 class="bg-warning">UUS: kasutajate automaatne registreerimine</h4>
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
                         pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
@@ -206,19 +206,24 @@ foreach (json_decode($rel) as $table => $params) {
                         ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
                         isikuprofiili ning seostada sellega kõik oma kasutajakontod.
                     </p>
-                    <p> &#xF33B; Esmasel sisselogimisel ID kaardiga tuleb pärast
-                        autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse registreerumise
-                        peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili kirje. Igatahes
-                        on see "jätka" ajutine lahendus.</p>
+                    <p> &#xF33B; Lahenduse sai hiljaaegu probleem, kus esmasel sisselogimisel ID kaardiga tuli pärast
+                        autentimist veel ühele "Jätka" lingile klikata, sest kasutaja moodustamise protsess seiskus. See
+                        jätkamislink oli ajutine lahendus.</p>
+                    <h4 class="bg-warning">TEOKSIL: halduskeskkond</h4>
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
-                        või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.
+                        või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid.
                     </p>
                     <p>
-                        <mark>Seisuga 29.11.2023</mark> on autori fookuses sisuhaldusse kaasatavate tabelite ja nende
-                        juurde kuuluva
-                        haldamine (st muutmine) üheainsa vormi vahendusel sarnaselt uue tabeli sisestamisega.
-                        Tõenäoliselt ei jää see ainsaks variandiks, kuid tekib esimesena.
+                        <mark>Seisuga 12.12.2023</mark> toimub sisuhaldussüsteemis uute tabelite loomine koos vaikimisi
+                        väljadega, milleks on lisaks primaarvõtmele ka kirje loomise ja muutmise andmed (kasutaja id ja
+                        vastavad ajatemplid)
+
+                    </p>
+                    <p>
+                        <mark>Alates 29.11.2023</mark> on autori fookuses sisuhaldusse kaasatavate tabelite ja nende
+                        juurde kuuluva haldamine (st muutmine) üheainsa vormi vahendusel sarnaselt uue tabeli
+                        sisestamisega. Tõenäoliselt ei jää see üksainus vorm ainsaks variandiks, kuid tekib esimesena.
                     </p>
                     <p>
                         Oluline väljakutse - muudatuste sisestamise korral peavad $_POST andmetest käiku minema vaid
