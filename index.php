@@ -71,8 +71,14 @@ if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), iss
 
 <head>
     <title>
-        Jaanus Nurmoja uni-api projekt
+        Jaanus Nurmoja projekt UNIAPIPLUS
     </title>
+    <meta property="og:title" content="Jaanus Nurmoja projekt UNIAPIPLUS" />
+    <meta property="og:description" content="Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
+                    keerukate ja mitmekihiliste seostega (nagu mu varasemas näidisrakenduses https: //test.nurmoja.net.ee/repeat
+), võimalikult väheste  päringute hulgaga ning võimalikult lihtsama ja napima seadistusega (sh nt ilma võõrvõtmete määramiseta andmebaasis).
+    Aluseks on võetud üks lihtsa crud api https://github.com/darioTecchia/uni-api projekt ,
+    mida  paraku pole mitu aastat edasi arendatud. Osa funktsionaalsusi võtan kindlasti sealt üle." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -157,7 +163,7 @@ if (loggedIn()) {?>
     </nav>
     <div class="container">
         <div class="row">
-            <h2>Jaanus Nurmoja: uni-api</h2>
+            <h2 id="title">Jaanus Nurmoja: uniapiplus</h2>
             <div class="col-sm">
                 <?php
 echo 'Uuri asja lähemalt siit: <a href="README.md">UNI-API RAKENDUS</a>';
@@ -173,7 +179,7 @@ foreach (json_decode($rel) as $table => $params) {
 }
 ?>
                 </table>
-                <h4>uni-api algsete funktsionaalsuste näide</h4>
+                <h4>uni-api algsete funktsionaalsuste näide (avanemine pole paraku tagatud)</h4>
                 <table class="table table-striped">
                     <tr>
                         <td>Õllele id-ga 1 vastavad sündmused</td>
@@ -186,7 +192,7 @@ foreach (json_decode($rel) as $table => $params) {
                 </table>
             </div>
             <div class="col-md">
-                <p>Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
+                <p id="lead">Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
                     keerukate ja mitmekihiliste seostega (nagu mu <a
                         href="https://test.nurmoja.net.ee/repeat/">varasemas näidisrakenduses</a>), võimalikult väheste
                     päringute hulgaga ning võimalikult
@@ -201,7 +207,7 @@ foreach (json_decode($rel) as $table => $params) {
                     lihtsamaid vahendeid ning ka vajalikke php-teeke.
                 </p>
                 <div>
-                    <h4 class="bg-warning">UUS: kasutajate automaatne registreerimine</h4>
+                    <h4 id="new" class="bg-warning">UUS: kasutajate automaatne registreerimine</h4>
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
                         pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
