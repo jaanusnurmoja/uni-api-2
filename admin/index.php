@@ -165,6 +165,10 @@ if (loggedIn()) {?>
                 <li class="nav-item">
                     <a class="navbar-brand" href="/uni-api/docs/php">Hetkeseisu dokumentatsioon</a>
                 </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="<?=$siteBaseUrl?>
+/docs/presentation/uniapiplus.pptx">Hetkeseisu ESITLUS</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="<?=$siteBaseUrl?>">Sait</a>
 
