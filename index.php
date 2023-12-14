@@ -17,6 +17,7 @@
  */
 
 session_start();
+require_once __DIR__.'/admin/Autoload.php';
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];

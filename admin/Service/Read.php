@@ -153,7 +153,7 @@ class Read
         return $diff;
     }
 
-    public function getDefaultFields($table)
+    public function getDefaultFields($table, $checkField = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
@@ -161,7 +161,16 @@ class Read
         $q = $db->query($query);
         $fields = [];
         $fields['indexes'] = [];
+        if (!empty($checkField)) {
+            $return = false;
+        }
+
         while ($row = $q->fetch_assoc()) {
+            if (!empty($checkField)) {
+                if ($row['Field'] == $checkField) {
+                    $return = true;
+                }
+            }
             if (empty($row['Key'])) {
                 $fieldName = Helper::camelize($row['Field'], true);
                 $field = new Field($fieldName, $row['Type']);
@@ -181,6 +190,9 @@ class Read
                     array_push($fields['indexes'], $row['Field']);
                 }
             }
+        }
+        if (!empty($checkField)) {
+            return $return;
         }
         return $fields;
     }

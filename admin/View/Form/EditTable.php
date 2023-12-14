@@ -1,7 +1,8 @@
 <?php namespace View\Form;
 
 use Common\Model\DataCreatedModified;
-use Model\Data;
+//use Model\Data;
+use \Service\Update;
 
 class EditTable
 {
@@ -388,6 +389,13 @@ foreach ($this->relations as $r) {
     <input type="submit" value="Salvesta muudatused" />
 </form>
 <?php
+$update = new Update();
+        if (isset($_POST['table'])) {
+            $update->updateTable($_POST['table']);
+            echo '<pre>';
+            print_r($_POST);
+            echo '</pre>';
+        }
 
     }
     public function createdModified($value, $inner = false)
@@ -409,7 +417,7 @@ foreach ($this->relations as $r) {
             echo '</dl>';
         } else {
             echo "<dt class='col-sm-4 border'>Current user</dt>
-        <dd class='col-sm-8 border mb-0'>" . $this->currentUser->id . "</dd>";
+<dd class='col-sm-8 border mb-0'>" . $this->currentUser->id . "</dd>";
             echo "</dl>";
         }
 
