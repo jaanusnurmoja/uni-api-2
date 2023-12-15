@@ -38,7 +38,7 @@ class Update
                 }
             }
         }
-        echo 'uuendame tabelit: ' . $sql . "\n";
+        echo 'uuendame tabelit: ' . $sql . "<hr>";
         $this->makeQueries($sql);
     }
 
@@ -52,12 +52,12 @@ class Update
                 /* store the result set in PHP */
                 if ($result = $cnn->store_result()) {
                     while ($row = $result->fetch_row()) {
-                        printf("%s\n", $row[0]);
+                        printf("%s<hr>", $row[0]);
                     }
                 }
                 /* print divider */
                 if ($cnn->more_results()) {
-                    printf("-----------------\n");
+                    printf("<hr>");
                 }
             } while ($cnn->next_result());
 
@@ -73,6 +73,9 @@ class Update
         foreach ($fieldProps as $fpName => $fpValue) {
             if ($fpName == 'name') {
                 $fpValue = Helper::uncamelize($fpValue);
+                $sql .= " $fpValue";
+            }
+            if ($fpName == 'type') {
                 $sql .= " $fpValue";
             }
             if ($fpName == 'defOrNull') {

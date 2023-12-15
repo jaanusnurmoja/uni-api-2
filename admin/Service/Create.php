@@ -138,7 +138,7 @@ class Create
             $sql = "INSERT INTO `models` ($propsList)
         VALUES ($valsList);
         ";
-            echo 'uus tabel listi: ' . $sql . "\n";
+            echo 'uus tabel listi: ' . $sql . "<hr>";
             $db->query($sql);
         }
         $inputId = isset($input['id']) ? $input['id'] : $db->insert_id;
@@ -179,7 +179,7 @@ class Create
         $columnToAdd = $this->columnDefinition($column);
         $sql = "ALTER TABLE $tableName
         ADD COLUMN $columnToAdd;";
-        echo 'lisame välja: ' . $sql . "\n";
+        echo 'lisame välja: ' . $sql . "<hr>";
         $db->query($sql);
     }
 
@@ -196,7 +196,7 @@ class Create
             $valList = implode(",", $lists['rdVals']);
             $sql = "INSERT INTO relation_details ($keyList)
                             VALUES ($valList);";
-            echo 'lisame seose: ' . $sql . "\n";
+            echo 'lisame seose: ' . $sql . "<hr>";
             $db->query($sql);
         }
         $db->close();
