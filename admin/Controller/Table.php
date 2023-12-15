@@ -4,6 +4,7 @@ include_once __DIR__ . '/../Service/Read.php';
 include_once __DIR__ . '/../Service/Create.php';
 include_once __DIR__ . '/../View/Table.php';
 include_once __DIR__ . '/../View/Form/NewTable.php';
+use Service\Delete;
 use \Dto\ListDTO;
 use \Service\Create;
 use \Service\Read;
@@ -120,6 +121,12 @@ class Table
         global $request;
         $read = new Read();
         return $read->req($request);
+    }
+
+    public function deleteTable($item)
+    {
+        $del = new Delete();
+        $del->removeFromList('models', $item);
     }
 
 }

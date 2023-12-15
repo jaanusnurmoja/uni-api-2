@@ -1,6 +1,5 @@
 <?php namespace View;
 
-use Common\Model\CreatedModified;
 use Common\Model\DataCreatedModified;
 use View\Form\EditTable;
 
@@ -52,16 +51,16 @@ class Table
             <?php
 foreach ($field as $k => $v) {
 
-    if (is_iterable($v)) {
-        $v = json_encode($v);
-    }
+                        if (is_iterable($v)) {
+                            $v = json_encode($v);
+                        }
                         echo "<li>$k: $v</li>";
                     }?></ul>
     </td>
 </tr>
 <?php
 }
-?>
+                    ?>
 <tr>
     <td colspan="2">
         <h2>Kes ja millal lisas või muutis</h2>
@@ -69,12 +68,12 @@ foreach ($field as $k => $v) {
 </tr>
 
 <?php
- //$cmf= new CreatedModified();
- $cmf = new DataCreatedModified();
- $this->tableSingleOrList->data->dataCreatedModified = $cmf;
-foreach ($cmf as $cmKey => $cmValue) {
-    echo "<tr><td>$cmKey</td><td>".json_encode($cmValue)."</td></tr>";
- }
+//$cmf= new CreatedModified();
+                    $cmf = new DataCreatedModified();
+                    $this->tableSingleOrList->data->dataCreatedModified = $cmf;
+                    foreach ($cmf as $cmKey => $cmValue) {
+                        echo "<tr><td>$cmKey</td><td>" . json_encode($cmValue) . "</td></tr>";
+                    }
 
                 }
 

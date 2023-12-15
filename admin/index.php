@@ -197,6 +197,9 @@ if (loggedIn()) {
                     if ($r['subtype'] == 'edit') {
                         $tc->getTableByIdOrName();
                     }
+                    if ($r['subtype'] == 'delete') {
+                        $tc->deleteTable($r['item']);
+                    }
                 }
             } else {
                 if ($r['item'] == 'new') {
