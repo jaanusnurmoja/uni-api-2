@@ -139,7 +139,7 @@ class Create
         VALUES ($valsList);
         ";
             echo 'uus tabel listi: ' . $sql . "\n";
-            //$db->query($sql);
+            $db->query($sql);
         }
         $inputId = isset($input['id']) ? $input['id'] : $db->insert_id;
         if (!empty($inputId) && !empty($dataForRdSql)) {
@@ -180,7 +180,7 @@ class Create
         $sql = "ALTER TABLE $tableName
         ADD COLUMN $columnToAdd;";
         echo 'lisame välja: ' . $sql . "\n";
-        //$db->query($sql);
+        $db->query($sql);
     }
 
     public function addRelation($input, $tableId)
@@ -197,7 +197,7 @@ class Create
             $sql = "INSERT INTO relation_details ($keyList)
                             VALUES ($valList);";
             echo 'lisame seose: ' . $sql . "\n";
-            //$db->query($sql);
+            $db->query($sql);
         }
         $db->close();
     }
