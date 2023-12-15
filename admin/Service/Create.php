@@ -43,22 +43,7 @@ class Create
         }
         if (isset($input['data']['fields'])) {
             foreach ($input['data']['fields'] as $column) {
-                $column['name'] = Helper::uncamelize($column['name']);
-                $sqlCreate .= ",
-                `$column[name]` $column[type]";
-                if (empty($column['defOrNull'])) {
-                    $sqlCreate .= " NOT NULL";
-                }
-                if (!empty($column['defaultValue'])) {
-                    if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
-                        $column['defaultValue'] = "'$column[defaultValue]'";
-                    }
-                    $sqlCreate .= " DEFAULT $column[defaultValue]";
-                } else {
-                    if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
-                        $sqlCreate .= " DEFAULT NULL";
-                    }
-                }
+                $sqlCreate .= $this->columnDefinition($column);
             }
         }
         /**
@@ -66,23 +51,7 @@ class Create
          */
         if (isset($input['data']['dataCreatedModified'])) {
             foreach ($input['data']['dataCreatedModified'] as $cmColumn) {
-                $cmColumn['name'] = Helper::uncamelize($cmColumn['name']);
-                $sqlCreate .= ",
-                `$cmColumn[name]` $cmColumn[type]";
-                if (empty($cmColumn['defOrNull'])) {
-                    $sqlCreate .= " NOT";
-                }
-                $sqlCreate .= " NULL";
-                if (!empty($cmColumn['defaultValue'])) {
-                    if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
-                        $column['defaultValue'] = "'$column[defaultValue]'";
-                    }
-                    $sqlCreate .= " DEFAULT $cmColumn[defaultValue]";
-                } else {
-                    if (isset($cmColumn['defOrNull']) && (bool) $cmColumn['defOrNull'] === true) {
-                        $sqlCreate .= " DEFAULT NULL";
-                    }
-                }
+                $sqlCreate .= $this->columnDefinition($cmColumn);
             }
 
         }
@@ -94,7 +63,6 @@ class Create
         }
 
         $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
-        print_r($sqlCreate);
         try {
             $db->query($sqlCreate);
             echo "<span class='bg-success'>Uus tabel " . $input['tableName'] . " on loodud!</span>";
@@ -113,19 +81,28 @@ class Create
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
             $db = $this->cnn();
         }
-        unset($input['id']);
+        if (empty($input['id'])) {
+            unset($input['id']);
+        }
         $props = [];
         $vals = [];
-        $dbFields = [];
+        // $dbFields = [];
         $dataForRdSql = [];
+        $main = false;
         foreach ($input as $key => $value) {
-            if (!is_array($value) && !is_object($value)) {
+            if (!is_array($value) && !is_object($value) && $key != 'id') {
                 $props[] = \Common\Helper::uncamelize($key);
                 $vals[] = is_numeric($value) ? $value : "'$value'";
+                if (!isset($input['id'])) {
+                    $main = true;
+                }
+
             }
-            if ($key == 'data') {
+            if ($key == 'data' && isset($input['id'])) {
                 foreach ($value['fields'] as $field) {
-                    $dbFields[] = \Common\Helper::uncamelize($field["name"]);
+                    $field["name"] = \Common\Helper::uncamelize($field["name"]);
+                    //$dbFields[] = $field;
+                    $this->addColumn($input['tableName'], $field);
                 }
             }
             if ($key == 'createdModified') {
@@ -139,7 +116,7 @@ class Create
                     $rdCols = [];
                     $rdVals = [];
                     foreach ($relationDetails as $rdKey => $rdValue) {
-                        if ($rdKey != 'id') {
+                        if ($rdKey != 'id' && $rdKey != 'table') {
                             if ($rdKey == 'createdModified') {
                                 $creMoRel = $this->createdModifiedTmpl($rdValue);
                                 $rdCols[] = $creMoRel->cols;
@@ -157,17 +134,53 @@ class Create
         }
         $propsList = implode(", ", $props);
         $valsList = implode(", ", $vals);
-        $sql = "INSERT INTO `models` ($propsList)
+        if ($main === true) {
+            $sql = "INSERT INTO `models` ($propsList)
         VALUES ($valsList);
         ";
-        $db->query($sql);
-
-        if (!empty($db->insert_id) && !empty($dataForRdSql)) {
+            echo 'uus tabel listi: ' . $sql . "\n";
+            //$db->query($sql);
+        }
+        $inputId = isset($input['id']) ? $input['id'] : $db->insert_id;
+        if (!empty($inputId) && !empty($dataForRdSql)) {
             foreach ($dataForRdSql as $relGroup => $rdDetailsList) {
-                $this->addRelation($rdDetailsList, $db->insert_id);
+                $this->addRelation($rdDetailsList, $inputId);
             }
         }
         $db->close();
+    }
+
+    public function columnDefinition($column)
+    {
+        $column['name'] = Helper::uncamelize($column['name']);
+        $sqlCreate = "`$column[name]` $column[type]";
+        if (empty($column['defOrNull'])) {
+            $sqlCreate .= " NOT";
+        }
+        $sqlCreate .= " NULL";
+        if (!empty($column['defaultValue'])) {
+            if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
+                $column['defaultValue'] = "'$column[defaultValue]'";
+            }
+            $sqlCreate .= " DEFAULT $column[defaultValue]";
+        } else {
+            if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
+                $sqlCreate .= " DEFAULT NULL";
+            }
+        }
+
+        return $sqlCreate;
+
+    }
+
+    public function addColumn($tableName, $column)
+    {
+        $db = $this->cnn();
+        $columnToAdd = $this->columnDefinition($column);
+        $sql = "ALTER TABLE $tableName
+        ADD COLUMN $columnToAdd;";
+        echo 'lisame välja: ' . $sql . "\n";
+        //$db->query($sql);
     }
 
     public function addRelation($input, $tableId)
@@ -183,7 +196,8 @@ class Create
             $valList = implode(",", $lists['rdVals']);
             $sql = "INSERT INTO relation_details ($keyList)
                             VALUES ($valList);";
-            $db->query($sql);
+            echo 'lisame seose: ' . $sql . "\n";
+            //$db->query($sql);
         }
         $db->close();
     }

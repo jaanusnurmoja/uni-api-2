@@ -1,6 +1,7 @@
 <?php namespace View\Form;
 
 use Common\Model\DataCreatedModified;
+use Service\Create;
 //use Model\Data;
 use \Service\Update;
 
@@ -73,6 +74,7 @@ class EditTable
 </p>
 <form id="edit-table" name="edit-table" class="repeat" method="post" enctype="application/json">
     <input type="hidden" name="table[id]" id="table.id" value="<?php echo $data->id ?>" />
+    <input type="hidden" name="new[id]" id="new.id" value="<?php echo $data->id ?>" />
     <input type="hidden" name="table[createdModified][modifiedBy]" id="table.createdModified.modifiedBy"
         value="<?=$this->currentUser->id?>" />
     <?php
@@ -390,12 +392,19 @@ foreach ($this->relations as $r) {
 </form>
 <?php
 $update = new Update();
+        $create = new Create();
+
         if (isset($_POST['table'])) {
+            $_POST['table']['tableName'] = $data->tableName;
             $update->updateTable($_POST['table']);
-            echo '<pre>';
-            print_r($_POST);
-            echo '</pre>';
         }
+        if (isset($_POST['new'])) {
+            $_POST['new']['tableName'] = $data->tableName;
+            $create->addTableToList($_POST['new']);
+        }
+        // echo '<pre>';
+        // print_r($_POST);
+        // echo '</pre>';
 
     }
     public function createdModified($value, $inner = false)
