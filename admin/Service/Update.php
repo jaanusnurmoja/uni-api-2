@@ -90,11 +90,12 @@ class Update
                     if ($fpValue != 'current_timestamp') {
                         $fpValue = "'$fpValue'";
                     }
-                    $sql .= " DEFAULT $fpValue;
+                    $sql .= " DEFAULT $fpValue
                                 ";
                 }
             }
         }
+        $sql .= ';';
         return $sql;
     }
 
