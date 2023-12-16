@@ -132,43 +132,57 @@ class EditTable
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
             </tr>
             <?php
-foreach ($data->data->fields as $fkey => $field) {?>
+foreach ($data->data->fields as $fkey => $field) {
+                    ?>
             <tr class="trow">
                 <td>
                     <span class="move btn btn-info btn-sm"><i class="bi bi-arrow-down-up"></i></span>
                 </td>
                 <td>
+                    <input type="hidden" name="del[data][fields][<?=$fkey?>]" value="1">
                     <fieldset>
                         <?php
 foreach ($field as $k => $v) {
-                    $elName = "table[data][fields][$fkey][$k]";
-                    $elId = "table.data.fields.$fkey.$k";
-                    if ($k == 'id') {
-                        echo "<input type='hidden' name='$elName' id='$elId' value='$v' disabled /> ";
-                    } else {
-                        echo "<label for='$elId' class='row col-10 mt-1'>
+                        $elName = "table[data][fields][$fkey][$k]";
+                        $elId = "table.data.fields.$fkey.$k";
+                        if ($k == 'id') {
+                            echo "<input type='hidden' name='$elName' id='$elId' value='$v' disabled /> ";
+                        } else {
+                            echo "<label for='$elId' class='row col-10 mt-1'>
                                 <div class='col col-2'>$k</div>
                                 <input class='form-switch col-1' type='checkbox' onclick=this.nextElementSibling.toggleAttribute('disabled')>
                                 <input class='col col-6'name='$elName' id='$elId' disabled";
-                        if (is_bool($v)) {
-                            $checked = $v ? ' checked="checked"' : '';
-                            echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
-                        } else {
-                            if (is_iterable($v)) {
-                                $v = json_encode($v);
-                            }
+                            if (is_bool($v)) {
+                                $checked = $v ? ' checked="checked"' : '';
+                                echo " type='checkbox' value=true$checked onclick=this.toggleAttribute('checked') />";
+                            } else {
+                                if (is_iterable($v)) {
+                                    $v = json_encode($v);
+                                }
 
-                            echo " type='text' value='$v' />";
+                                echo " type='text' value='$v' />";
+                            }
+                            echo '</label>';
                         }
-                        echo '</label>';
-                    }
-                }?>
+                    }?>
                     </fieldset>
                 </td>
                 <td width="10%"><span class="remove btn btn-danger btn-sm">Remove</span></td>
             </tr>
             <?php
 }
+//drop
+                    $a1 = array_keys($data->data->fields);
+                    if (!empty($this->postBody) && isset($this->postBody['del']['data']['fields'])) {
+                        $a2 = array_keys($this->postBody['del']['data']['fields']);
+                        $diff = array_diff($a1, $a2);
+                        echo '<hr>väljadiff: <hr>';
+                        foreach ($diff as $stmtval) {
+                            echo "ALTER TABLE $data->tableName DROP COLUMN $stmtval;";
+                            $this->tableController->dropColumn($data->tableName, $stmtval);
+                        }
+                    }
+//end drop
                     $data->data->dataCreatedModified = new DataCreatedModified($data->tableName);?>
 
             <tr>
@@ -305,8 +319,8 @@ $this->createdModified($value);
                 </td>
             </tr>
 
-            <?php
-if (!empty($value)) {
+            <?php $relDiff = [];
+                        if (!empty($value)) {
                             foreach ($value as $i => $av) {
                                 ?>
 
@@ -318,6 +332,8 @@ if (!empty($value)) {
                         id="table.<?=$key?>.<?=$i?>.table.id" />
                     <input type="hidden" name="table[<?=$key?>][<?=$i?>][createdModified][modifiedBy]"
                         id="table.<?=$key?>.<?=$i?>.createdModified.modifiedBy" value="<?=$this->currentUser->id?>" />
+                    <input type="hidden" name="del[<?=$key?>][<?=$i?>][id]" id="del.<?=$key?>.<?=$i?>.id"
+                        value="<?=$av->id?>">
                     <table id="<?=$key?>_<?=$i?>">
                         <?php foreach ($av as $rdKey => $rdValue) {
                                     $rdName = "table[$key][$i][$rdKey]";
@@ -383,7 +399,22 @@ foreach ($this->relations as $r) {
             </tr>
             <?php
 }
+                            $ac1 = array_column($value, 'id');
+                            if (!empty($this->postBody)) {
+                                if (!isset($this->postBody['del'][$key])) {
+                                    $this->postBody['del'][$key] = [];
+                                }
+                                $ac2 = array_column($this->postBody['del'][$key], 'id');
+                                $acDiff = array_diff($ac1, $ac2);
+                                if (!empty($acDiff)) {
+                                    foreach ($acDiff as $d) {
+                                        echo "DELETE FROM relation_details WHERE id=$d;";
+                                        $this->tableController->removeFromList('relation_details', $d);
+                                    }
+                                    echo '<hr>see on reldiff: <hr>';}
+                            }
                         }
+
                     }
                     ?>
         </tbody>

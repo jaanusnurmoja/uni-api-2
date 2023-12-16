@@ -144,4 +144,16 @@ class Table
         }
     }
 
+    public function dropColumn($table, $column)
+    {
+        $del = new Delete();
+        $del->dropColumn($table, $column);
+    }
+
+    public function removeFromList($list, $idOrName)
+    {
+        $del = new Delete();
+        $del->removeFromList($list, $idOrName);
+    }
+
 }

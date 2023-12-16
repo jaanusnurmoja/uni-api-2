@@ -18,4 +18,11 @@ class Delete
         $sql = "DELETE from $list WHERE $item = '$idOrName'";
         $db->query($sql);
     }
+
+    public function dropColumn($table, $column)
+    {
+        $db = $this->cnn();
+        $sql = "ALTER TABLE $table DROP COLUMN $column";
+        $db->query($sql);
+    }
 }
