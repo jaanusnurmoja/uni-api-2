@@ -3,7 +3,7 @@
 use Common\Model\DataCreatedModified;
 use Service\Create;
 //use Model\Data;
-use \Service\Update;
+use Service\Update;
 
 class EditTable
 {
