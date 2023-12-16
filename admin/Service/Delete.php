@@ -16,7 +16,6 @@ class Delete
         $db = $this->cnn();
         $item = is_numeric($idOrName) ? 'id' : 'table_name';
         $sql = "DELETE from $list WHERE $item = '$idOrName'";
-        echo $sql;
         $db->query($sql);
     }
 }

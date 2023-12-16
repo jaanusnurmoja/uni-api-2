@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 include_once __DIR__ . '/../Service/Read.php';
+include_once __DIR__ . '/../Service/Delete.php';
 include_once __DIR__ . '/../Service/Create.php';
 include_once __DIR__ . '/../View/Table.php';
 include_once __DIR__ . '/../View/Form/NewTable.php';
@@ -123,10 +124,17 @@ class Table
         return $read->req($request);
     }
 
-    public function deleteTable($item)
+    public function deleteTable($item, $confirmed = false)
     {
-        $del = new Delete();
-        $del->removeFromList('models', $item);
+        if ($confirmed === true) {
+            $del = new Delete();
+            $del->removeFromList('models', $item);
+        } else {
+            $read = new Read();
+            $table = $read->getTables(null, ['table_name' => $item]);
+            $view = new TableListOrDetails($table);
+            $view->tableDetails(true);
+        }
     }
 
 }

@@ -32,9 +32,45 @@ class Table
      *
      * @return void
      */
-    public function tableDetails()
+    public function tableDetails($confirmDelete = false)
     {
         echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
+        if ($confirmDelete === true) {
+            $origin = $_SERVER['HTTP_REFERER'];
+            $delId = $this->tableSingleOrList->id;
+            ?>
+<div class="card w-75">
+    <div class="card-body">
+        <h5 class="card-title bg-warning">Tabeli kustutamine loetelust</h5>
+        <div class="card-text">
+            Oled kustutamas tabelit <?=$this->tableSingleOrList->tableName?> loetelust. Tabel ise jääb andmebaasi alles,
+            kuid selle andmed on avalikkusele osaliselt nähtavad üksnes juhul, kui mõnel teisel, sisuhaldusesse kaasatud
+            tabelil on sellega belongsTo (või hasManyAndBelongsTo) tüüpi andmeseos (tüüpiline näide vormivaates -
+            rippmenüü või märkeruudud). Soovi korral võib tabeli hiljem uuesti sisuhaldusesse kaasata, tehes tabeli
+            lisamise vormis valiku kaasamata tabelite hulgast.
+            <h3>Kas soovid selle tabeli praegu loetelust kustutada?</h3>
+        </div>
+        <form method="post" action="../../View/Form/Delete.php">
+            <input id="remove" type="hidden" name="remove" value="1" disabled />
+            <input id="callback" name="callback" type="hidden" value="<?=$origin?>" />
+            <input id="delId" name="delId" type="hidden" value="<?=$delId?>" />
+
+            <label for=" decide">Jah, eemaldan <input id="decide" onclick="
+            document.getElementById('remove').toggleAttribute('disabled');
+            document.getElementById('yes').classList.toggle('d-none');
+            document.getElementById('no').classList.toggle('d-none');
+            " type="checkbox" value="Jah, eemaldan" /></label>
+            <input type="button" id="no" value="Ei, jäta alles" class="btn btn-warning"
+                onclick="window.location.href='<?=$_SERVER['HTTP_REFERER']?>'" />
+            <input type="submit" id="yes" value="Eemalda" class="btn btn-danger d-none" />
+        </form>
+
+    </div>
+</div>
+
+<?php
+}
+
         echo '<table class="table table-warning table-striped">';
 
         foreach ($this->tableSingleOrList as $key => $value) {
