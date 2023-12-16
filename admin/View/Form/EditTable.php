@@ -1,9 +1,8 @@
 <?php namespace View\Form;
 
 use Common\Model\DataCreatedModified;
-use Service\Create;
+
 //use Model\Data;
-use Service\Update;
 
 class EditTable
 {
@@ -12,8 +11,13 @@ class EditTable
      */
     public $currentUser;
     /**
+     * @var \Controller\Table tableController
+     */
+    public $tableController;
+    /**
      * @var array relations
      */
+
     public $relations;
     /**
      * @var \DTO\TableDTO dto
@@ -38,6 +42,7 @@ class EditTable
     public function __construct($data = null)
     {
         $readRels = new \Controller\Table();
+        $this->tableController = $readRels;
         $list = new \DTO\ListDTO();
         $this->currentUser = $_SESSION['loggedIn']['userData'];
         $readRels->getRelationsList($list);
@@ -391,16 +396,17 @@ foreach ($this->relations as $r) {
     <input type="submit" value="Salvesta muudatused" />
 </form>
 <?php
-$update = new Update();
-        $create = new Create();
+//$update = new Update();
+        //$create = new Create();
 
         if (isset($_POST['table'])) {
             $_POST['table']['tableName'] = $data->tableName;
-            $update->updateTable($_POST['table']);
+            //$update->updateTable($_POST['table']);
+            $this->tableController->updateTable($_POST['table']);
         }
         if (isset($_POST['new'])) {
             $_POST['new']['tableName'] = $data->tableName;
-            $create->addTableToList($_POST['new']);
+            $this->tableController->addTable($_POST['new'], true);
         }
         // echo '<pre>';
         // print_r($_POST);
