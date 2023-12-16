@@ -230,8 +230,7 @@ foreach (json_decode($rel) as $table => $params) {
                     <p>
                         <mark>Seisuga 16.12.2023</mark> kaasatud tabelite loetellu saab kirjeid lisada, muuta ja
                         kustutada.Tabelikirjete sees saab uusi infovälju lisada, muuta ja kustutada, samamoodi on
-                  vastavad ajatemplid)
-
+                        seosekirjetega.
                     </p>
                     <p>
                         <mark>Seisuga 12.12.2023</mark> toimub sisuhaldussüsteemis uute tabelite loomine koos vaikimisi
