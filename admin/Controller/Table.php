@@ -5,11 +5,11 @@ include_once __DIR__ . '/../Service/Delete.php';
 include_once __DIR__ . '/../Service/Create.php';
 include_once __DIR__ . '/../View/Table.php';
 include_once __DIR__ . '/../View/Form/NewTable.php';
-use Service\Delete;
-use Service\Update;
 use \Dto\ListDTO;
 use \Service\Create;
+use \Service\Delete;
 use \Service\Read;
+use \Service\Update;
 use \View\Form\NewTable;
 use \View\Table as TableListOrDetails;
 
