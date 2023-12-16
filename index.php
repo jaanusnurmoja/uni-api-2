@@ -17,7 +17,7 @@
  */
 
 session_start();
-require_once __DIR__.'/admin/Autoload.php';
+require_once __DIR__ . '/admin/Autoload.php';
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];
@@ -224,7 +224,14 @@ foreach (json_decode($rel) as $table => $params) {
                     <h4 class="bg-warning">TEOKSIL: halduskeskkond</h4>
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
-                        või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid.
+                        või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid. SISULISELT
+                        OLEMAS.
+                    </p>
+                    <p>
+                        <mark>Seisuga 16.12.2023</mark> kaasatud tabelite loetellu saab kirjeid lisada, muuta ja
+                        kustutada.Tabelikirjete sees saab uusi infovälju lisada, muuta ja kustutada, samamoodi on
+                  vastavad ajatemplid)
+
                     </p>
                     <p>
                         <mark>Seisuga 12.12.2023</mark> toimub sisuhaldussüsteemis uute tabelite loomine koos vaikimisi
