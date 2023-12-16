@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 include_once __DIR__ . '/../Service/Read.php';
+include_once __DIR__ . '/../Service/Update.php';
 include_once __DIR__ . '/../Service/Delete.php';
 include_once __DIR__ . '/../Service/Create.php';
 include_once __DIR__ . '/../View/Table.php';
