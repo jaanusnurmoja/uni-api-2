@@ -1,6 +1,7 @@
 <?php namespace Service;
 
 use Common\Helper;
+use Controller\Table as ControllerTable;
 use mysqli;
 use stdClass;
 
@@ -36,6 +37,7 @@ class Create
 
         if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
             foreach ($input['belongsTo'] as $fk) {
+                echo "KEY `$fk[otherTable]` (`$fk[keyField]`)<br>";
                 $sqlCreate .= ",
                 `$fk[keyField]` int(11) DEFAULT NULL";
                 $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
@@ -43,7 +45,7 @@ class Create
         }
         if (isset($input['data']['fields'])) {
             foreach ($input['data']['fields'] as $column) {
-                $sqlCreate .= $this->columnDefinition($column);
+                $sqlCreate .= ', ' . $this->columnDefinition($column);
             }
         }
         /**
@@ -51,7 +53,7 @@ class Create
          */
         if (isset($input['data']['dataCreatedModified'])) {
             foreach ($input['data']['dataCreatedModified'] as $cmColumn) {
-                $sqlCreate .= $this->columnDefinition($cmColumn);
+                $sqlCreate .= ', ' . $this->columnDefinition($cmColumn);
             }
 
         }
@@ -112,7 +114,19 @@ class Create
             }
 
             if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
+                
                 foreach ($value as $relationDetails) {
+                    if ($main === false) {
+                        $tc = new ControllerTable();
+                        if($tc->checkIfFieldExists($input['tableName'], $relationDetails['keyField']) === false) {
+                            echo 'lisame olemasolevale tabelile uue indexivälja ' . $relationDetails['keyField'] . '<br>';
+                            
+                            $sql = "ALTER TABLE `$input[tableName]` 
+                            ADD COLUMN `$relationDetails[keyField]` int(11) DEFAULT NULL,
+                            ADD KEY `$relationDetails[otherTable]` (`$relationDetails[keyField]`);";
+                            $db->query($sql);
+                        }
+                    }
                     $rdCols = [];
                     $rdVals = [];
                     foreach ($relationDetails as $rdKey => $rdValue) {
@@ -128,8 +142,8 @@ class Create
 
                         }
                     }
+                    $dataForRdSql[$key][$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
                 }
-                $dataForRdSql[$key][$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
             }
         }
         $propsList = implode(", ", $props);
@@ -144,7 +158,7 @@ class Create
         $inputId = isset($input['id']) ? $input['id'] : $db->insert_id;
         if (!empty($inputId) && !empty($dataForRdSql)) {
             foreach ($dataForRdSql as $relGroup => $rdDetailsList) {
-                $this->addRelation($rdDetailsList, $inputId);
+                $this->addRelation($rdDetailsList, $inputId, $input['tableName']);
             }
         }
         $db->close();
@@ -183,22 +197,25 @@ class Create
         $db->query($sql);
     }
 
-    public function addRelation($input, $tableId)
+    public function addRelation($input, $tableId, $tableName)
     {
 
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-
+        $sql = ''; 
         foreach ($input as $lists) {
+            //$comb = array_combine($lists['rdCols'], $lists['rdVals']);
+            //$keyField = trim("'", $comb['key_field']);
+
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
             $keyList = implode(',', $lists['rdCols']);
             $valList = implode(",", $lists['rdVals']);
-            $sql = "INSERT INTO relation_details ($keyList)
+            $sql .= "INSERT INTO relation_details ($keyList)
                             VALUES ($valList);";
-            echo 'lisame seose: ' . $sql . "<hr>";
-            $db->query($sql);
         }
+        echo 'lisame seose: ' . $sql . "<hr>";
+        $db->multi_query($sql);
         $db->close();
     }
 

@@ -77,6 +77,10 @@ class Table
 
     public function addTable($input, $existingToList = false)
     {
+        echo 'Lisamine:<br>';
+        echo '<pre>';
+        print_r($input);
+        echo '</pre>';
 
         $create = new Create();
         foreach ($input as $k => $v) {
@@ -128,6 +132,10 @@ class Table
 
     public function updateTable($table)
     {
+        echo 'Muutmine:<br>';
+        echo '<pre>';
+        print_r($table);
+        echo '</pre>';
         $update = new Update();
         $update->updateTable($table);
     }
@@ -155,6 +163,11 @@ class Table
     {
         $del = new Delete();
         $del->removeFromList($list, $idOrName);
+    }
+
+    public function checkIfFieldExists($table, $field) {
+        $read = new Read();
+        return $read->getDefaultFields($table, $field);
     }
 
 }

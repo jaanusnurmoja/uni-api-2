@@ -307,7 +307,7 @@ $this->createdModified($value);
                                     if ($rdKey != "id") {
                                         //echo "<input type='hidden' name='new[$key][{{row-count-placeholder}}][$rdKey]'>";
                                         //} else {
-                                        echo "<tr><td>$rdKey</td><td><input type='text' id='$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
+                                        echo "<tr><td>$rdKey</td><td><input type='text' id='new.$key.{{row-count-placeholder}}.$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                                     }
                                 }
                             }
@@ -429,20 +429,18 @@ foreach ($this->relations as $r) {
 <?php
 //$update = new Update();
         //$create = new Create();
+        if (!empty($this->postBody)) {
 
-        if (isset($_POST['table'])) {
-            $_POST['table']['tableName'] = $data->tableName;
+        if (isset($this->postBody['table'])) {
+            $this->postBody['table']['tableName'] = $data->tableName;
             //$update->updateTable($_POST['table']);
             $this->tableController->updateTable($_POST['table']);
         }
-        if (isset($_POST['new'])) {
-            $_POST['new']['tableName'] = $data->tableName;
-            $this->tableController->addTable($_POST['new'], true);
+        if (isset($this->postBody['new'])) {
+            $this->postBody['new']['tableName'] = $data->tableName;
+            $this->tableController->addTable($this->postBody['new'], true);
         }
-        // echo '<pre>';
-        // print_r($_POST);
-        // echo '</pre>';
-
+}
     }
     public function createdModified($value, $inner = false)
     {
