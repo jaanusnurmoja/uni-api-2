@@ -1,8 +1,8 @@
 <?php
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 0);
+//ini_set('display_errors', 1);
 
-error_reporting(0);
+//error_reporting(E_ALL);
 
 //require_once 'config.php';
 
@@ -22,7 +22,7 @@ mysqli_set_charset($link, 'utf8');
 /**
  * Set response status code and print an JS Object with error's info
  *
- * @param Integer $status_code  Status code
+ * @param int $status_code  Status code
  * @param String  $message      Error's info
  */
 function error_response($status_code, $message)
@@ -257,7 +257,7 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
 }
 
 /**
- * Andmebaasipäringu keskne moodustaja. 
+ * Andmebaasipäringu keskne moodustaja.
  * @param mixed $rowid
  * @return string
  *
@@ -379,7 +379,7 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
  * @param mixed $value
  * @return mixed
  *
- * 
+ *
  * Arvestatud on võimalusega, et sama funktsiooni saaks kasutada ka
  * nt html vormis rippmenüü täitmiseks, seetõttu tagastatakse kas üksik rida või loetelu
  */
@@ -817,15 +817,16 @@ function keySplitter($key)
  *
  * Pärineb originaalist
  */
+//echo count($request);
 switch (count($request)) {
 
     case 2:
     case 3:
-        require_once './core/single_table.php';
+        require_once __DIR__ . '/core/single_table.php';
         break;
     case 4:
     case 5:
-        require_once './core/multi_table.php';
+        require_once __DIR__ . '/core/multi_table.php';
         break;
     default:
         echo (json_encode(array('error' => 'Welcome on Uni-API!')));
