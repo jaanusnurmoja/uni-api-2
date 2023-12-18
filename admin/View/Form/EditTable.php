@@ -408,7 +408,7 @@ foreach ($this->relations as $r) {
                                 $acDiff = array_diff($ac1, $ac2);
                                 if (!empty($acDiff)) {
                                     foreach ($acDiff as $d) {
-                                        echo "DELETE FROM relation_details WHERE id=$d;";
+                                        echo "DELETE FROM uasys_relation_details WHERE id=$d;";
                                         $this->tableController->removeFromList('relation_details', $d);
                                     }
                                     echo '<hr>see on reldiff: <hr>';}
@@ -431,16 +431,16 @@ foreach ($this->relations as $r) {
         //$create = new Create();
         if (!empty($this->postBody)) {
 
-        if (isset($this->postBody['table'])) {
-            $this->postBody['table']['tableName'] = $data->tableName;
-            //$update->updateTable($_POST['table']);
-            $this->tableController->updateTable($_POST['table']);
+            if (isset($this->postBody['table'])) {
+                $this->postBody['table']['tableName'] = $data->tableName;
+                //$update->updateTable($_POST['table']);
+                $this->tableController->updateTable($_POST['table']);
+            }
+            if (isset($this->postBody['new'])) {
+                $this->postBody['new']['tableName'] = $data->tableName;
+                $this->tableController->addTable($this->postBody['new'], true);
+            }
         }
-        if (isset($this->postBody['new'])) {
-            $this->postBody['new']['tableName'] = $data->tableName;
-            $this->tableController->addTable($this->postBody['new'], true);
-        }
-}
     }
     public function createdModified($value, $inner = false)
     {

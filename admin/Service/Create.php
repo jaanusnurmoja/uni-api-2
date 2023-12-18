@@ -115,14 +115,14 @@ class Create
             }
 
             if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
-                
+
                 foreach ($value as $relationDetails) {
                     if ($main === false) {
                         $tc = new ControllerTable();
-                        if($tc->checkIfFieldExists($input['tableName'], $relationDetails['keyField']) === false) {
+                        if ($tc->checkIfFieldExists($input['tableName'], $relationDetails['keyField']) === false) {
                             echo 'lisame olemasolevale tabelile uue indexivälja ' . $relationDetails['keyField'] . '<br>';
-                            
-                            $sql = "ALTER TABLE `$input[tableName]` 
+
+                            $sql = "ALTER TABLE `$input[tableName]`
                             ADD COLUMN `$relationDetails[keyField]` int(11) DEFAULT NULL,
                             ADD FOREIGN KEY `$relationDetails[otherTable]` (`$relationDetails[keyField]`)
                             REFERENCES `$relationDetails[otherTable]` (`id`)
@@ -153,7 +153,7 @@ class Create
         $propsList = implode(", ", $props);
         $valsList = implode(", ", $vals);
         if ($main === true) {
-            $sql = "INSERT INTO `models` ($propsList)
+            $sql = "INSERT INTO `uasys_models` ($propsList)
         VALUES ($valsList);
         ";
             echo 'uus tabel listi: ' . $sql . "<hr>";
@@ -206,7 +206,7 @@ class Create
 
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-        $sql = ''; 
+        $sql = '';
         foreach ($input as $lists) {
             //$comb = array_combine($lists['rdCols'], $lists['rdVals']);
             //$keyField = trim("'", $comb['key_field']);
@@ -215,7 +215,7 @@ class Create
             array_push($lists['rdVals'], $tableId);
             $keyList = implode(',', $lists['rdCols']);
             $valList = implode(",", $lists['rdVals']);
-            $sql .= "INSERT INTO relation_details ($keyList)
+            $sql .= "INSERT INTO uasys_relation_details ($keyList)
                             VALUES ($valList);";
         }
         echo 'lisame seose: ' . $sql . "<hr>";

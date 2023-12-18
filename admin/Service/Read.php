@@ -62,12 +62,12 @@ class Read
         tcu.id as tcu_id, tcu.username as tcu_name, tcu.email as tcu_email, tcu.password as tcu_password, tcu.social as tcu_social, tcu.user_token as tcu_usertoken, tcu.identity_token as tcu_id_token, tcu.role as tcu_role,
         rcu.id as rcu_id, rcu.username as rcu_name, rcu.email as rcu_email, rcu.password as rcu_password, rcu.social as rcu_social, rcu.user_token as rcu_usertoken, rcu.identity_token as rcu_id_token, rcu.role as rcu_role
 
-        FROM models t
+        FROM uasys_models t
         LEFT JOIN fields f ON f.models_id = t.id
-        LEFT JOIN relation_details rd ON rd.models_id = t.id
-        LEFT JOIN relations r ON r.id = rd.relations_id
-        LEFT JOIN users tcu ON tcu.id = t.created_by
-        LEFT JOIN users rcu ON rcu.id = rd.created_by
+        LEFT JOIN uasys_relation_details rd ON rd.models_id = t.id
+        LEFT JOIN uasys_relations r ON r.id = rd.relations_id
+        LEFT JOIN uasys_users tcu ON tcu.id = t.created_by
+        LEFT JOIN uasys_users rcu ON rcu.id = rd.created_by
         $where";
         $q = $db->query($query);
 
@@ -114,7 +114,7 @@ class Read
                 $tcUser = new User;
                 $tcUser->setId($row['tcu_id'])->setUsername($row['tcu_name'])->setEmail($row['tcu_email'])->setPassword($row['tcu_password'])->setSocial($row['tcu_social'])->setUserToken($row['tcu_usertoken'])->setIdentityToken($row['tcu_id_token'])->setRole($row['tcu_role']);
 
-                $tableCreMod = new CreatedModified($row['rowid'], 'models');
+                $tableCreMod = new CreatedModified($row['rowid'], 'uasys_models');
                 $tableCreMod->setCreatedBy($tcUser)->setCreatedWhen($row['tc_when'])->setModifiedBy($row['tm_who'])->setModifiedWhen($row['tm_when']);
                 $model->setData($data);
                 $model->setCreatedModified($tableCreMod);
@@ -203,7 +203,7 @@ class Read
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
 
-        $query = "SELECT * FROM relations";
+        $query = "SELECT * FROM uasys_relations";
         $q = $db->query($query);
 
         while ($row = $q->fetch_assoc()) {

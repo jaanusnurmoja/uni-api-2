@@ -47,7 +47,7 @@ class Db
             $singleRow = in_array('u.id', array_keys($props));
             $where = " WHERE" . implode(" AND ", $ws);
         }
-        $sql = "SELECT u.id as ID, u.*, $pQuery FROM users u
+        $sql = "SELECT u.id as ID, u.*, $pQuery FROM uasys_users u
         LEFT JOIN persons p ON p.id = u.persons_id$where;";
         $q = $cnn->query($sql);
         while ($row = $q->fetch_assoc()) {
@@ -109,7 +109,7 @@ class Db
         $cols = implode(', ', array_keys($newKvs));
         $vals = "'" . implode("','", array_values($newKvs)) . "'";
         $vals = str_replace("'last_insert_id()'", "last_insert_id()", $vals);
-        $sql .= "INSERT INTO users ($cols) values ($vals);";
+        $sql .= "INSERT INTO uasys_users ($cols) values ($vals);";
         $sql .= "SELECT last_insert_id() as lastId;";
         $r = new stdClass;
         $cnn->multi_query($sql);
@@ -194,7 +194,7 @@ class Db
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $cnn = $this->cnn();
-        $sql = "UPDATE users SET persons_id = $p WHERE id = $u->id";
+        $sql = "UPDATE uasys_users SET persons_id = $p WHERE id = $u->id";
         if ($cnn->query($sql)) {
             return $u;
         }

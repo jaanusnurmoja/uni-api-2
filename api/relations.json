@@ -79,7 +79,7 @@
   },
   "hasManyAndBelongsTo": {
     "xref": {
-      "table": "crossref",
+      "table": "uasys_crossref",
       "field": "table_value"
     },
     "tables": [

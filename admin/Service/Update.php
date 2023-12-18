@@ -17,7 +17,7 @@ class Update
         $whereId = $table['id'];
         $sql = '';
 
-        $sql .= "UPDATE models SET modified_by = " . $table['createdModified']['modifiedBy'] . " WHERE id = $whereId;
+        $sql .= "UPDATE uasys_models SET modified_by = " . $table['createdModified']['modifiedBy'] . " WHERE id = $whereId;
         ";
         foreach ($table as $propName => $propContent) {
             if ($propName == 'data' && isset($propContent['fields'])) {
@@ -101,7 +101,7 @@ class Update
 
     public function updateRelationDetails($relationDetails, $rdId)
     {
-        $sql = "UPDATE relation_details SET ";
+        $sql = "UPDATE uasys_relation_details SET ";
         foreach ($relationDetails as $rdKey => $rdValue) {
             if ($rdKey == 'createdModified') {
                 foreach ($rdValue as $cmKey => $cmValue) {
@@ -126,4 +126,19 @@ class Update
         $read = new Read();
         return $read->getDefaultFields($table, $field);
     }
+
+    /**
+     * @TODO
+     * ALTER TABLE `systeem` DROP FOREIGN KEY `beers`;
+     * ALTER TABLE `systeem` ADD CONSTRAINT `beers` FOREIGN KEY (`beers_id`)
+     * REFERENCES `beers`(`id`)
+     * ON DELETE SET NULL
+     * ON UPDATE CASCADE;
+     * ALTER TABLE `systeem` DROP FOREIGN KEY `producers`;
+     * ALTER TABLE `systeem` ADD CONSTRAINT `producers` FOREIGN KEY (`producers_id`)
+     * REFERENCES `producers`(`id`)
+     * ON DELETE SET NULL
+     * ON UPDATE CASCADE;
+
+     */
 }
