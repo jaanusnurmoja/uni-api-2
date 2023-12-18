@@ -40,7 +40,8 @@ class Create
                 echo "KEY `$fk[otherTable]` (`$fk[keyField]`)<br>";
                 $sqlCreate .= ",
                 `$fk[keyField]` int(11) DEFAULT NULL";
-                $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
+                $indexes[] = "FOREIGN KEY `$fk[otherTable]` (`$fk[keyField]`)
+                REFERENCES `$fk[otherTable]`(`id`)";
             }
         }
         if (isset($input['data']['fields'])) {
@@ -123,7 +124,10 @@ class Create
                             
                             $sql = "ALTER TABLE `$input[tableName]` 
                             ADD COLUMN `$relationDetails[keyField]` int(11) DEFAULT NULL,
-                            ADD KEY `$relationDetails[otherTable]` (`$relationDetails[keyField]`);";
+                            ADD FOREIGN KEY `$relationDetails[otherTable]` (`$relationDetails[keyField]`)
+                            REFERENCES `$relationDetails[otherTable]` (`id`)
+                            ON UPDATE CASCADE
+                            ON DELETE SET NULL;";
                             $db->query($sql);
                         }
                     }
