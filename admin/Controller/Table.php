@@ -144,7 +144,7 @@ class Table
     {
         if ($confirmed === true) {
             $del = new Delete();
-            $del->removeFromList('models', $item);
+            $del->removeFromList('uasys_models', $item);
         } else {
             $read = new Read();
             $table = $read->getTables(null, ['table_name' => $item]);
@@ -165,7 +165,8 @@ class Table
         $del->removeFromList($list, $idOrName);
     }
 
-    public function checkIfFieldExists($table, $field) {
+    public function checkIfFieldExists($table, $field)
+    {
         $read = new Read();
         return $read->getDefaultFields($table, $field);
     }
