@@ -74,7 +74,7 @@ switch ($table) {
                  * Päring, mis moodustatakse api.php -s funktsioonis buildQuery()
                  * $request[2] on tabeli nimi url -is - nt http://minusrv.ee/uni-api/api/tabelinimi
                  */
-                $sql = buildQuery($request[2]);
+                $sql = buildQuery(isset($request[2]) && count($request) == 3 ? $request[2] : null);
                 break;
 
             case 'PUT':
@@ -161,7 +161,9 @@ switch ($table) {
                         }
                         $end = microtime(true);
                         $mySQLtime = $end - $starttime;
-                        echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
+
+                        //echo json_encode(buildQueryResults($dataRows, $starttime, $mySQLtime));
+                        restructure($dataRows);
                     }
                     break;
 
