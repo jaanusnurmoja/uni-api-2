@@ -1,20 +1,23 @@
 <?php namespace Common\Model;
+
 use \user\model\User;
 
 /**
  * Lisamis- ja muutmisinfot kandev väljade rühm halduskeskkonna jaoks
  */
-class CreatedModified {
+class CreatedModified
+{
 
-    public int $tableId = 0;
-    public string $tableName;
+    private int $tableId = 0;
+    private string $tableName;
     public User $createdBy;
     public string $createdWhen;
     public ?int $modifiedBy = null;
     public ?string $modifiedWhen = null;
-    
-    public function __construct($tableId=null, $tableName=null){
-        
+
+    public function __construct($tableId = null, $tableName = null)
+    {
+
         if (!empty($tableId)) {
             if ($this->tableId == $tableId && $this->tableName == $tableName) {
                 return $this;
@@ -22,10 +25,10 @@ class CreatedModified {
                 $this->setTableId($tableId);
                 $this->setTableName($tableName);
             }
-        } 
+        }
     }
-      
-        /**
+
+    /**
      * Get the value of tableId
      *
      * @return int
@@ -48,22 +51,22 @@ class CreatedModified {
 
         return $this;
     }
-    
+
     /**
      * Get the value of tableName
-     * 
-     * @return string 
+     *
+     * @return string
      */
-  
-     public function getTableName(): string
+
+    public function getTableName(): string
     {
         return $this->tableName;
     }
 
     /**
      * Set the value of tableName
-     * 
-     * @param string  $tableName 
+     *
+     * @param string  $tableName
      */
     public function setTableName($tableName): self
     {
@@ -74,8 +77,8 @@ class CreatedModified {
 
     /**
      * Get the value of createdBy
-     * 
-     * @return User 
+     *
+     * @return User
      */
     public function getCreatedBy(): User
     {
@@ -84,7 +87,7 @@ class CreatedModified {
 
     /**
      * Set the value of createdBy
-     * 
+     *
      * @param User $createdBy
      */
     public function setCreatedBy(User $createdBy): self
@@ -96,7 +99,7 @@ class CreatedModified {
 
     /**
      * Get the value of createdWhen
-     * 
+     *
      * @return string  (mysql: timestamp)
      */
     public function getCreatedWhen()
@@ -106,7 +109,7 @@ class CreatedModified {
 
     /**
      * Set the value of createdWhen
-     * 
+     *
      * @param string  $createdWhen ('Y-m-d H:i:s')
      */
     public function setCreatedWhen($createdWhen): self
@@ -118,7 +121,7 @@ class CreatedModified {
 
     /**
      * Get the value of modifiedBy
-     * 
+     *
      * @return int (user id)
      */
     public function getModifiedBy()
@@ -128,7 +131,7 @@ class CreatedModified {
 
     /**
      * Set the value of modifiedBy
-     * 
+     *
      * $param int $modifiedBy
      */
     public function setModifiedBy($modifiedBy): self
@@ -140,7 +143,7 @@ class CreatedModified {
 
     /**
      * Get the value of modifiedWhen
-     * 
+     *
      *   @return string  (mysql: timestamp)
      */
     public function getModifiedWhen()
@@ -150,15 +153,14 @@ class CreatedModified {
 
     /**
      * Set the value of modifiedWhen
-     * 
+     *
      * @param string  $modifiedWhen ('Y-m-d H:i:s')
-    */
+     */
     public function setModifiedWhen($modifiedWhen): self
     {
         $this->modifiedWhen = $modifiedWhen;
 
         return $this;
     }
-
 
 }

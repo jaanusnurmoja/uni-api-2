@@ -1,5 +1,6 @@
 <?php
 
+use Api\Model\Data;
 use Api\Model\Entity;
 use Common\Helper;
 
@@ -13,6 +14,7 @@ session_start();
 require_once __DIR__ . '/../admin/Controller/Table.php';
 require_once __DIR__ . '/../Autoload.php';
 require_once __DIR__ . '/src/Model/Entity.php';
+require_once __DIR__ . '/src/Model/Data.php';
 require_once __DIR__ . '/src/Dto/Entity.php';
 
 // get the HTTP method, path and body of the request
@@ -42,6 +44,7 @@ function error_response($status_code, $message)
     http_response_code($status_code);
     exit();
 }
+
 createClassesForEntity();
 
 function createClassesForEntity()
@@ -51,33 +54,7 @@ function createClassesForEntity()
     global $adminController;
     $models = $adminController->getTables(true);
     foreach ($models as $i => $model) {
-        $entityTmpl = new \Api\Model\Entity();
-        foreach ($model as $modelProp => $propValue) {
-            if ($modelProp == 'tableName') {
-                $entityTmpl->setTable($propValue);
-            }
-
-            if ($modelProp == 'pk') {
-                $entityTmpl->setPk(array('name' => $propValue, 'value' => null));
-            }
-
-            if ($modelProp == 'data') {
-                $entityTmpl->setData($propValue);
-            }
-            if (in_array($modelProp, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
-                if (!empty($propValue)) {
-                    $setModelProp = 'set' . ucFirst($modelProp);
-                    if ($modelProp == 'hasManyAndBelongsTo') {
-                        foreach ($propValue as $relProps) {
-                            $entityTmpl->setHasManyAndBelongsTo($model->tableName, $model->pk, 'id', $relProps->otherTable == $model->tableName ? null : $relProps->otherTable);
-                        }
-                    } else {
-                        $entityTmpl->$setModelProp($propValue);
-                    }
-                }
-            }
-        }
-        $entities[$model->tableName] = $entityTmpl;
+        $entities[$model->tableName] = $model;
     }
 
     $newClassName = Helper::camelize($model->tableName);
@@ -95,6 +72,50 @@ function createClassesForEntity()
     }
 }
 
+function makeEntityForTable($table)
+{
+    global $entities;
+    $entity = new Entity();
+    $adminTmpl = $entities[$table];
+    $entity->setTable($table);
+    $entity->setPk($adminTmpl->pk);
+    $data = new Data($table);
+    $content = [];
+    $fields = array_keys($adminTmpl->data->fields);
+    foreach ($fields as $field) {
+        //foreach ($adminTmpl->data->fields as $field => $value) {
+        $content[$field] = null;
+        //}
+    }
+
+    $data->setContent($content);
+    if (!empty($adminTmpl->belongsTo)) {
+        foreach ($adminTmpl->belongsTo as $i => $btItem) {
+            unset($adminTmpl->belongsTo[$i]->createdModified, $adminTmpl->belongsTo[$i]->relations);
+            $adminTmpl->belongsTo[$i]->item = makeEntityForTable($btItem->otherTable);
+        }
+        $entity->setBelongsTo($adminTmpl->belongsTo);
+    }
+    if (!empty($adminTmpl->hasMany)) {
+        foreach ($adminTmpl->hasMany as $i => $hmItem) {
+            unset($adminTmpl->hasMany[$i]->createdModified, $adminTmpl->hasMany[$i]->relations);
+            $adminTmpl->hasMany[$i]->items[] = makeEntityForTable($hmItem->otherTable);
+        }
+        $entity->setHasMany($adminTmpl->hasMany);
+    }
+    if (!empty($adminTmpl->hasManyAndBelongsTo)) {
+        foreach ($adminTmpl->hasManyAndBelongsTo as $i => $hmabtItem) {
+            unset($adminTmpl->hasManyAndBelongsTo[$i]->createdModified, $adminTmpl->hasManyAndBelongsTo[$i]->relations);
+            $adminTmpl->hasManyAndBelongsTo[$i]->items[] = makeEntityForTable($hmabtItem->otherTable);
+        }
+        $entity->setHasManyAndBelongsTo($table, 0, $hmabtItem->otherTable);
+    }
+    return $entity;
+}
+
+echo json_encode(makeEntityForTable($request[1]));
+//echo json_encode($entities);
+
 function restructure($tmpDataRows)
 {
     global $entities;
@@ -106,42 +127,12 @@ function restructure($tmpDataRows)
         $newEntity = new Entity();
         $hmEntity = new Entity();
         $related = [];
+        $main = makeMainRow($request[1], $outputRows[0], $newEntity);
         foreach ($outputRows as $i => $row) {
             $data = [];
             $pkValue = null;
             foreach ($row as $key => $value) {
-                if (!strpos($key, ':') && $newEntity->pk['value'] != $row[$newEntity->pk['name']]) {
-                    //kui ei ole :
-                    if ($key == $entityTmpl->pk['name']) {
-                        $newEntity->setPkName($key);
-                        $newEntity->setPkValue($value);
-                    } else {
-                        $data[$key] = $value;
-                        if (!empty($entityTmpl->belongsTo)) {
-                            foreach ($entityTmpl->belongsTo as $i => $joinItem) {
-                                $related['belongsTo'][$i] = new stdClass;
-                                $btEntity = new \Api\Dto\Entity();
-                                if ($key == $joinItem->keyField && (!isset($btEntity->pk['value']) || $btEntity->pk['value'] != $value)) {
-                                    foreach ($entities[$joinItem->otherTable] as $btKey => $btValue) {
-                                        if ($btKey == 'pk') {
-                                            $btEntity->pk['name'] = $btValue;
-                                            $btEntity->pk['value'] = $value;
-                                        }
-                                        if ($btKey == 'data') {
-                                            $sub = getValueOrListFromSubQuery($joinItem->otherTable, $btEntity->pk['name'], $btEntity->pk['value']);
-                                            unset($sub[$btEntity->pk['name']]);
-                                            $btEntity->data = $sub;
-                                        }
-                                    }
-                                }
-                                $related['belongsTo'][$i]->item = $btEntity;
-                            }
-                        }
-                    }
-                    $newEntity->setPkValue($pkValue);
-                    $newEntity->setData($data);
-                    // kui ei ole : lõpp
-                } else {
+                if (strpos($key, ':') && $newEntity->pk['value'] != $row[$newEntity->pk['name']]) {
                     // kui on :
                     $real = keySplitter($key);
                     //$real['table'], $real['field']
@@ -160,10 +151,12 @@ function restructure($tmpDataRows)
                                     $related['hasMany'][$i]->items[$value]->pk = $pk;
                                 }
                             } else {
+                                /*
                                 print_r($row["{$real['table']}:{$pk['name']}"]);
                                 echo '<hr>';
                                 print_r($real);
                                 echo '<hr>';
+                                 */
                                 $related['hasMany'][$i]->items[$row["{$real['table']}:{$pk['name']}"]]->data[$real['field']] = $value;
                             }
                         }
@@ -173,6 +166,38 @@ function restructure($tmpDataRows)
                     }
                 }
                 // kui on : lõpp
+                } else {
+                //kui ei ole :
+                if ($key == $entityTmpl->pk['name']) {
+                    $newEntity->setTable($request[1]);
+                    $newEntity->setPkName($key);
+                    $newEntity->setPkValue($value);
+                } else {
+                    $data[$key] = $value;
+                    if (!empty($entityTmpl->belongsTo)) {
+                        foreach ($entityTmpl->belongsTo as $i => $joinItem) {
+                            $related['belongsTo'][$i] = new stdClass;
+                            $btEntity = new \Api\Dto\Entity();
+                            if ($key == $joinItem->keyField && (!isset($btEntity->pk['value']) || $btEntity->pk['value'] != $value)) {
+                                foreach ($entities[$joinItem->otherTable] as $btKey => $btValue) {
+                                    if ($btKey == 'pk') {
+                                        $btEntity->pk['name'] = $btValue;
+                                        $btEntity->pk['value'] = $value;
+                                    }
+                                    if ($btKey == 'data') {
+                                        $sub = getValueOrListFromSubQuery($joinItem->otherTable, $btEntity->pk['name'], $btEntity->pk['value']);
+                                        unset($sub[$btEntity->pk['name']]);
+                                        $btEntity->data = $sub;
+                                    }
+                                }
+                            }
+                            $related['belongsTo'][$i]->item = $btEntity;
+                        }
+                    }
+                }
+                $newEntity->setPkValue($pkValue);
+                $newEntity->setData($data);
+// kui ei ole : lõpp
             }
 
         }
@@ -181,6 +206,21 @@ function restructure($tmpDataRows)
         $dataRows[$rowid] = $newEntity;
     }
     //print_r($dataRows);
+}
+
+function makeMainRow($table, $row, $entity) {
+    $pk = [];
+    $data = new Data();
+    $cmFields = get_object_vars($data->createdModified);
+while (!strpos($key,':') && $row[$key] = $value) {
+    if (isPk($table, $key)) {
+        $pk['name'] = $key;
+        $pk['value'] = $value;
+    } else {
+
+    }
+
+}
 }
 
 function isPk($table, $field)

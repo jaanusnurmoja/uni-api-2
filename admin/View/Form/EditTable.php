@@ -44,7 +44,10 @@ class EditTable
         $readRels = new \Controller\Table();
         $this->tableController = $readRels;
         $list = new \DTO\ListDTO();
-        $this->currentUser = $_SESSION['loggedIn']['userData'];
+        if (isset($_SESSION['loggedIn'])) {
+            $this->currentUser = $_SESSION['loggedIn']['userData'];
+        }
+
         $readRels->getRelationsList($list);
         $this->relations = $list->list;
         $this->data = $data;
