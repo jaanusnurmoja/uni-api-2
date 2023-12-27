@@ -1,8 +1,8 @@
 <?php
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 0);
+//ini_set('display_errors', 1);
 
-error_reporting(0);
+//error_reporting(E_ALL);
 
 //require_once 'config.php';
 
@@ -22,7 +22,7 @@ mysqli_set_charset($link, 'utf8');
 /**
  * Set response status code and print an JS Object with error's info
  *
- * @param Integer $status_code  Status code
+ * @param int $status_code  Status code
  * @param String  $message      Error's info
  */
 function error_response($status_code, $message)
@@ -62,22 +62,20 @@ function check_token()
 }
 
 /**
- * Summary of getRelations
+ * Andmeseoste seadistus json failist
  * @return mixed
- * Seadistus imporditakse
  */
 function getRelations()
 {
     return json_decode(file_get_contents('relations.json'), true);
 }
 /**
- * Summary of hasManyAndBelongsTo
+ * Ristviidete mall
  * @param mixed $relation
  * @param mixed $relations
  * @param mixed $table
  * @return mixed
  *
- * Ristviidete mall
  */
 function hasManyAndBelongsTo($relation, $relations, $table)
 {
@@ -120,13 +118,12 @@ function hasManyAndBelongsTo($relation, $relations, $table)
 }
 
 /**
- * Summary of getDataWithRelations
+ * Andmestruktuuri moodustaja seadistusfaili põhjal
  * @param mixed $table
  * @param mixed $pkValue
  * @param mixed $origTable
  * @return array
  *
- * Andmestruktuuri moodustaja seadistusfaili põhjal
  */
 function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 {
@@ -171,11 +168,10 @@ function getDataWithRelations($table = null, $pkValue = null, $origTable = null)
 }
 
 /**
- * Summary of getDataStructure
+ * Tagastab getDataWithRelations andmed ilma peatabeli nimega indeksita
  * @param mixed $table
  * @return mixed
  *
- * Hiljem loodud abifunktsioon, mis tagastab getDataWithRelations andmed ilma peatabeli nimega indeksita
  */
 function getDataStructure($table = null)
 {
@@ -189,7 +185,7 @@ function getDataStructure($table = null)
 }
 
 /**
- * Summary of getColumns
+ * Päringus kasutatavad väljad
  * @param mixed $table
  * @param mixed $parent
  * @param mixed $tableAlias
@@ -237,7 +233,7 @@ function getColumns($table, $parent = null, $tableAlias = null)
 }
 
 /**
- * Summary of getJoinColumns
+ * Rekursiivne funktsioon ühendatud tabelite väljanimede kogumiseks
  * @param mixed $table
  * @param mixed $tableData
  * @param mixed $parent
@@ -245,7 +241,6 @@ function getColumns($table, $parent = null, $tableAlias = null)
  * @param mixed $cols
  * @return string
  *
- * Rekursiivne funktsioon ühendatud tabelite väljanimede kogumiseks
  */
 function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols = '')
 {
@@ -262,11 +257,11 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
 }
 
 /**
- * Summary of buildQuery
+ * Andmebaasipäringu keskne moodustaja.
  * @param mixed $rowid
  * @return string
  *
- * Andmebaasipäringu keskne moodustaja. Siin kutsutakse esile ka ühendatud andmete päringuosa, v.a. many-to-one
+ * Siin kutsutakse esile ka ühendatud andmete päringuosa, v.a. many-to-one
  */
 function buildQuery($rowid = null)
 {
@@ -312,7 +307,7 @@ function buildQuery($rowid = null)
 }
 
 /**
- * Summary of buildQueryJoins
+ * Joinide moodustaja
  * @param mixed $joinTable
  * @param mixed $joinTableData
  * @param mixed $table
@@ -378,13 +373,13 @@ function buildQueryJoins($joinTable, $joinTableData, $table, $tableData, $xref =
 }
 
 /**
- * Summary of getValueOrListFromSubQuery
+ * Moodustab üksikpäringuid many-to-one väljade jaoks.
  * @param mixed $table
  * @param mixed $where
  * @param mixed $value
  * @return mixed
  *
- * Moodustab üksikpäringuid many-to-one väljade jaoks.
+ *
  * Arvestatud on võimalusega, et sama funktsiooni saaks kasutada ka
  * nt html vormis rippmenüü täitmiseks, seetõttu tagastatakse kas üksik rida või loetelu
  */
@@ -408,11 +403,10 @@ function getValueOrListFromSubQuery($table, $where = null, $value = null)
     return $count == 1 ? $data[0] : $data;
 }
 /**
- * Summary of getKeys
+ * Abifunktsioon primaar- või võõrvõtmete saamiseks
  * @param mixed $data
  * @return array<array>
  *
- * Abifunktsioon primaar- või võõrvõtmete saamiseks
  * @todo Siin on primaarvõtme nimi "hardcoded". Tavaliselt on selle nimi id, kuid alati ei pruugi olla
  */
 function getKeys($data)
@@ -441,12 +435,11 @@ function getKeys($data)
 }
 
 /**
- * Summary of getPk
+ * Abifunktsioon: leia primaarvõti andmete hulgast või lihtsalt küsi, mis on selle tabeli primaarvõti
  * @param mixed $table
  * @param mixed $data
  * @return mixed
  *
- * Abifunktsioon: leia primaarvõti andmete hulgast või lihtsalt küsi, mis on selle tabeli primaarvõti
  */
 function getPk($table, $data = null)
 {
@@ -464,12 +457,12 @@ function getPk($table, $data = null)
 }
 
 /**
- * Summary of isInHasManyOf
+ * Abifunktsioon: kas $lookup tabel on $table alam
  * @param mixed $lookup
  * @param mixed $table
  * @return bool
  *
- * Abifunktsioon: kas $lookup tabel on $table alam. Kui $table on null, siis mõeldakse ülemtabelina peamist tabelit
+ * Kui $table on null, siis mõeldakse ülemtabelina peamist tabelit
  */
 function isInHasManyOf($lookup, $table = null)
 {
@@ -481,13 +474,12 @@ function isInHasManyOf($lookup, $table = null)
 }
 
 /**
- * Summary of isInHasManyAndBelongsTo
+ * Abifunktsioon: kas see tabel või selle aliasega tabel on ristviidete loetelus (vt seadistusfaili)
  * @param mixed $lookupAlias
  * @param mixed $table
  * @param mixed $realName
  * @return mixed
  *
- * Abifunktsioon: kas see tabel või selle aliasega tabel on ristviidete loetelus (vt seadistusfaili)
  */
 function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
 {
@@ -508,13 +500,12 @@ function isInHasManyAndBelongsTo($lookupAlias, $table = null, $realName = false)
 }
 
 /**
- * Summary of getTablesThisBelongsTo
+ * Abifunktsioon: leia tabelid, mille alam see tabel (või fk väli) on
  * @param mixed $table
  * @param mixed $field
  * @param mixed $check
  * @return array
  *
- * Abifunktsioon: leia tabelid, mille alam see tabel (või fk väli) on
  */
 function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 {
@@ -536,11 +527,10 @@ function getTablesThisBelongsTo($table = null, $field = null, $check = null)
 }
 
 /**
- * Summary of hasMany
+ * Abifunktsioon: tabeli alamtabelite loetelu.
  * @param mixed $table
  * @return mixed
  *
- * Abifunktsioon: tabeli alamtabelite loetelu.
  */
 function hasMany($table = null)
 {
@@ -551,7 +541,7 @@ function hasMany($table = null)
 }
 
 /**
- * Summary of startsWith
+ * String algab sellega
  * @param mixed $haystack
  * @param mixed $needle
  * @return bool
@@ -565,13 +555,12 @@ function startsWith($haystack, $needle)
 }
 
 /**
- * Summary of reorganize
+ * Abifunktsioon: mall andmete ümberpaigutamiseks
  * @param mixed $table
  * @param mixed $item
  * @param mixed $forBelongsTo
  * @return array
  *
- * Abifunktsioon: mall andmete ümberpaigutamiseks
  */
 function reorganize($table, $item, $forBelongsTo = false)
 {
@@ -601,12 +590,12 @@ function reorganize($table, $item, $forBelongsTo = false)
 }
 
 /**
- * Summary of buildQueryResults
+ * Andmebaasist päritud andmete kuvaja
  * @param mixed $data
  * @param mixed $starttime
  * @param mixed $mySQLtime
  * @return array
- * Andmebaasist päritud andmete kuvamiseks pöördutakse selle funktsiooni poole.
+ *
  * Esialgne andmevoog on $data. Teised parameetrid - andmete laadimise algus
  * ning mysql päringu tagastamise kiirus sekundites.
  */
@@ -687,14 +676,13 @@ function buildQueryResults($data, $starttime = null, $mySQLtime = null)
     return $results;
 }
 /**
- * Summary of buildResultsOfHMABT
+ * Kahepoolsete many-to-many seoste andmete näitamise funktsioon
  * @param mixed $dataRows
  * @param mixed $tbl
  * @param mixed $tblAlias
  * @param mixed $d
  * @return mixed
  *
- * Kahepoolsete many-to-many seoste andmete näitamise funktsioons
  */
 function buildResultsOfHMABT(
     $dataRows,
@@ -725,7 +713,7 @@ function buildResultsOfHMABT(
 }
 
 /**
- * Summary of buildJoinedDataOfResults
+ * Korduvate alamandmete näitamise funktsioon.
  * @param mixed $dataRows
  * @param mixed $currentTable
  * @param mixed $fKeyFromArray
@@ -735,7 +723,6 @@ function buildResultsOfHMABT(
  * @param mixed $d
  * @return mixed
  *
- * Korduvate alamandmete näitamise funktsioon.
  */
 function buildJoinedDataOfResults(
     $dataRows,
@@ -799,11 +786,10 @@ function buildJoinedDataOfResults(
 }
 
 /**
- * Summary of keySplitter
+ * Väljanimede pooleks jagaja
  * @param mixed $key
  * @return array<string>
  *
- * Väljanimede pooleks jagaja
  */
 function keySplitter($key)
 {
@@ -831,15 +817,16 @@ function keySplitter($key)
  *
  * Pärineb originaalist
  */
+//echo count($request);
 switch (count($request)) {
 
     case 2:
     case 3:
-        require_once './core/single_table.php';
+        require_once __DIR__ . '/core/single_table.php';
         break;
     case 4:
     case 5:
-        require_once './core/multi_table.php';
+        require_once __DIR__ . '/core/multi_table.php';
         break;
     default:
         echo (json_encode(array('error' => 'Welcome on Uni-API!')));

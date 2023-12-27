@@ -1,11 +1,18 @@
 <?php namespace Admin;
 
-//require_once 'Autoload.php';
+/**
+ * @package uniapiplusadmin
+ *
+ * Sisuhaldussüsteemi uniapiplus halduskeskkond
+ *
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
 
-//use \Controller\Table;
-//include_once __DIR__ .'/Controller/Table.php';
+ */
 
 session_start();
+
+require_once __DIR__ . '/../Autoload.php';
+
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
@@ -13,35 +20,50 @@ $request = !empty($path) ? explode('/', $path) : [];
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 
-
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $current = str_replace(['/index.php'], '', $_SERVER['PHP_SELF']);
 
-$currentFullUrl = $http.$_SERVER['HTTP_HOST'].$current.$path;
+$currentFullUrl = $http . $_SERVER['HTTP_HOST'] . $current . $path;
 
 $_SESSION['urlComingFrom'] = $uri;
 
 $siteBase = str_replace(['/admin', $path], '', $current);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF'] . $path);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
-include_once __DIR__. '/../user/Session.php';
+include_once __DIR__ . '/../user/Session.php';
 
-if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+if (file_exists(__DIR__ . '/../config/testuser.ini')) {
+    $testUser = parse_ini_file(__DIR__ . '/../config/testuser.ini', true);
+    $_SESSION['idCardData'] = $testUser['idCardData'];
+    $_SESSION['currentPerson'] = $testUser['currentPerson']['currentPerson'];
+
+}
+
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+/**
+ * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+ *
+ * @return string
+ *
+ * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+ */
     function loggedIn()
     {
-        if (isset($_SESSION['loggedIn']))
-        {
+        $sId = '';
+        if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
-            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
         }
     }
 }
@@ -49,14 +71,13 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
 $socialIni = parse_ini_file(__DIR__ . '/../config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
-
+$_SESSION['idCardAuthService'] = $idCardAuthService;
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($currentFullUrl) : '';
 
 $api = isset($_GET['api']) ? true : false;
-include_once __DIR__ .'/Controller/Table.php';
+include_once __DIR__ . '/Controller/Table.php';
 
 $tc = new \Controller\Table();
-
 
 if (!$api) {
     ?>
@@ -104,7 +125,7 @@ if (!$api) {
     </script>
 </head>
 
-<body>
+<body class="mb-5">
     <nav class="navbar sticky-top navbar-dark bg-dark">
         <div class="container-fluid">
             <ul class="navbar-nav nav-pills list-group-horizontal">
@@ -115,29 +136,26 @@ if (!$api) {
                     <a class="navbar-brand" href="<?=$siteBaseUrl?>/admin/tables">Tabelid</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?php echo $siteBaseUrl?>/user/logout'"><?=loggedIn()?> |
+                        onclick="window.location.href='<?php echo $siteBaseUrl ?>/user/logout'"><?=loggedIn()?> |
                         LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
-                        ID CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Eesti
+                        ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
-                            style="max-height:16px"><span
-                            style="vertical-align:top; padding-left:2px">OTHER</span></button>
+                            style="max-height:16px"><span style="vertical-align:top; padding-left:2px">MUUL
+                            VIISIL | OTHER</span></button>
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
-                        'twitter'
+                    _oneall.push(['social_login', 'set_providers', [
+                        'google', 'facebook', 'twitter', 'windowslive', 'openid', 'github'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'
@@ -147,6 +165,13 @@ if (!$api) {
                     </script>
                 </li>
                 <?php }?>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="/uni-api/docs/php">Hetkeseisu dokumentatsioon</a>
+                </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="<?=$siteBaseUrl?>
+/docs/presentation/uniapiplus.pptx">Hetkeseisu ESITLUS</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="<?=$siteBaseUrl?>">Sait</a>
 
@@ -171,6 +196,9 @@ if (loggedIn()) {
                 } else {
                     if ($r['subtype'] == 'edit') {
                         $tc->getTableByIdOrName();
+                    }
+                    if ($r['subtype'] == 'delete') {
+                        $tc->deleteTable($r['item']);
                     }
                 }
             } else {
@@ -205,9 +233,51 @@ if (loggedIn()) {
                 <h5 class="card-title">Tuleb sisse logida</h5>
                 <div class="card-text">
                     Hea huviline! Selleks, et vaadata ringi halduskeskkonnas, peaksid olema sisse logitud.
-                    Soovitan seda teha id-kaardiga. Sotsiaalmeedia kontoga sisselogimine ei tundu hetkel töökindel
-                    olevat.
-                    Praegu ei saa sisseloginust kasutajat - sisseloginu on üksnes oma sessiooniga sees.
+                    Seda on võimalik teha
+                    <ol>
+                        <li>
+                            autentides end id-kaardiga siinsamas
+                        </li>
+                        <li>
+                            või valides mõne alljärgnevatest sotsiaalkontodest:
+                            <ul>
+                                <li>
+                                    Google (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Facebook (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Twitter (kommentaare ei vaja)
+                                </li>
+                                <li>
+                                    Microsoft - võib arvata, et sealgi on konto igaühel, kes pole just Windowsi vihkaja
+                                </li>
+                                <li>
+                                    GITHUB - seal peaks igal arendajal konto olema :)
+                                </li>
+                                <li>
+                                    OpenID: mh on see alternatiivne viis ID-kaardiga sisselogimiseks, autentides
+                                    vastu openid.ee serverit. Avanevasse vormilahtrisse tuleb kirjutada
+                                    openid.ee, sellest piisab.
+                                </li>
+                                <li class="bg-warning">
+                                    Kahjuks puuduvad nende võimaluste hulgast Linkedin, Instagram jt. Kui vähegi
+                                    võimalik, siis tekivad needki. Olgu veel öeldud, et olemasolev nn sotsiaalne
+                                    sisselogimine toimub tegelikult üheainsa teenuse vahendusel (OneAll).
+                                </li>
+                                <li><i class="bi bi-exclamation-triangle"></i> Esmasel sisselogimisel ID kaardiga tuleb
+                                    pärast
+                                    autentimist veel ühele "Jätka" lingile klikata. Võimalik, et see bug (automaatse
+                                    registreerumise
+                                    peatumine) on seotud asjaoluga, et koos kasutajakontoga luuakse ka isikuprofiili
+                                    kirje. Igatahes
+                                    on see "jätka" ajutine lahendus.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    Nüüd, nagu öeldud ka esilehel, saab sisseloginust automaatselt kasutaja (varem oli nii ID-kaardiga
+                    kui ka Google vms sisseloginu lihtsalt oma sessiooniga ees).
                 </div>
             </div>
         </div>
@@ -215,12 +285,11 @@ if (loggedIn()) {
             <div class="card-body">
                 <h5 class="card-title">Need to log in</h5>
                 <div class="card-text">
-                    Dear visitor! You should be logged in to look around the administration environment.
-                    I recommend doing this with an ID card. Logging in with a social media account does not seem to be
-                    reliable
-                    at the moment.
-                    Currently, a login does not become a registered user - a login is only logged in with its own
-                    session.
+                    Dear visitor! You should be logged in to look around in the administration environment.
+                    You can do it either using Estonian ID card or any of the social accounts listed under the menu item
+                    OTHER.
+                    For now, if you are logged in, you will automatically become a registered user (earlier, a logged in
+                    user was in only with one's session and then forgotten).
                 </div>
             </div>
         </div>
@@ -235,7 +304,7 @@ if (!$api) {
         jQuery('.repeat').each(function() {
             jQuery(this).repeatable_fields({
                 wrapper: 'table',
-                container: 'tbody',
+                container: '.repeatcontainer',
                 row: '.trow',
             });
         });
@@ -244,7 +313,6 @@ if (!$api) {
     <!-- script src="https://ajax.cloudflare.com/cdn-cgi/scripts/a2bd7673/cloudflare-static/rocket-loader.min.js"
         data-cf-settings="86dc64a4e19322c20a32dff2-|49" defer="">
     </!-->
-</body>
 
 </html>
 <?php }?>

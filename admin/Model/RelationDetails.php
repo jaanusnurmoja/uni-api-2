@@ -1,5 +1,13 @@
 <?php namespace Model;
 
+use Common\Model\CreatedModified;
+
+/**
+ * Andmeseose täiendavad üksikasjad
+ *
+ * @todo osa üksikasju võiksid tegelikult pärineda Relation relation mudelist
+ *
+ */
 class RelationDetails
 {
 
@@ -10,8 +18,10 @@ class RelationDetails
     public bool $hasMany = false;
     public Table $table;
     public $otherTable;
+    public CreatedModified $createdModified;
 
-    public function __construct(?int $id = null) {
+    public function __construct(?int $id = null)
+    {
         if ($id !== null) {
             $this->id = $id;
         }
@@ -127,14 +137,34 @@ class RelationDetails
         return $this;
     }
 
-    public function getOtherTable() {
-    	return $this->otherTable;
+    public function getOtherTable()
+    {
+        return $this->otherTable;
     }
 
     /**
-    * @param $otherTable
-    */
-    public function setOtherTable($otherTable) {
-    	$this->otherTable = $otherTable;
+     * @param $otherTable
+     */
+    public function setOtherTable($otherTable)
+    {
+        $this->otherTable = $otherTable;
+    }
+
+    /**
+     * Get the value of createdModified
+     */
+    public function getCreatedModified(): CreatedModified
+    {
+        return $this->createdModified;
+    }
+
+    /**
+     * Set the value of createdModified
+     */
+    public function setCreatedModified(CreatedModified $createdModified): self
+    {
+        $this->createdModified = $createdModified;
+
+        return $this;
     }
 }

@@ -1,5 +1,8 @@
 <?php namespace Model;
 
+/**
+ * Relation
+ */
 class Relation
 {
     public $id;

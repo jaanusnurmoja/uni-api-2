@@ -1,4 +1,10 @@
 <?php namespace user\model;
+
+/**
+ * @property int $count
+    @property array $list;
+
+ */
 class Users
 {
     public $count = 0;
@@ -44,6 +50,11 @@ class Users
         return $this;
     }
 
+    /**
+     * Lisa kasutaja loetellu. Muutuja $list peamine täitja
+     * @param User $user
+     * @return void
+     */
     public function addUserToList(User $user): void {
         array_push($this->list, $user);
         $this->setCount(count($this->list));
