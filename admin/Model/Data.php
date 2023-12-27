@@ -1,9 +1,12 @@
 <?php namespace Model;
 
+use Common\Model\DataCreatedModified;
+
 class Data
 {
     public $table;
     public $fields = [];
+    public DataCreatedModified $dataCreatedModified;
 
     /**
      * Get the value of table
@@ -37,6 +40,24 @@ class Data
     public function setFields($fields): self
     {
         $this->fields = $fields;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of createdModified
+     */
+    public function getDataCreatedModified(): DataCreatedModified
+    {
+        return $this->dataCreatedModified;
+    }
+
+    /**
+     * Set the value of createdModified
+     */
+    public function setDataCreatedModified(DataCreatedModified $dataCreatedModified): self
+    {
+        $this->dataCreatedModified = $dataCreatedModified;
 
         return $this;
     }

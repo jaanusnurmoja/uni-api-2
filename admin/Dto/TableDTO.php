@@ -2,22 +2,27 @@
 
 use \Model\Table;
 
+/**
+ * Põhimudeli töötleja, sh on seosed teiste tabelitega jaotatud vastavalt tüübile
+ */
 class TableDTO
 {
     public $id;
     public $tableName;
     public $pk;
     public $data;
+    public $createdModified;
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
 
-    public function __construct(Table $model=null)
+    public function __construct(Table $model)
     {
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
+        $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
         foreach ($model->getRelationDetails() as $rdRow) {
 
@@ -33,7 +38,6 @@ class TableDTO
                 array_push($this->hasManyAndBelongsTo, $rdRow);
             }
         }
-
     }
 
     /**
@@ -65,9 +69,9 @@ class TableDTO
     /**
      * Set the value of name
      */
-    public function setTableName($name): self
+    public function setTableName($tableName): self
     {
-        $this->tableName = $name;
+        $this->tableName = $tableName;
 
         return $this;
     }
@@ -93,6 +97,24 @@ class TableDTO
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Get the value of createdModified
+     */
+    public function getCreatedModified()
+    {
+        return $this->createdModified;
+    }
+
+    /**
+     * Set the value of createdModified
+     */
+    public function setCreatedModified($createdModified): self
+    {
+        $this->createdModified = $createdModified;
+
+        return $this;
     }
 
     /**
@@ -141,4 +163,5 @@ class TableDTO
     {
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
+
 }

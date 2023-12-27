@@ -245,7 +245,7 @@ function buildQuery($rowid = null)
  * Päringute join osa (v.a. many-to-one) moodustub siin, sh many-to-many päringud
  * 1) ristviited ainsa tabeli raames
  * SELECT * FROM `products`
- * LEFT JOIN crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), products.id)
+ * LEFT JOIN uasys_crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), products.id)
  * LEFT JOIN products AS related_products
  * ON (JSON_CONTAINS(JSON_EXTRACT(table_value, '$.products'), related_products.
  * id) AND related_products.id <> products.id)
@@ -253,7 +253,7 @@ function buildQuery($rowid = null)
  * 2) kahe tabeliga ristviited
  *
  * SELECT * FROM `events`
- * LEFT JOIN crossref ON JSON_CONTAINS_PATH(table_value, 'ALL','$.events','$.beers')
+ * LEFT JOIN uasys_crossref ON JSON_CONTAINS_PATH(table_value, 'ALL','$.events','$.beers')
  * AND  JSON_EXTRACT(table_value, '$.events') = events.id
  * LEFT JOIN beers ON JSON_EXTRACT(table_value, '$.beers') = beers.id
  */

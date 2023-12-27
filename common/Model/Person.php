@@ -1,18 +1,23 @@
-<?php
+<?php namespace Common\Model;
 
+/**
+ * Põhilised isikuandmed. Tabelisse persons kantakse automaatselt need, kes sisenevad esmakordselt süsteemi id-kaardiga.
+ *
+ * @todo Laiendusklass detailsemate isikuandmetega, nt sünnikuupäev (isikukoodi põhjal)
+ */
 class Person
 {
     public $id;
-    public $name;
     public $firstName;
     public $middleName;
     public $lastName;
+    /**
+     * Riik, vaikimisi Eesti
+     *
+     * @var mixed country
+     */
     public $country = 'EE';
-    private $pno;
-    private $pnoFull;
-    public $born;
-    public bool $isAlive = true;
-    public $deceased = null;
+    public $pno;
 
     /**
      * Get the value of id
@@ -28,24 +33,6 @@ class Person
     public function setId($id): self
     {
         $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of name
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set the value of name
-     */
-    public function setName($name): self
-    {
-        $this->name = $name;
 
         return $this;
     }
@@ -123,7 +110,7 @@ class Person
     }
 
     /**
-     * Get the value of pno
+     * Get  the value of pno
      */
     public function getPno()
     {
@@ -135,100 +122,9 @@ class Person
      */
     public function setPno($pno = null): self
     {
-        if ($pno == null && !empty($this->pnoFull)) {
-            $pnoArr = explode('-', $this->getPnoFull());
-            $pno = $pnoArr[1];
-            $country = str_replace('PNO', '', $pnoArr[0]);
-            if ($this->country != $country) {
-                $this->setCountry($country);
-            }
-        }
         $this->pno = $pno;
-        return $this;
-    }
-
-    /**
-     * Get the value of pnoFull
-     */
-    public function getPnoFull()
-    {
-        return $this->pnoFull;
-    }
-
-    /**
-     * Set the value of pnoFull
-     */
-    public function setPnoFull($pnoFull=null): self
-    {
-        if ( $pnoFull === null && !empty($this->pno)) {
-            $pnoFull = 'PNO' . $this->getCountry() . '-' . $this->getPno();
-        }
-            
-        $this->pnoFull = $pnoFull;
 
         return $this;
     }
 
-    /**
-     * Get the value of born
-     */
-    public function getBorn()
-    {
-        return $this->born;
-    }
-
-    /**
-     * Set the value of born
-     */
-    public function setBorn($born): self
-    {
-        $this->born = $born;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of isAlive
-     *
-     * @return bool
-     */
-    public function getIsAlive(): bool
-    {
-        return $this->isAlive;
-    }
-
-    /**
-     * Set the value of isAlive
-     *
-     * @param bool $isAlive
-     *
-     * @return self
-     */
-    public function setIsAlive(bool $isAlive = true): self
-    {
-        if ($isAlive === true) {
-            $this->setDeceased(null);
-        }
-        $this->isAlive = $isAlive;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of deceased
-     */
-    public function getDeceased()
-    {
-        return $this->deceased;
-    }
-
-    /**
-     * Set the value of deceased
-     */
-    public function setDeceased($deceased): self
-    {
-        $this->deceased = $deceased;
-
-        return $this;
-    }
 }

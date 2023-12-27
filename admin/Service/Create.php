@@ -1,6 +1,9 @@
 <?php namespace Service;
 
+use Common\Helper;
+use Controller\Table as ControllerTable;
 use mysqli;
+use stdClass;
 
 include_once __DIR__ . '/../Model/RelationDetails.php';
 include_once __DIR__ . '/../Model/Relation.php';
@@ -10,6 +13,9 @@ include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
 include_once __DIR__ . '/../../common/Helper.php';
 
+/**
+ * Andmete / tabelite loomine (create table, insert into)
+ */
 class Create
 {
     protected function cnn()
@@ -31,40 +37,44 @@ class Create
 
         if (isset($input['belongsTo']) && !empty($input['belongsTo'])) {
             foreach ($input['belongsTo'] as $fk) {
+                echo "KEY `$fk[otherTable]` (`$fk[keyField]`)<br>";
                 $sqlCreate .= ",
                 `$fk[keyField]` int(11) DEFAULT NULL";
-                $indexes[] = "KEY `$fk[otherTable]` (`$fk[keyField]`)";
+                $indexes[] = "FOREIGN KEY `$fk[otherTable]` (`$fk[keyField]`)
+                REFERENCES `$fk[otherTable]`(`id`)";
             }
         }
-        foreach ($input['data']['fields'] as $column) {
-            $sqlCreate .= ",
-                `$column[name]` $column[type]";
-            if (empty($column['defOrNull'])) {
-                $sqlCreate .= " NOT NULL";
+        if (isset($input['data']['fields'])) {
+            foreach ($input['data']['fields'] as $column) {
+                $sqlCreate .= ', ' . $this->columnDefinition($column);
             }
-            if (!empty($column['defaultValue'])) {
-                $sqlCreate .= " DEFAULT '$column[defaultValue]'";
-            } else {
-                if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
-                    $sqlCreate .= " DEFAULT NULL";
-                }
+        }
+        /**
+         * @todo Ilmselgelt tuleb luua ühisfunktsioon tavaliste ja loomis/muutmisinfo väljade loomiseks, vt koodi kordumist
+         */
+        if (isset($input['data']['dataCreatedModified'])) {
+            foreach ($input['data']['dataCreatedModified'] as $cmColumn) {
+                $sqlCreate .= ', ' . $this->columnDefinition($cmColumn);
             }
+
         }
         $sqlCreate .= ",
-           PRIMARY KEY (`$input[pk]`),
-           " . implode(',
-           ', $indexes) . "
-           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
-        ($sqlCreate);
+           PRIMARY KEY (`$input[pk]`)";
+        if (!empty($indexes)) {
+            $sqlCreate .= ', ' . implode(',
+           ', $indexes);
+        }
+
+        $sqlCreate .= ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci";
         try {
             $db->query($sqlCreate);
-            echo "<span class='bg-success'>Uus tabel $input[tableName] on loodud!</span>";
+            echo "<span class='bg-success'>Uus tabel " . $input['tableName'] . " on loodud!</span>";
             $this->addTableToList($input, $db);
         } catch (\mysqli_sql_exception $e) {
             $err = $e->getMessage();
-            echo "<span class='bg-warning'>$err: Tabel $input[tableName] näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+            echo "<span class='bg-warning'>$err: Tabel " . $input['tableName'] . " näikse juba olemas olevat, uut sellenimelist igatahes ei loodud.</span>";
+            //$this->addTableToList($input, $db);
         }
-        $db->close();
 
     }
 
@@ -74,73 +84,159 @@ class Create
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
             $db = $this->cnn();
         }
-        unset($input['id']);
+        if (empty($input['id'])) {
+            unset($input['id']);
+        }
         $props = [];
         $vals = [];
-        $dbFields = [];
+        // $dbFields = [];
         $dataForRdSql = [];
+        $main = false;
         foreach ($input as $key => $value) {
-            if (!is_array($value) && !is_object($value)) {
+            if (!is_array($value) && !is_object($value) && $key != 'id') {
                 $props[] = \Common\Helper::uncamelize($key);
-                $vals[] = $value;
+                $vals[] = is_numeric($value) ? $value : "'$value'";
+                if (!isset($input['id'])) {
+                    $main = true;
+                }
+
             }
-            if ($key == 'data') {
+            if ($key == 'data' && isset($input['id'])) {
                 foreach ($value['fields'] as $field) {
-                    $dbFields[] = \Common\Helper::uncamelize($field["name"]);
+                    $field["name"] = \Common\Helper::uncamelize($field["name"]);
+                    //$dbFields[] = $field;
+                    $this->addColumn($input['tableName'], $field);
                 }
             }
-            if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsto'])) {
+            if ($key == 'createdModified') {
+                $creMo = $this->createdModifiedTmpl($value);
+                $props[] = $creMo->cols;
+                $vals[] = $creMo->vals;
+            }
+
+            if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
+
                 foreach ($value as $relationDetails) {
+                    if ($main === false) {
+                        $tc = new ControllerTable();
+                        if ($tc->checkIfFieldExists($input['tableName'], $relationDetails['keyField']) === false) {
+                            echo 'lisame olemasolevale tabelile uue indexivälja ' . $relationDetails['keyField'] . '<br>';
+
+                            $sql = "ALTER TABLE `$input[tableName]`
+                            ADD COLUMN `$relationDetails[keyField]` int(11) DEFAULT NULL,
+                            ADD FOREIGN KEY `$relationDetails[otherTable]` (`$relationDetails[keyField]`)
+                            REFERENCES `$relationDetails[otherTable]` (`id`)
+                            ON UPDATE CASCADE
+                            ON DELETE SET NULL;";
+                            $db->query($sql);
+                        }
+                    }
                     $rdCols = [];
                     $rdVals = [];
                     foreach ($relationDetails as $rdKey => $rdValue) {
-                        if ($rdKey != 'id') {
-                            $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
-                            $rdVals[] = $rdValue;
+                        if ($rdKey != 'id' && $rdKey != 'table') {
+                            if ($rdKey == 'createdModified') {
+                                $creMoRel = $this->createdModifiedTmpl($rdValue);
+                                $rdCols[] = $creMoRel->cols;
+                                $rdVals[] = $creMoRel->vals;
+                            } else {
+                                $rdCols[] = $rdKey == 'relation' ? 'relations_id' : \Common\Helper::uncamelize($rdKey);
+                                $rdVals[] = is_numeric($rdValue) ? $rdValue : "'$rdValue'";
+                            }
+
                         }
                     }
-                    $dataForRdSql[$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
-                    //$this->addRelation(current($input), $db->insert_id);
+                    $dataForRdSql[$key][$relationDetails['otherTable']] = ['rdCols' => $rdCols, 'rdVals' => $rdVals];
                 }
             }
         }
         $propsList = implode(", ", $props);
-        $valsList = implode("', '", $vals);
-        $sql = "INSERT INTO `models` ($propsList)
-        VALUES ('$valsList');
+        $valsList = implode(", ", $vals);
+        if ($main === true) {
+            $sql = "INSERT INTO `uasys_models` ($propsList)
+        VALUES ($valsList);
         ";
-        $db->query($sql);
-
-        if (!empty($db->insert_id) && !empty($dataForRdSql)) {
-            $this->addRelation($dataForRdSql, $db->insert_id);
+            echo 'uus tabel listi: ' . $sql . "<hr>";
+            $db->query($sql);
         }
-        //$read = new Read();
-        //$newTable = $read->getTables(null,['t.id' => $db->insert_id]);
-
-        // ($db->insert_id);
-
-        //$stmt = $db->prepare($sql);
-        //$stmt->execute();
-                $db->close();
+        $inputId = isset($input['id']) ? $input['id'] : $db->insert_id;
+        if (!empty($inputId) && !empty($dataForRdSql)) {
+            foreach ($dataForRdSql as $relGroup => $rdDetailsList) {
+                $this->addRelation($rdDetailsList, $inputId, $input['tableName']);
+            }
+        }
+        $db->close();
     }
 
-    public function addRelation($input, $tableId)
+    public function columnDefinition($column)
+    {
+        $column['name'] = Helper::uncamelize($column['name']);
+        $sqlCreate = "`$column[name]` $column[type]";
+        if (empty($column['defOrNull'])) {
+            $sqlCreate .= " NOT";
+        }
+        $sqlCreate .= " NULL";
+        if (!empty($column['defaultValue'])) {
+            if (!in_array($column['defaultValue'], ['current_timestamp', 'null', 'NULL'])) {
+                $column['defaultValue'] = "'$column[defaultValue]'";
+            }
+            $sqlCreate .= " DEFAULT $column[defaultValue]";
+        } else {
+            if (isset($column['defOrNull']) && $column['defOrNull'] === true) {
+                $sqlCreate .= " DEFAULT NULL";
+            }
+        }
+
+        return $sqlCreate;
+
+    }
+
+    public function addColumn($tableName, $column)
+    {
+        $db = $this->cnn();
+        $columnToAdd = $this->columnDefinition($column);
+        $sql = "ALTER TABLE $tableName
+        ADD COLUMN $columnToAdd;";
+        echo 'lisame välja: ' . $sql . "<hr>";
+        $db->query($sql);
+    }
+
+    public function addRelation($input, $tableId, $tableName)
     {
 
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
-
-        ($input);
+        $sql = '';
         foreach ($input as $lists) {
+            //$comb = array_combine($lists['rdCols'], $lists['rdVals']);
+            //$keyField = trim("'", $comb['key_field']);
+
             array_push($lists['rdCols'], 'models_id');
             array_push($lists['rdVals'], $tableId);
             $keyList = implode(',', $lists['rdCols']);
-            $valList = "'" . implode("','", $lists['rdVals']) . "'";
-            $sql = "INSERT INTO relation_details ($keyList)
-                        VALUES ($valList);";
-            $db->query($sql);
-         $db->close();
-       }
+            $valList = implode(",", $lists['rdVals']);
+            $sql .= "INSERT INTO uasys_relation_details ($keyList)
+                            VALUES ($valList);";
+        }
+        echo 'lisame seose: ' . $sql . "<hr>";
+        $db->multi_query($sql);
+        $db->close();
+    }
+
+    public function createdModifiedTmpl($value)
+    {
+        $res = new stdClass;
+        foreach ($value as $k => $v) {
+            if ($k == 'createdBy') {
+                $res->cols = 'created_by';
+                $res->vals = $v['id'];
+            }
+            if ($k == 'modifiedBy') {
+                $res->cols = 'modified_by';
+                $res->vals = $v;
+            }
+        }
+        return $res;
     }
     /**
      * CREATE TABLE `test`.`katseloom`

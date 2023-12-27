@@ -5,10 +5,30 @@ class Field
 {
     public $id;
     public $name;
-    public $type;
+    public $type = 'varchar(255)';
     public bool $defOrNull = false;
-    public $defaultValue;
-    public $htmlDefaults;
+    public $defaultValue = null;
+    public $htmlDefaults = [];
+
+    public function __construct($name = null, $type = null)
+    {
+        $this->name = $name;
+        if (!empty($type)) {
+            $this->type = $type;
+        }
+
+        if (in_array($name, ['createdBy', 'createdWhen', 'modifiedBy', 'modifiedWhen'])) {
+            $this->defOrNull = in_array($name, ['modifiedBy', 'modifiedWhen']) ? true : false;
+            if ($name == 'createdWhen') {
+                $this->defaultValue = 'current_timestamp';
+            }
+            $this->htmlDefaults['form'] = true;
+            $this->htmlDefaults['input'] = 'hidden';
+            if ($name == 'modifiedBy') {
+                $this->defOrNull = true;
+            }
+        }
+    }
 
     public function getId()
     {
@@ -70,7 +90,6 @@ class Field
         return $this;
     }
 
-    
     /**
      * Get the value of defaultValue
      */

@@ -92,19 +92,19 @@ INSERT INTO `conductors` (`name`, `nationality`, `id`, `orchestraId`, `update_da
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `crossref`
+-- Tabeli struktuur tabelile `uasys_crossref`
 --
 
-CREATE TABLE `crossref` (
+CREATE TABLE `uasys_crossref` (
   `id` int(11) NOT NULL,
   `table_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`table_value`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `crossref`
+-- Andmete tõmmistamine tabelile `uasys_crossref`
 --
 
-INSERT INTO `crossref` (`id`, `table_value`) VALUES
+INSERT INTO `uasys_crossref` (`id`, `table_value`) VALUES
 (1, '{\"events\":1,\"beers\":1}'),
 (2, '{\"events\":1,\"beers\":2}'),
 (3, '{\"events\":2,\"beers\":1}'),
@@ -164,12 +164,12 @@ INSERT INTO `events_beers` (`id`, `events_id`, `beers_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `fields`
+-- Tabeli struktuur tabelile `uasys_fields`
 --
 
-CREATE TABLE `fields` (
+CREATE TABLE `uasys_fields` (
   `id` int(11) NOT NULL,
-  `models_id` int(11) NOT NULL,
+  `uasys_models_id` int(11) NOT NULL,
   `category` enum('pk','fk','data') COLLATE utf8mb4_estonian_ci NOT NULL,
   `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
   `type` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
@@ -178,10 +178,10 @@ CREATE TABLE `fields` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `fields`
+-- Andmete tõmmistamine tabelile `uasys_fields`
 --
 
-INSERT INTO `fields` (`id`, `models_id`, `category`, `name`, `type`, `belongs_to`, `parent_key`) VALUES
+INSERT INTO `uasys_fields` (`id`, `uasys_models_id`, `category`, `name`, `type`, `belongs_to`, `parent_key`) VALUES
 (1, 1, 'fk', 'producers_id', 'INT', 'producers', 'producers.id'),
 (2, 2, 'fk', 'orchestraId', 'INT', 'orchestras', 'orchestras.id'),
 (3, 4, 'fk', 'orchestraId', 'INT', 'orchestras', 'orchestras.id'),
@@ -264,10 +264,10 @@ INSERT INTO `manufacturers` (`name`, `nationality`, `id`, `update_date`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `models`
+-- Tabeli struktuur tabelile `uasys_models`
 --
 
-CREATE TABLE `models` (
+CREATE TABLE `uasys_models` (
   `id` int(11) NOT NULL,
   `name` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
   `pk` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL DEFAULT '''id''',
@@ -277,10 +277,10 @@ CREATE TABLE `models` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `models`
+-- Andmete tõmmistamine tabelile `uasys_models`
 --
 
-INSERT INTO `models` (`id`, `name`, `pk`, `belongs_to`, `data`, `has_many_and_belongs_to`) VALUES
+INSERT INTO `uasys_models` (`id`, `name`, `pk`, `belongs_to`, `data`, `has_many_and_belongs_to`) VALUES
 (1, 'beers', 'id', 1, 'default', 1),
 (2, 'conductors', 'id', 1, 'default', 0),
 (3, 'events', 'id', 0, 'default', 1),
@@ -471,10 +471,10 @@ INSERT INTO `products` (`id`, `title`, `category`, `price`, `createdAt`, `update
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `relations`
+-- Tabeli struktuur tabelile `uasys_relations`
 --
 
-CREATE TABLE `relations` (
+CREATE TABLE `uasys_relations` (
   `id` int(11) NOT NULL,
   `type` enum('belongsTo -','hasManyAndBelongsTo','belongsTo - hasMany','inner hasManyAndBelongsTo','inner belongsTo-','inner belongsTo - hasMany') COLLATE utf8mb4_estonian_ci NOT NULL,
   `allow_has_many` tinyint(1) DEFAULT NULL,
@@ -482,10 +482,10 @@ CREATE TABLE `relations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `relations`
+-- Andmete tõmmistamine tabelile `uasys_relations`
 --
 
-INSERT INTO `relations` (`id`, `type`, `allow_has_many`, `is_inner`) VALUES
+INSERT INTO `uasys_relations` (`id`, `type`, `allow_has_many`, `is_inner`) VALUES
 (1, 'belongsTo - hasMany', 0, 0),
 (2, 'hasManyAndBelongsTo', NULL, 0),
 (3, 'inner hasManyAndBelongsTo', NULL, 1),
@@ -497,23 +497,23 @@ INSERT INTO `relations` (`id`, `type`, `allow_has_many`, `is_inner`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `relation_details`
+-- Tabeli struktuur tabelile `uasys_relation_details`
 --
 
-CREATE TABLE `relation_details` (
+CREATE TABLE `uasys_relation_details` (
   `id` int(11) NOT NULL,
-  `relations_id` int(11) NOT NULL,
+  `uasys_relations_id` int(11) NOT NULL,
   `role` enum('belongsTo','parent','hasManyAndBelongsTo') COLLATE utf8mb4_estonian_ci NOT NULL,
   `key_field` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
   `hasMany` tinyint(1) DEFAULT NULL,
-  `models_id` int(11) NOT NULL
+  `uasys_models_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `relation_details`
+-- Andmete tõmmistamine tabelile `uasys_relation_details`
 --
 
-INSERT INTO `relation_details` (`id`, `relations_id`, `role`, `key_field`, `hasMany`, `models_id`) VALUES
+INSERT INTO `uasys_relation_details` (`id`, `uasys_relations_id`, `role`, `key_field`, `hasMany`, `uasys_models_id`) VALUES
 (1, 1, 'parent', 'id', 1, 7),
 (2, 1, 'belongsTo', 'producers_id', NULL, 1),
 (3, 2, 'hasManyAndBelongsTo', 'id', NULL, 1),
@@ -529,10 +529,10 @@ INSERT INTO `relation_details` (`id`, `relations_id`, `role`, `key_field`, `hasM
 -- --------------------------------------------------------
 
 --
--- Tabeli struktuur tabelile `users`
+-- Tabeli struktuur tabelile `uasys_users`
 --
 
-CREATE TABLE `users` (
+CREATE TABLE `uasys_users` (
   `username` varchar(32) COLLATE utf8mb4_estonian_ci NOT NULL,
   `password` varchar(60) COLLATE utf8mb4_estonian_ci NOT NULL,
   `id` int(11) NOT NULL,
@@ -541,10 +541,10 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_estonian_ci;
 
 --
--- Andmete tõmmistamine tabelile `users`
+-- Andmete tõmmistamine tabelile `uasys_users`
 --
 
-INSERT INTO `users` (`username`, `password`, `id`, `token`, `token_expiring_date`) VALUES
+INSERT INTO `uasys_users` (`username`, `password`, `id`, `token`, `token_expiring_date`) VALUES
 ('admin', '$2y$10$aBO2IWkFSb09cU5CRRqn.e.VvsOq/trW26yD72QU5Y.ZpNxYIOjkq', 1, NULL, '2022-10-03 19:48:43');
 
 --
@@ -574,9 +574,9 @@ ALTER TABLE `conductors`
   ADD KEY `orchestra` (`orchestraId`);
 
 --
--- Indeksid tabelile `crossref`
+-- Indeksid tabelile `uasys_crossref`
 --
-ALTER TABLE `crossref`
+ALTER TABLE `uasys_crossref`
   ADD PRIMARY KEY (`id`),
   ADD KEY `table_value` (`table_value`(768));
 
@@ -595,11 +595,11 @@ ALTER TABLE `events_beers`
   ADD KEY `beers_id` (`beers_id`);
 
 --
--- Indeksid tabelile `fields`
+-- Indeksid tabelile `uasys_fields`
 --
-ALTER TABLE `fields`
+ALTER TABLE `uasys_fields`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `models` (`models_id`);
+  ADD KEY `uasys_models` (`uasys_models_id`);
 
 --
 -- Indeksid tabelile `instruments`
@@ -616,9 +616,9 @@ ALTER TABLE `manufacturers`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksid tabelile `models`
+-- Indeksid tabelile `uasys_models`
 --
-ALTER TABLE `models`
+ALTER TABLE `uasys_models`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -661,23 +661,23 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksid tabelile `relations`
+-- Indeksid tabelile `uasys_relations`
 --
-ALTER TABLE `relations`
+ALTER TABLE `uasys_relations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksid tabelile `relation_details`
+-- Indeksid tabelile `uasys_relation_details`
 --
-ALTER TABLE `relation_details`
+ALTER TABLE `uasys_relation_details`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `models` (`models_id`),
-  ADD KEY `relations` (`relations_id`);
+  ADD KEY `uasys_models` (`uasys_models_id`),
+  ADD KEY `uasys_relations` (`relations_id`);
 
 --
--- Indeksid tabelile `users`
+-- Indeksid tabelile `uasys_users`
 --
-ALTER TABLE `users`
+ALTER TABLE `uasys_users`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -703,9 +703,9 @@ ALTER TABLE `conductors`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT tabelile `crossref`
+-- AUTO_INCREMENT tabelile `uasys_crossref`
 --
-ALTER TABLE `crossref`
+ALTER TABLE `uasys_crossref`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
@@ -721,9 +721,9 @@ ALTER TABLE `events_beers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT tabelile `fields`
+-- AUTO_INCREMENT tabelile `uasys_fields`
 --
-ALTER TABLE `fields`
+ALTER TABLE `uasys_fields`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
@@ -739,9 +739,9 @@ ALTER TABLE `manufacturers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT tabelile `models`
+-- AUTO_INCREMENT tabelile `uasys_models`
 --
-ALTER TABLE `models`
+ALTER TABLE `uasys_models`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
@@ -769,21 +769,21 @@ ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT tabelile `relations`
+-- AUTO_INCREMENT tabelile `uasys_relations`
 --
-ALTER TABLE `relations`
+ALTER TABLE `uasys_relations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT tabelile `relation_details`
+-- AUTO_INCREMENT tabelile `uasys_relation_details`
 --
-ALTER TABLE `relation_details`
+ALTER TABLE `uasys_relation_details`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT tabelile `users`
+-- AUTO_INCREMENT tabelile `uasys_users`
 --
-ALTER TABLE `users`
+ALTER TABLE `uasys_users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -832,11 +832,11 @@ ALTER TABLE `producers_beers`
   ADD CONSTRAINT `producers_beers_ibfk_2` FOREIGN KEY (`beers_id`) REFERENCES `beers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Piirangud tabelile `relation_details`
+-- Piirangud tabelile `uasys_relation_details`
 --
-ALTER TABLE `relation_details`
-  ADD CONSTRAINT `models` FOREIGN KEY (`models_id`) REFERENCES `models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `relations` FOREIGN KEY (`relations_id`) REFERENCES `relations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `uasys_relation_details`
+  ADD CONSTRAINT `uasys_models` FOREIGN KEY (`uasys_models_id`) REFERENCES `uasys_models` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `uasys_relations` FOREIGN KEY (`uasys_relations_id`) REFERENCES `uasys_relations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
