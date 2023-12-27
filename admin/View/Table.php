@@ -50,6 +50,7 @@ foreach ($field as $k => $v) {
                 }
             }
         }
+        echo $this->tableSingleOrList->getSql();
     }
 
     public function tableList()
@@ -107,6 +108,7 @@ foreach ($this->tableSingleOrList as $row) {
 
             ?>
     </tbody>
+</table>
     <?php
 
         }

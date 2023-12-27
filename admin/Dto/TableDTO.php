@@ -1,5 +1,6 @@
 <?php namespace Dto;
 
+use Common\Helper;
 use \Model\Table;
 
 class TableDTO
@@ -11,6 +12,7 @@ class TableDTO
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
+    private $sql;
 
     public function __construct(Table $model=null)
     {
@@ -19,6 +21,7 @@ class TableDTO
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
         unset($this->data->table);
+        $this->makeSql();
         foreach ($model->getRelationDetails() as $rdRow) {
 
             unset($rdRow->table);
@@ -140,5 +143,29 @@ class TableDTO
     public function setHasManyAndBelongsTo($hasManyAndBelongsTo)
     {
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
+    }
+
+    public function getSql() {
+    	return $this->sql;
+    }
+
+    /**
+    * @param $sql
+    */
+    public function setSql($sql) {
+    	$this->sql = $sql;
+    }
+
+    public function makeSql() {
+        $sql = 'SELECT ';
+        $sql .= "'$this->pk' AS pk_name";
+        $sql .= ", $this->pk AS pk_value";
+        $sql .= ", '$this->tableName' AS table_name";
+        foreach ($this->data->fields as $field => $value) {
+            $sqlName = Helper::uncamelize($field);
+            $sql = ", $sqlName";
+        }
+        $sql .= " FROM $this->tableName";
+        $this->setSql($sql);
     }
 }
