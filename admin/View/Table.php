@@ -32,6 +32,9 @@ class Table
         <ul>
             <?php
 foreach ($field as $k => $v) {
+    if (is_array($v)) {
+        $v = json_encode($v);
+    }
                         echo "<li>$k: $v</li>";
                     }?></ul>
     </td>
@@ -50,7 +53,11 @@ foreach ($field as $k => $v) {
                 }
             }
         }
-        echo $this->tableSingleOrList->getSql();
+        ?>
+        </table>
+        <?php
+        echo $this->tableSingleOrList->makeSql();
+        //echo $this->tableSingleOrList->getSql();
     }
 
     public function tableList()
@@ -85,6 +92,7 @@ $thead = get_object_vars($this->tableSingleOrList[1]);
 foreach ($this->tableSingleOrList as $row) {
                 echo "<tr>";
                 $url = '';
+                $row->setSql(null);
                 foreach ($row as $key => $value) {
                     if ($key == 'tableName') {
                         $url = isset($request[1]) ? $key : "tables/$value";
@@ -97,7 +105,7 @@ foreach ($this->tableSingleOrList as $row) {
                         $value = count($value);
                     }
                     if (is_object($value)) {
-                        $value = count($value);
+                        $value = count(get_object_vars($value));
                     }
                     echo '<td>' . $value . '</td>';
                 }

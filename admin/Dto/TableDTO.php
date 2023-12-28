@@ -1,7 +1,10 @@
 <?php namespace Dto;
 
 use Common\Helper;
+use Controller\Table as ControllerTable;
 use \Model\Table;
+use Service\Read;
+use user\model\User;
 
 /**
  * Põhimudeli töötleja, sh on seosed teiste tabelitega jaotatud vastavalt tüübile
@@ -17,16 +20,18 @@ class TableDTO
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
     private $sql;
+    protected $model;
 
     public function __construct(Table $model)
     {
+        $this->model = $model;
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
         $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
-        $this->makeSql();
+        //$this->makeSql();
         foreach ($model->getRelationDetails() as $rdRow) {
 
             unset($rdRow->table);
@@ -167,6 +172,10 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
+    private function getModel() {
+        return $this->model;
+    }
+
     public function getSql() {
     	return $this->sql;
     }
@@ -179,15 +188,103 @@ class TableDTO
     }
 
     public function makeSql() {
+        $model = $this->getModel();
         $sql = 'SELECT ';
-        $sql .= "'$this->pk' AS pk_name";
-        $sql .= ", $this->pk AS pk_value";
-        $sql .= ", '$this->tableName' AS table_name";
-        foreach ($this->data->fields as $field => $value) {
-            $sqlName = Helper::uncamelize($field);
-            $sql = ", $sqlName";
-        }
+        $sql .= $this->queryFields($model, $this->tableName);
         $sql .= " FROM $this->tableName";
-        $this->setSql($sql);
+        return $sql;
+        //$this->setSql($sql);
     }
+    public function queryFields(
+            $model = null,
+            $mainTable,
+            $parentTable = null,
+            $i = null,
+            $parentRelDetail = null,
+            $parentModel = null
+        ) {
+        $read = new Read();
+        $mainTablePref = '';
+        $mainTableAlias = '';
+        $sql = '';
+        $joinStmt = [];
+
+        if ($mainTable) {
+            if ($mainTable != $this->tableName) {
+                $mainTablePref = $mainTable . ':';
+                $mainTableAlias = $mainTable . '`.`';
+            }
+        $pref = !isset($i) ? '' : "{$i}::";
+
+
+        $sql = ", '$model->pk' AS `$pref{$mainTablePref}pk_name`, 
+        `$pref{$mainTableAlias}{$model->pk}` AS `$pref{$mainTablePref}pk_value`, 
+        `$pref{$mainTableAlias}{$model->tableName}` AS `$pref{$mainTablePref}table_name`
+        ";
+        foreach ($model->data->fields as $dtoField => $dtoValue) {
+            $dtofSqlName = Helper::uncamelize($dtoField);
+            $sql .= ", `$pref{$mainTableAlias}$dtofSqlName` AS `$pref{$mainTablePref}$dtofSqlName`
+            ";
+        }
+        $i = 0;
+        foreach($model->data->dataCreatedModified as $cmKey => $cmValue) {
+            $cmSqlName = Helper::uncamelize($cmKey);
+            $sql .= ", `$pref{$mainTableAlias}$cmSqlName` AS `$pref{$mainTablePref}$cmSqlName`";
+            if ($cmValue instanceof User) {
+                $sql .= ", $i::users.id AS $i::users:id, $i::users.user_name AS $i::users:user_name
+                ";
+                $i++;
+            }
+        }
+        
+        if (!empty($model->getRelationDetails())){
+            
+            if (isset($parentRelDetail->role) && $parentRelDetail->role == 'belongsTo'){
+                unset($model->relationDetails);
+            }
+            
+            if (isset($model->relationDetails)) {
+            foreach($model->relationDetails as $n => $relDetail) {
+                
+                $otherTable = Helper::uncamelize($relDetail->otherTable);
+                $dto = $read->getTables(null, ['table_name' => $otherTable]);
+                if ($relDetail->role == 'belongsTo') {
+                    if (!empty($parentTable && $otherTable == $parentTable)) {
+                        
+                            $joinStmt[$i] = "($parentTable hasMany $mainTable) LEFT JOIN $mainTable $pref{$mainTable} ON $pref{$mainTable}.{$relDetail->keyField} = $parentTable.{$parentModel->pk}";
+                            echo $joinStmt[$i];
+                            echo '<hr>';
+                        
+                    } else {
+                        if (!in_array($otherTable, [$mainTable, $parentTable])) {
+                            $joinStmt[$i] = "($mainTable belongsTo $otherTable) LEFT JOIN $otherTable $pref{$otherTable} ON $pref{$otherTable}.{$dto->pk} = $mainTable.{$relDetail->keyField}";
+                            echo $joinStmt[$i];
+                            echo '<hr>';
+                        }
+                    }
+
+                }
+                
+                    $sql .= $this->queryFields(
+                        $dto->getModel(), 
+                        $dto->getModel()->tableName, 
+                        $mainTable, 
+                        $i,
+                        $relDetail,
+                        $model
+                    );
+                    $i++;
+                }
+            }
+        }
+    }
+
+    print_r( $joinStmt);
+
+        return $sql;
+    }
+
+    //public function joins($mainTable, $mainKey, $otherTable, $otherKey, $i) {}
+
+
 }
