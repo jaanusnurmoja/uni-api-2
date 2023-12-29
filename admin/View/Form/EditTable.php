@@ -408,8 +408,8 @@ foreach ($this->relations as $r) {
                                 $acDiff = array_diff($ac1, $ac2);
                                 if (!empty($acDiff)) {
                                     foreach ($acDiff as $d) {
-                                        echo "DELETE FROM uasys_relation_details WHERE id=$d;";
-                                        $this->tableController->removeFromList('relation_details', $d);
+                                        echo "DELETE FROM uasys_relation_settings WHERE id=$d;";
+                                        $this->tableController->removeFromList('relation_settings', $d);
                                     }
                                     echo '<hr>see on reldiff: <hr>';}
                             }

@@ -101,7 +101,7 @@ class Update
 
     public function updateRelationSettings($relationSettings, $rdId)
     {
-        $sql = "UPDATE uasys_relation_details SET ";
+        $sql = "UPDATE uasys_relation_settings SET ";
         foreach ($relationSettings as $rdKey => $rdValue) {
             if ($rdKey == 'createdModified') {
                 foreach ($rdValue as $cmKey => $cmValue) {

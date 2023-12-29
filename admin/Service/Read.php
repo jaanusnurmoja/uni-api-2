@@ -64,7 +64,7 @@ class Read
 
         FROM uasys_models t
         LEFT JOIN fields f ON f.models_id = t.id
-        LEFT JOIN uasys_relation_details rd ON rd.models_id = t.id
+        LEFT JOIN uasys_relation_settings rd ON rd.models_id = t.id
         LEFT JOIN uasys_relations r ON r.id = rd.relations_id
         LEFT JOIN uasys_users tcu ON tcu.id = t.created_by
         LEFT JOIN uasys_users rcu ON rcu.id = rd.created_by
@@ -89,7 +89,7 @@ class Read
                 $rcUser = new User;
                 $rcUser->setId($row['rcu_id'])->setUsername($row['rcu_name'])->setEmail($row['rcu_email'])->setPassword($row['rcu_password'])->setSocial($row['rcu_social'])->setUserToken($row['rcu_usertoken'])->setIdentityToken($row['rcu_id_token'])->setRole($row['rcu_role']);
 
-                $relDetailsCreMod = new CreatedModified($row['rd_id'], 'relation_details');
+                $relDetailsCreMod = new CreatedModified($row['rd_id'], 'relation_settings');
                 $relDetailsCreMod->setCreatedBy($rcUser)
                     ->setCreatedWhen($row['rc_when'])
                     ->setModifiedBy($row['rm_who'])
