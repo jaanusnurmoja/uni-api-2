@@ -2,7 +2,7 @@
 
 use Common\Helper;
 use Common\Model\DataCreatedModified;
-include_once __DIR__ . '/../Model/RelationDetails.php';
+include_once __DIR__ . '/../Model/RelationSettings.php';
 include_once __DIR__ . '/../Model/Relation.php';
 include_once __DIR__ . '/../Model/Table.php';
 include_once __DIR__ . '/../Model/Field.php';
@@ -17,7 +17,7 @@ use \Dto\TableDTO;
 use \Model\Data;
 use \Model\Field;
 use \Model\Relation;
-use \Model\RelationDetails;
+use \Model\RelationSettings;
 use \Model\Table;
 use \user\model\User;
 
@@ -42,7 +42,7 @@ class Read
         }
     }
 
-    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
+    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationSettings $relationSettings = null, TableDTO $tableDTO = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
@@ -78,8 +78,8 @@ class Read
         while ($row = $q->fetch_assoc()) {
             unset($row['id'], $row['role'], $row['created_by'], $row['created_when'], $row['modified_by'], $row['modified_when']);
             $rowsDebug[] = $row;
-            while ($row['rd_id'] != null && (empty($relationDetails) || $relationDetails->getId() != $row['rd_id'])) {
-                $relationDetails = new RelationDetails();
+            while ($row['rd_id'] != null && (empty($relationSettings) || $relationSettings->getId() != $row['rd_id'])) {
+                $relationSettings = new RelationSettings();
                 $rel = new Relation();
                 $rel->setId($row['rid']);
                 $rel->setType($row['type']);
@@ -95,7 +95,7 @@ class Read
                     ->setModifiedBy($row['rm_who'])
                     ->setModifiedWhen($row['rm_when']);
 
-                $relationDetails->setCreatedModified($relDetailsCreMod)
+                $relationSettings->setCreatedModified($relDetailsCreMod)
                     ->setId($row['rd_id'])->setRelation($rel)->setRole($row['rd_role'])->setKeyField($row['key_field'])->setHasMany((bool) $row['hasMany'])->setOtherTable($row['other_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
@@ -120,11 +120,11 @@ class Read
                 $model->setCreatedModified($tableCreMod);
 
             }
-            if (!empty($relationDetails)) {
-                $relationDetails->setTable($model);
-                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+            if (!empty($relationSettings)) {
+                $relationSettings->setTable($model);
+                if ($relationSettings->getTable()->getId() == $row['rowid'] && $relationSettings->getId() == $row['rd_id']) {
 
-                    $model->addRelationDetails($relationDetails);
+                    $model->addRelationSettings($relationSettings);
                 }
             }
 

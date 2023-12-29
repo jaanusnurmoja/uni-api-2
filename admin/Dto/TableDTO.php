@@ -24,7 +24,7 @@ class TableDTO
         $this->data = $model->getData() ? $model->getData() : null;
         $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
-        foreach ($model->getRelationDetails() as $rdRow) {
+        foreach ($model->getRelationSettings() as $rdRow) {
 
             unset($rdRow->table);
             if ($rdRow->getRole() == 'belongsTo') {

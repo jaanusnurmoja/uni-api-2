@@ -31,10 +31,10 @@ class Update
             }
 
             if (in_array($propName, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
-                foreach ($propContent as $relationDetails) {
-                    $rdId = $relationDetails['id'];
-                    unset($relationDetails['id'], $relationDetails['table']);
-                    $sql .= $this->updateRelationDetails($relationDetails, $rdId);
+                foreach ($propContent as $relationSettings) {
+                    $rdId = $relationSettings['id'];
+                    unset($relationSettings['id'], $relationSettings['table']);
+                    $sql .= $this->updateRelationSettings($relationSettings, $rdId);
                 }
             }
         }
@@ -99,20 +99,20 @@ class Update
         return $sql;
     }
 
-    public function updateRelationDetails($relationDetails, $rdId)
+    public function updateRelationSettings($relationSettings, $rdId)
     {
         $sql = "UPDATE uasys_relation_details SET ";
-        foreach ($relationDetails as $rdKey => $rdValue) {
+        foreach ($relationSettings as $rdKey => $rdValue) {
             if ($rdKey == 'createdModified') {
                 foreach ($rdValue as $cmKey => $cmValue) {
                     $sqlKey = Helper::uncamelize($cmKey);
                     $sql .= "$sqlKey = $cmValue";
-                    $sql .= next($relationDetails) ? ', ' : '';
+                    $sql .= next($relationSettings) ? ', ' : '';
                 }
             } else {
                 $sqlKey = Helper::uncamelize($rdKey);
                 $sql .= "$sqlKey = $rdValue";
-                $sql .= next($relationDetails) ? ', ' : '';
+                $sql .= next($relationSettings) ? ', ' : '';
             }
         }
         $sql .= " WHERE id = $rdId;

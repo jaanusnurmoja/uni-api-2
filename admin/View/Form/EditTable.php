@@ -270,7 +270,7 @@ $this->createdModified($value);
                     <table>
 
                         <?php $data->$key = [];
-                        $data->$key[0] = new \Model\RelationDetails();
+                        $data->$key[0] = new \Model\RelationSettings();
                         if (!isset($data->$key[0]->relation)) {
                             $data->$key[0]->relation = new \Model\Relation();
                         }
