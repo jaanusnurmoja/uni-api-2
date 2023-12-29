@@ -94,9 +94,16 @@ class Read
                     ->setCreatedWhen($row['rc_when'])
                     ->setModifiedBy($row['rm_who'])
                     ->setModifiedWhen($row['rm_when']);
+                $relDetailsCreMod->__construct();
 
-                $relationSettings->setCreatedModified($relDetailsCreMod)
-                    ->setId($row['rd_id'])->setRelation($rel)->setRole($row['rd_role'])->setKeyField($row['key_field'])->setHasMany((bool) $row['hasMany'])->setOtherTable($row['other_table']);
+                $relationSettings
+                    ->setCreatedModified($relDetailsCreMod)
+                    ->setId($row['rd_id'])
+                    ->setRelation($rel)
+                    ->setRole($row['rd_role'])
+                    ->setKeyField($row['key_field'])
+                    ->setHasMany((bool) $row['hasMany'])
+                    ->setOtherTable($row['other_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();

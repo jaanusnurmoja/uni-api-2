@@ -18,6 +18,15 @@ class RelationSettings
     public bool $hasMany = false;
     public Table $table;
     public $otherTable;
+    public $mode;
+    public Table $many;
+    public $manyTable;
+    public $manyFk;
+    public $manyMany;
+    public $oneAny;
+    public $onePk;
+    public $oneTable;
+    public Table $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = null)
@@ -150,21 +159,123 @@ class RelationSettings
         $this->otherTable = $otherTable;
     }
 
-    /**
-     * Get the value of createdModified
-     */
-    public function getCreatedModified(): CreatedModified
-    {
-        return $this->createdModified;
+    public function getMode() {
+    	return $this->mode;
     }
 
     /**
-     * Set the value of createdModified
-     */
-    public function setCreatedModified(CreatedModified $createdModified): self
-    {
-        $this->createdModified = $createdModified;
+    * @param $mode
+    */
+    public function setMode($mode) {
+    	$this->mode = $mode;
+    }
 
+    /**
+    * @return Table
+    */
+    public function getMany(): Table {
+    	return $this->many;
+    }
+
+    /**
+    * @param Table $many
+    */
+    public function setMany(Table $many): void {
+    	$this->many = $many;
+    }
+
+    public function getManyTable() {
+    	return $this->manyTable;
+    }
+
+    /**
+    * @param $manyTable
+    */
+    public function setManyTable($manyTable) {
+    	$this->manyTable = $manyTable;
+    }
+
+    public function getManyFk() {
+    	return $this->manyFk;
+    }
+
+    /**
+    * @param $manyFk
+    */
+    public function setManyFk($manyFk) {
+    	$this->manyFk = $manyFk;
+    }
+
+    public function getManyMany() {
+    	return $this->manyMany;
+    }
+
+    /**
+    * @param $manyMany
+    */
+    public function setManyMany($manyMany) {
+    	$this->manyMany = $manyMany;
+    }
+
+    public function getOneAny() {
+    	return $this->oneAny;
+    }
+
+    /**
+    * @param $oneAny
+    */
+    public function setOneAny($oneAny) {
+    	$this->oneAny = $oneAny;
+    }
+
+    public function getOnePk() {
+    	return $this->onePk;
+    }
+
+    /**
+    * @param $onePk
+    */
+    public function setOnePk($onePk) {
+    	$this->onePk = $onePk;
+    }
+
+    public function getOneTable() {
+    	return $this->oneTable;
+    }
+
+    /**
+    * @param $oneTable
+    */
+    public function setOneTable($oneTable) {
+    	$this->oneTable = $oneTable;
+    }
+
+    /**
+    * @return Table
+    */
+    public function getOne(): Table {
+    	return $this->one;
+    }
+
+    /**
+    * @param Table $one
+    */
+    public function setOne(Table $one): void {
+    	$this->one = $one;
+    }
+
+    /**
+    * @return CreatedModified
+    */
+    public function getCreatedModified(): CreatedModified {
+    	return $this->createdModified;
+    }
+
+    /**
+    * @param CreatedModified $createdModified
+    */
+    public function setCreatedModified(CreatedModified $createdModified) {
+    	$this->createdModified = $createdModified;
         return $this;
     }
 }

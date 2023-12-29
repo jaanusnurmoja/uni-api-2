@@ -127,7 +127,7 @@ foreach ($field as $k => $v) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
                         foreach ($av as $rdKey => $rdValue) {
-                            if (is_object($rdValue)) {
+                            if (is_object($rdValue) || is_array($rdValue)) {
                                 $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
                             }
                             echo "<tr><td>$rdKey</td><td>$rdValue</td></tr>";
