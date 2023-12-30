@@ -16,14 +16,12 @@ use \Dto\ListDTO;
 use \Dto\TableDTO;
 use \Model\Data;
 use \Model\Field;
-use Model\HasAny;
 use \Model\Relation;
 use \Model\RelationSettings;
 use \Model\Table;
 use \user\model\User;
 use Model\HasManyAndBelongsTo;
 use Model\HasMany;
-use Model\BelongsTo;
 
 /**
  * Andmete lugemine andmebaasitabelitest
@@ -83,10 +81,7 @@ class Read
             $rowsDebug[] = $row;
             while ($row['rd_id'] != null && (empty($relationSettings) || $relationSettings->getId() != $row['rd_id'])) {
                 $relationSettings = new RelationSettings();
-                $hasMany = new HasMany($row['rd_id']);
-                $belongsTo = new BelongsTo($row['rd_id']);
-                $manyMany = new HasManyAndBelongsTo($row['rd_id']);
-                $hasAny = new HasAny($row['rd_id']);
+                $hasMany = new HasMany;
 
                 $rcUser = new User;
                 $rcUser->setId($row['rcu_id'])->setUsername($row['rcu_name'])->setEmail($row['rcu_email'])->setPassword($row['rcu_password'])->setSocial($row['rcu_social'])->setUserToken($row['rcu_usertoken'])->setIdentityToken($row['rcu_id_token'])->setRole($row['rcu_role']);
@@ -99,40 +94,15 @@ class Read
                 $relDetailsCreMod->__construct();
 
                 $relationSettings
+                    ->setCreatedModified($relDetailsCreMod)
                     ->setId($row['rd_id'])
-                    ->setCreatedModified($relDetailsCreMod);
-
-                if ($row['one_id'] == $row['rowid']) {
-                    $hasMany
-                    ->setRole($row['rd_mode'])
-                    ->setThisTable($row['one_table'])
-                    ->setKeyField($row['one_pk'])
-                    ->setOtherKeyField($row['many_fk'])
-                    ->setOtherTable($row['many_table']);
-                }
-                if ($row['many_id'] == $row['rowid']) {
-                    $belongsTo
-                    ->setRole($row['rd_mode'])
-                    ->setThisTable($row['many_table'])
-                    ->setKeyField($row['many_fk'])
-                    ->setOtherKeyField($row['one_pk'])
-                    ->setOtherTable($row['one_table']);
-                }
-                if (!empty($row['many_many_id']) && in_array($row['rowid'], json_decode($row['many_many_id']))) {
-                    $manyMany->setRole($row['rd_mode']);
-                    $manyMany->setManyMany($row['many_many']);
-                }
-
-                if ($row['any_id'] == $row['rowid']) {
-                    $hasAny->setRole($row['rd_mode']);
-                    $hasAny->setAnyAny($row['any_any']);
-                    $hasAny->setAnyPk($row['any_pk']);
-                    $hasAny->setAnyTable($row['any_table']);
-                }
-                echo '<pre>';
-                print_r($hasMany);
-                echo '</pre>';
-
+                    ->setMode($row['rd_mode'])
+                    ->setManyTable($row['many_table'])
+                    ->setManyFk($row['many_fk'])
+                    ->setManyMany($row['many_many'])
+                    ->setAnyAny($row['any_any'])
+                    ->setOnePk($row['one_pk'])
+                    ->setOneTable($row['one_table']);
             }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
@@ -156,39 +126,40 @@ class Read
                 $model->setCreatedModified($tableCreMod);
 
             }
-            $single = new TableDTO($model);
             if (!empty($relationSettings)) {
+                $one = null;
+                $many = null;
+                $manyMany = null;
+                $any = null;
                 
                 if ($relationSettings->getManyTable() == $row['table_name'] ) {
-                    $belongsTo->setMany($model);
-                    $many = $belongsTo->getMany()->getId();
-                    $model->addRelationSettings($belongsTo);
-                    $single->addBelongsTo($belongsTo);
+                    $relationSettings->setMany($model);
+                    $many = $relationSettings->getMany()->getId();
                 }
                 if ($relationSettings->getOneTable() == $row['table_name'] ) {
-                    $hasMany->setTable($model);
-                    $model->addRelationSettings($hasMany);
-                    $single->addHasMany($hasMany);
+                    $relationSettings->setOne($model);
+                    $one = $relationSettings->getOne()->getId();
                 }
                 if (!empty($relationSettings->getManyManyIds()) && in_array($row['rowid'], json_decode($relationSettings->getManyManyIds()))) {
-                    $manyMany->setTableIamIn($model);
-                    $model->addRelationSettings($manyMany);
-                    $single->addHasManyAndBelongsTo($manyMany);
-                   
+                    $hmabt = new HasManyAndBelongsTo($row['rd_id']);
+                    if ($hmabt instanceof $relationSettings) {
+                        $hmabt->setTableIamIn($model);
+                    }
+                    $manyMany = $hmabt->getTableIamIn()->getId();
+                    
                 }
                 if ($relationSettings->getAnyTable() == $row['table_name'] ) {
-                    $hasAny->setTable($model);
-                    $model->addRelationSettings($hasAny);
-                    $single->addHasAny($hasAny);
-               }
-/*
+                    $relationSettings->setAny($model);
+                    $any = $relationSettings->getAny()->getId();
+                }
+
                 if (in_array($row['rowid'], [$one, $many, $manyMany, $any]) && $relationSettings->getId() == $row['rd_id']) {
 
                     $model->addRelationSettings($relationSettings);
                 }
-            */
-           }
+            }
 
+            $single = new TableDTO($model);
             $rowList[$row['rowid']] = $single;
         }
         if (!empty($params) && count($rowList) == 1) {

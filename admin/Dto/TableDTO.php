@@ -29,7 +29,7 @@ class TableDTO
         $this->data = $model->getData() ? $model->getData() : null;
         $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
-        /*
+        
         foreach ($model->getRelationSettings() as $rdRow) {
 
             if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getMany()->getId()) {
@@ -58,7 +58,7 @@ class TableDTO
                 }
             }
         }
-        */
+        
     }
 
     /**
