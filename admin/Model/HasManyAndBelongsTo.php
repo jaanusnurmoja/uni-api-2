@@ -1,21 +1,15 @@
-<?php
-
-declare(strict_types=1);
-
-namespace Model;
+<?php namespace Model;
 
 class HasManyAndBelongsTo extends RelationSettings
 {
-    private Table $tableIamIn;
+    public Table $tableIamIn;
     public $role;
     public $manyMany;
 
     
     public function __construct($id = null) {
-        if ($this->id == $id) {
-            parent::__construct();
-        }
-    }
+            parent::__construct($id);
+}
     /**
     * @return Table
     */
@@ -26,23 +20,24 @@ class HasManyAndBelongsTo extends RelationSettings
     /**
     * @param Table $tableIamIn
     */
-    public function setTableIamIn(Table $tableIamIn): void {
+    public function setTableIamIn(Table $tableIamIn){
     	$this->tableIamIn = $tableIamIn;
+        return $this;
     }
 
     public function getRole() {
-        $this->role = $this->mode;
     	return $this->role;
     }
 
     /**
     * @param $role
     */
-    /*
+    
     public function setRole($role) {
-    	$this->role = $role;
+        parent::setMode($role);
+    	$this->role = $this->getMode();
     }
-    */
+
     public function getManyMany() {
     	return $this->manyMany;
     }
@@ -51,6 +46,8 @@ class HasManyAndBelongsTo extends RelationSettings
     * @param $manyMany
     */
     public function setManyMany($manyMany) {
-    	$this->manyMany = $manyMany;
+        parent::setManyMany($manyMany);
+    	$this->manyMany = parent::getManyMany();
+        return $this;
     }
 }

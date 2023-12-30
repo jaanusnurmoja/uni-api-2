@@ -3,7 +3,7 @@ use Model\RelationSettings;
 
 class BelongsTo extends RelationSettings {
 
-    public Table $tableIamIn;
+    public Table $table;
     public $role;
     public $thisTable;
 
@@ -12,54 +12,84 @@ class BelongsTo extends RelationSettings {
     public $otherTable;
     public Table $other;
 
+
     public function __construct($id = null) {
-        if ($this->id == $id) {
-            parent::__construct();
-    }
+            parent::__construct($id);
+        
     }
     /**
     * @return Table
     */
-    public function getTableIamIn(): Table {
-    	return $this->tableIamIn;
+    public function getTable(): Table {
+    	return $this->table;
     }
 
-    public function setTableIamIn(Table $table) {
+    /**
+    * @param Table $table
+    */
+    public function setTable(Table $table) {
         parent::setMany($table);
-        $this->tableIamIn = $this->many;
+    	$this->table = $this->getMany();
+        return $this;
     }
 
 
     public function getRole() {
-        $this->role = $this->mode;
+        $this->role = $this->getMode();
     	return $this->role;
     }
 
-    public function getThisTable() {
+    public function setRole($role) {
+        parent::setMode($role);
+        $this->role = $this->getMode();
+        return $this;
+    }
+
+   public function getThisTable() {
     	return $this->thisTable;
     }
 
-        /**
+    /**
     * @param $thisTable
     */
-    public function setThisTable($thisTable): void {
+    public function setThisTable($thisTable) {
         parent::setManyTable($thisTable);
-    	$this->thisTable = $this->manyTable;
+    	$this->thisTable = $this->getManyTable();
+        return $this;
     }
 
     public function getKeyField() {
-        $this->keyField = $this->manyFk;
     	return $this->keyField;
+    }
+
+    public function setKeyField($keyField) {
+        parent::setManyFk($keyField);
+        $this->keyField = $this->getManyFk();
+    	return $this;
     }
 
     public function getOtherKeyField() {
     	return $this->otherKeyField;
     }
 
+    public function setOtherKeyField($otherKeyField) {
+        parent::setOnePk($otherKeyField);
+        $this->otherKeyField = $this->getOnePk();
+    	return $this;
+    }
+
     public function getOtherTable() {
     	return $this->otherTable;
     }
 
+    /**
+    * @param $otherTable
+    */
+    public function setOtherTable($otherTable) {
+        parent::setOneTable($otherTable);
+    	$this->otherTable = $this->getOneTable();
+        return $this;
+    }
     /**
     * @return Table
     */
@@ -70,26 +100,9 @@ class BelongsTo extends RelationSettings {
     /**
     * @param Table $other
     */
-    public function setOther(Table $other): void {
+    public function setOther(Table $other) {
         parent::setOne($other);
-    	$this->other = $this->one;
+    	$this->other = $this->getOne();
+        return $this;
     }
-
-
-    /**
-    * @param $otherKeyField
-    */
-    public function setOtherKeyField($otherKeyField) {
-        parent::setOnePk($otherKeyField);
-    	$this->otherKeyField = $this->onePk;
-    }
-
-    /**
-    * @param $otherTable
-    */
-    public function setOtherTable($otherTable) {
-        parent::setOneTable($otherTable);
-    	$this->otherTable = $this->oneTable;
-    }
-
 }

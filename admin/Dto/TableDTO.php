@@ -29,26 +29,36 @@ class TableDTO
         $this->data = $model->getData() ? $model->getData() : null;
         $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
+        /*
         foreach ($model->getRelationSettings() as $rdRow) {
 
-            unset($rdRow->table);
-            if ($rdRow->getRole() == 'belongsTo') {
-                $bt = new BelongsTo($rdRow->id);
-                array_push($this->belongsTo, $bt);
+            if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getMany()->getId()) {
+                $bt = new BelongsTo($rdRow->getId());
+                if ($bt instanceof $rdRow) {
+                    array_push($this->belongsTo, $bt);
+                }
             }
-            if ($rdRow->getRole() == 'hasMany') {
-                $hm = new HasMany($rdRow->id);
-                array_push($this->hasMany, $hm);
+            if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getOne()->getId()) {
+                $hm = new HasMany($rdRow->getId());
+                $hm = $rdRow;
+                //if ($hm instanceof $rdRow) {
+                    array_push($this->hasMany, $hm);
+                //}
             }
-            if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
-                $hmabt = new HasManyAndBelongsTo($rdRow->id);
-                array_push($this->hasManyAndBelongsTo, $hmabt);
+            if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
+                $hmabt = new HasManyAndBelongsTo($rdRow->getId());
+                if ($hmabt instanceof $rdRow){
+                    array_push($this->hasManyAndBelongsTo, $hmabt);
+                }
             }
             if ($rdRow->getMode() == 'hasAny') {
-                $ha = new HasAny($rdRow->id);
-                array_push($this->hasAny, $ha);
+                $ha = new HasAny($rdRow->getId());
+                if ($ha instanceof $rdRow){
+                    array_push($this->hasAny, $ha);
+                }
             }
         }
+        */
     }
 
     /**
@@ -149,6 +159,11 @@ class TableDTO
         $this->belongsTo = $belongsTo;
     }
 
+    public function addBelongsTo($belongsTo)
+    {
+        array_push($this->belongsTo, $belongsTo);
+    }
+
     public function getHasMany()
     {
         return $this->hasMany;
@@ -162,6 +177,10 @@ class TableDTO
         $this->hasMany = $hasMany;
     }
 
+    public function addHasMany($hasMany)
+    {
+        array_push($this->hasMany, $hasMany);
+    }
     public function getHasManyAndBelongsTo()
     {
         return $this->hasManyAndBelongsTo;
@@ -175,6 +194,11 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
+    public function addHasManyAndBelongsTo($hasManyAndBelongsTo)
+    {
+        array_push($this->hasManyAndBelongsTo, $hasManyAndBelongsTo);
+    }
+
 
     public function getHasAny() {
     	return $this->hasAny;
@@ -185,5 +209,9 @@ class TableDTO
     */
     public function setHasAny($hasAny) {
     	$this->hasAny = $hasAny;
+    }
+
+    public function addHasAny($hasAny) {
+        array_push($this->hasAny, $hasAny);
     }
 }

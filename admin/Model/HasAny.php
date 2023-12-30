@@ -1,48 +1,82 @@
-<?php
+<?php namespace Model;
 
-declare(strict_types=1);
-
-namespace Model;
 use Model\RelationSettings;
 
 class HasAny extends RelationSettings
 {
-    public Table $one;
+    public Table $table;
     public $role;
-    public $oneAny;
+    public $anyAny;
+    public $anyPk;
+    public $anyTable;
 
     public function __construct($id = null) {
-        if ($this->id == $id) {
-            parent::__construct();
-        }
-    }
+            parent::__construct($id);
+        
+}
     /**
     * @return Table
     */
-    public function getOne(): Table {
-    	return $this->one;
+    public function getTable(): Table {
+    	return $this->table;
     }
 
     /**
-    * @param Table $one
+    * @param Table $table
     */
-    public function setOne(Table $one): void {
-    	$this->one = $one;
+    public function setTable(Table $table): void {
+        parent::setAny($table);
+    	$this->table = $this->getAny();
     }
 
     public function getRole() {
-        $this->role = $this->mode;
     	return $this->role;
     }
 
-    public function getOneAny() {
-    	return $this->oneAny;
+    public function setRole($role) {
+        parent::setMode($role);
+    	$this->role = $this->getMode();
+    }
+
+   public function getAnyAny() {
+    	return $this->anyAny;
     }
 
     /**
-    * @param $oneAny
+    * @param $anyAny
     */
-    public function setOneAny($oneAny) {
-    	$this->oneAny = $oneAny;
+    public function setAnyAny($anyAny) {
+        parent::setAnyAny($anyAny);
+    	$this->anyAny = parent::getAnyAny();
+    }
+
+    /**
+     * Get the value of anyPk
+     */
+    public function getAnyPk() {
+        return $this->anyPk;
+    }
+
+    /**
+     * Set the value of anyPk
+     */
+    public function setAnyPk($anyPk): parent {
+        $this->anyPk = $this->getAnyPk();
+        return $this;
+    }
+
+    /**
+     * Get the value of anyTable
+     */
+    public function getAnyTable() {
+        return $this->anyTable;
+    }
+
+    /**
+     * Set the value of anyTable
+     */
+    public function setAnyTable($anyTable): parent {
+        $this->anyTable = $anyTable;
+        return $this;
     }
 }
