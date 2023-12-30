@@ -1,5 +1,9 @@
 <?php namespace Dto;
 
+use \Model\BelongsTo;
+use \Model\HasAny;
+use \Model\HasMany;
+use \Model\HasManyAndBelongsTo;
 use \Model\Table;
 
 /**
@@ -15,6 +19,7 @@ class TableDTO
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
+    public $hasAny = [];
 
     public function __construct(Table $model)
     {
@@ -28,14 +33,20 @@ class TableDTO
 
             unset($rdRow->table);
             if ($rdRow->getRole() == 'belongsTo') {
-
-                array_push($this->belongsTo, $rdRow);
+                $bt = new BelongsTo($rdRow->id);
+                array_push($this->belongsTo, $bt);
             }
             if ($rdRow->getRole() == 'hasMany') {
-                array_push($this->hasMany, $rdRow);
+                $hm = new HasMany($rdRow->id);
+                array_push($this->hasMany, $hm);
             }
             if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
-                array_push($this->hasManyAndBelongsTo, $rdRow);
+                $hmabt = new HasManyAndBelongsTo($rdRow->id);
+                array_push($this->hasManyAndBelongsTo, $hmabt);
+            }
+            if ($rdRow->getMode() == 'hasAny') {
+                $ha = new HasAny($rdRow->id);
+                array_push($this->hasAny, $ha);
             }
         }
     }
@@ -164,4 +175,15 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
+
+    public function getHasAny() {
+    	return $this->hasAny;
+    }
+
+    /**
+    * @param $hasAny
+    */
+    public function setHasAny($hasAny) {
+    	$this->hasAny = $hasAny;
+    }
 }
