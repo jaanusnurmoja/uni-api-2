@@ -20,6 +20,7 @@ use \Model\Relation;
 use \Model\RelationSettings;
 use \Model\Table;
 use \user\model\User;
+use Dto\TableItem;
 
 /**
  * Andmete lugemine andmebaasitabelitest
@@ -106,14 +107,17 @@ class Read
                     ->setHasMany((bool) $row['hasMany'])
                     ->setOtherTable($row['other_table'])
                     ->setMode($row['mode'])
+                    ->setManyTable($row['many_table'])
                     ->setManyFk($row['many_fk'])
                     ->setManyMany($row['many_many'])
                     ->setManyManyIds($row['many_many_ids'])
+                    ->setAnyId($row['any_id'])
                     ->setAnyAny($row['any_any'])
                     ->setAnyTable($row['any_table'])
                     ->setAnyPk($row['any_pk'])
                     ->setOnePk($row['one_pk'])
                     ->setOneTable($row['one_table'])
+                    ->setOneId($row['one_id'])
                     ;
 
                 }
@@ -123,7 +127,8 @@ class Read
                 $model->setTableName($row['table_name']);
                 $model->setPk($row['pk']);
                 $data = new Data();
-                $data->setTable($model);
+                $modelItem = new TableItem($model);
+                $data->setTable($modelItem);
                 $fields = $this->getDefaultFields($row['table_name']);
                 if ($row['field_data'] == 'default') {
                     $data->setFields($fields['dataFields']);
@@ -140,8 +145,8 @@ class Read
 
             }
             if (!empty($relationSettings)) {
-                $relationSettings->setTable($model);
-                if ($relationSettings->getTable()->getId() == $row['rowid'] && $relationSettings->getId() == $row['rd_id']) {
+                $relationSettings->setTable($modelItem);
+                if ($relationSettings->table->id == $row['rowid'] && $relationSettings->getId() == $row['rd_id']) {
 
                     $model->addRelationSettings($relationSettings);
                 }

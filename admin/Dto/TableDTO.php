@@ -17,31 +17,36 @@ class TableDTO
     public $hasManyAndBelongsTo = [];
     public $hasAny = [];
 
-    public function __construct(Table $model)
+    public function __construct(Table $model, $mini = false)
     {
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
-        $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
-        unset($this->data->table);
-        foreach ($model->getRelationSettings() as $rdRow) {
+        if ($mini === false) {
+            $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
+            unset($this->data->table);
+            foreach ($model->getRelationSettings() as $rdRow) {
 
-            unset($rdRow->table);
-            if ($rdRow->getRole() == 'belongsTo') {
+                unset($rdRow->table);
+                if ($rdRow->getRole() == 'belongsTo') {
 
-                array_push($this->belongsTo, $rdRow);
+                    array_push($this->belongsTo, $rdRow);
+                }
+                if ($rdRow->getRole() == 'hasMany') {
+                    array_push($this->hasMany, $rdRow);
+                }
+                if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
+                    array_push($this->hasManyAndBelongsTo, $rdRow);
+                }
+                if ($rdRow->getRole() == 'hasAny') {
+                    array_push($this->hasAny, $rdRow);
+                }
             }
-            if ($rdRow->getRole() == 'hasMany') {
-                array_push($this->hasMany, $rdRow);
-            }
-            if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
-                array_push($this->hasManyAndBelongsTo, $rdRow);
-            }
-            if ($rdRow->getRole() == 'hasAny') {
-                array_push($this->hasAny, $rdRow);
-            }
-        }
+
+        } else {
+        unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
+    }
     }
 
     /**

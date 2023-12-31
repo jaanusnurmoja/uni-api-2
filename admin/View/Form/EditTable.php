@@ -60,6 +60,9 @@ class EditTable
         if (empty($data)) {
             $data = $this->data;
         }
+        //echo '<pre>';
+        //print_r($data);
+        //echo '</pre>';
         ?>
 <h1>
     <?php echo $data->tableName ?>
@@ -306,7 +309,8 @@ $this->createdModified($value);
                                 } else {
                                     if ($rdKey != "id") {
                                         //echo "<input type='hidden' name='new[$key][{{row-count-placeholder}}][$rdKey]'>";
-                                        //} else {
+                                        //} else 
+                                        //if ($rdKey == 'table') echo json_encode($rdValue);
                                         echo "<tr><td>$rdKey</td><td><input type='text' id='new.$key.{{row-count-placeholder}}.$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                                     }
                                 }
@@ -322,6 +326,7 @@ $this->createdModified($value);
             <?php $relDiff = [];
                         if (!empty($value)) {
                             foreach ($value as $i => $av) {
+                                
                                 ?>
 
             <tr class="trow">
@@ -378,6 +383,7 @@ foreach ($this->relations as $r) {
                                                 echo "$rdValue <input type='hidden' id='$rdId' name='$rdName' value='$rdValue'>";
                                             } else {
                                                 if ($rdKey != 'createdModified') {
+                                                    
                                                     echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
                                                 } else {
                                                     echo '<h4>Created & modified</h4>';

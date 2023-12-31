@@ -1,6 +1,8 @@
 <?php namespace Model;
 
 use Common\Model\CreatedModified;
+use Dto\TableDTO;
+use Dto\TableItem;
 
 /**
  * Andmeseose täiendavad üksikasjad
@@ -11,19 +13,21 @@ use Common\Model\CreatedModified;
 class RelationSettings
 {
 
-    public ?int $id = 0;
+    public ?int $id;
     public Relation $relation;
     public $role;
     public $keyField;
     public bool $hasMany = false;
-    public Table $table;
+    public TableItem $table;
     public $otherTable;
     public $mode;
     public Table $many;
+    private $manyId;
     public $manyTable;
     public $manyFk;
     public $manyMany;
     public $manyManyIds;
+    private $anyId;
     public $anyAny;
     public ?Table $any;
     public $anyTable;
@@ -31,17 +35,13 @@ class RelationSettings
     public $oneAny;
     public $onePk;
     public $oneTable;
+    private $oneId;
     public Table $one;
     public CreatedModified $createdModified;
 
-    public function __construct(?int $id = null)
+    public function __construct(?int $id = 0)
     {
-        if ($id !== null) {
-            $this->id = $id;
-        }
-        if (isset($this->id) && is_numeric($this->id)) {
-            $this;
-        }
+        $this->id = $id;
     }
     /**
      * Get the value of id
@@ -136,7 +136,7 @@ class RelationSettings
     /**
      * Get the value of table
      */
-    public function getTable(): Table
+    public function getTable(): TableItem
     {
         return $this->table;
     }
@@ -144,7 +144,7 @@ class RelationSettings
     /**
      * Set the value of table
      */
-    public function setTable(Table $table): self
+    public function setTable(TableItem $table): self
     {
         $this->table = $table;
 
@@ -173,7 +173,15 @@ class RelationSettings
     * @param $mode
     */
     public function setMode($mode) {
-    	$this->mode = $mode;
+        $currentMode = explode('__one_many__', $mode);
+        $this->mode = json_encode($currentMode);
+        /*
+        if ($this->table->getId() == $this->manyId) {
+            $this->mode == $currentMode[1];
+        } else {
+            $this->mode = $currentMode[0];
+        }
+        */
         return $this;
     }
 
@@ -369,6 +377,51 @@ class RelationSettings
      */
     public function setAnyPk($anyPk): self {
         $this->anyPk = $anyPk;
+        return $this;
+    }
+
+    /**
+     * Get the value of manyId
+     */
+    public function getManyId() {
+        return $this->manyId;
+    }
+
+    /**
+     * Set the value of manyId
+     */
+    public function setManyId($manyId): self {
+        $this->manyId = $manyId;
+        return $this;
+    }
+
+    /**
+     * Get the value of anyId
+     */
+    public function getAnyId() {
+        return $this->anyId;
+    }
+
+    /**
+     * Set the value of anyId
+     */
+    public function setAnyId($anyId): self {
+        $this->anyId = $anyId;
+        return $this;
+    }
+
+    /**
+     * Get the value of oneId
+     */
+    public function getOneId() {
+        return $this->oneId;
+    }
+
+    /**
+     * Set the value of oneId
+     */
+    public function setOneId($oneId): self {
+        $this->oneId = $oneId;
         return $this;
     }
 }
