@@ -123,7 +123,7 @@ foreach ($field as $k => $v) {
                     }
                 }
 
-                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
+                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
                         foreach ($av as $rdKey => $rdValue) {

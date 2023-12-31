@@ -245,7 +245,7 @@ $this->createdModified($value);
 
     <?php }
 
-                    $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
+                    $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny'];
 
                     if (in_array($key, $roles)) {
 

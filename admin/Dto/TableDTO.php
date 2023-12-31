@@ -15,6 +15,7 @@ class TableDTO
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
+    public $hasAny = [];
 
     public function __construct(Table $model)
     {
@@ -36,6 +37,9 @@ class TableDTO
             }
             if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
                 array_push($this->hasManyAndBelongsTo, $rdRow);
+            }
+            if ($rdRow->getRole() == 'hasAny') {
+                array_push($this->hasAny, $rdRow);
             }
         }
     }
@@ -164,4 +168,15 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
+
+    public function getHasAny() {
+    	return $this->hasAny;
+    }
+
+    /**
+    * @param $hasAny
+    */
+    public function setHasAny($hasAny) {
+    	$this->hasAny = $hasAny;
+    }
 }
