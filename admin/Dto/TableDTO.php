@@ -29,7 +29,20 @@ class TableDTO
         $this->data = $model->getData() ? $model->getData() : null;
         $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
         unset($this->data->table);
-        
+
+        $rels = $model->getRelationSettings();
+
+        /*
+        echo '<pre>';
+        print_r($rels);
+        echo '</pre>';
+        */
+
+        if (isset($rels['belongsTo'])) $this->setBelongsTo($rels['belongsTo']);
+        if (isset($rels['hasMany']))$this->setHasMany($rels['hasMany']);
+        if (isset($rels['hasManyAndBelongsTo'])) $this->setHasManyAndBelongsTo($rels['hasManyAndBelongsTo']);
+        if (isset($rels['hasAny'])) $this->setHasAny($rels['hasAny']);
+    /*    
         foreach ($model->getRelationSettings() as $rdRow) {
 
             if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getMany()->getId()) {
@@ -58,7 +71,7 @@ class TableDTO
                 }
             }
         }
-        
+        */
     }
 
     /**

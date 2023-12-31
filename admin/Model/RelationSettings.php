@@ -12,19 +12,19 @@ class RelationSettings
 {
 
     public $id;
-    private $mode;
-    private ?Table $many;
-    private $manyTable;
-    private $manyFk;
-    private $manyMany;
-    private $manyManyIds;
-    private $anyAny;
-    private ?Table $any;
-    private $anyTable;
-    private $anyPk;
-    private $onePk;
-    private $oneTable;
-    private ?Table $one;
+    protected $mode;
+    protected ?Table $many;
+    protected $manyTable;
+    protected $manyFk;
+    protected $manyMany;
+    protected $manyManyIds;
+    protected $anyAny;
+    protected ?Table $any;
+    protected $thisTable;
+    protected $keyField;
+    protected $onePk;
+    protected $oneTable;
+    protected ?Table $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = null)
@@ -185,14 +185,14 @@ class RelationSettings
      * Get the value of anyPk
      */
     public function getAnyPk() {
-        return $this->anyPk;
+        return $this->keyField;
     }
 
     /**
      * Set the value of anyPk
      */
     public function setAnyPk($anyPk): self {
-        $this->anyPk = $anyPk;
+        $this->keyField = $anyPk;
         return $this;
     }
 
@@ -236,14 +236,14 @@ class RelationSettings
      * Get the value of anyTable
      */
     public function getAnyTable() {
-        return $this->anyTable;
+        return $this->thisTable;
     }
 
     /**
      * Set the value of anyTable
      */
     public function setAnyTable($anyTable): self {
-        $this->anyTable = $anyTable;
+        $this->thisTable = $anyTable;
         return $this;
     }
 }

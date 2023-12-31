@@ -7,8 +7,8 @@ class HasAny extends RelationSettings
     public Table $table;
     public $role;
     public $anyAny;
-    public $anyPk;
-    public $anyTable;
+    public $keyField;
+    public $thisTable;
 
     public function __construct($id = null) {
             parent::__construct($id);
@@ -36,6 +36,7 @@ class HasAny extends RelationSettings
     public function setRole($role) {
         parent::setMode($role);
     	$this->role = $this->getMode();
+        return $this;
     }
 
    public function getAnyAny() {
@@ -48,35 +49,38 @@ class HasAny extends RelationSettings
     public function setAnyAny($anyAny) {
         parent::setAnyAny($anyAny);
     	$this->anyAny = parent::getAnyAny();
+        return $this;
     }
 
     /**
      * Get the value of anyPk
      */
-    public function getAnyPk() {
-        return $this->anyPk;
+    public function getKeyField() {
+        return $this->keyField;
     }
 
     /**
      * Set the value of anyPk
      */
-    public function setAnyPk($anyPk): parent {
-        $this->anyPk = $this->getAnyPk();
+    public function setKeyField($keyField) {
+        parent::setAnyPk($keyField);
+        $this->keyField = $this->getAnyPk();
         return $this;
     }
 
     /**
      * Get the value of anyTable
      */
-    public function getAnyTable() {
-        return $this->anyTable;
+    public function getThisTable() {
+        return $this->thisTable;
     }
 
     /**
      * Set the value of anyTable
      */
-    public function setAnyTable($anyTable): parent {
-        $this->anyTable = $anyTable;
+    public function setThisTable($thisTable) {
+        parent::setAnyTable($thisTable);
+        $this->thisTable = $this->getAnyTable();
         return $this;
     }
 }
