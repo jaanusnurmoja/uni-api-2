@@ -23,6 +23,11 @@ class RelationSettings
     public $manyTable;
     public $manyFk;
     public $manyMany;
+    public $manyManyIds;
+    public $anyAny;
+    public ?Table $any;
+    public $anyTable;
+    public $anyPk;
     public $oneAny;
     public $onePk;
     public $oneTable;
@@ -35,7 +40,7 @@ class RelationSettings
             $this->id = $id;
         }
         if (isset($this->id) && is_numeric($this->id)) {
-            return $this;
+            $this;
         }
     }
     /**
@@ -157,6 +162,7 @@ class RelationSettings
     public function setOtherTable($otherTable)
     {
         $this->otherTable = $otherTable;
+        return $this;
     }
 
     public function getMode() {
@@ -168,6 +174,7 @@ class RelationSettings
     */
     public function setMode($mode) {
     	$this->mode = $mode;
+        return $this;
     }
 
     /**
@@ -180,8 +187,9 @@ class RelationSettings
     /**
     * @param Table $many
     */
-    public function setMany(Table $many): void {
+    public function setMany(Table $many) {
     	$this->many = $many;
+        return $this;
     }
 
     public function getManyTable() {
@@ -193,6 +201,7 @@ class RelationSettings
     */
     public function setManyTable($manyTable) {
     	$this->manyTable = $manyTable;
+        return $this;
     }
 
     public function getManyFk() {
@@ -204,6 +213,7 @@ class RelationSettings
     */
     public function setManyFk($manyFk) {
     	$this->manyFk = $manyFk;
+        return $this;
     }
 
     public function getManyMany() {
@@ -215,6 +225,7 @@ class RelationSettings
     */
     public function setManyMany($manyMany) {
     	$this->manyMany = $manyMany;
+        return $this;
     }
 
     public function getOneAny() {
@@ -226,6 +237,7 @@ class RelationSettings
     */
     public function setOneAny($oneAny) {
     	$this->oneAny = $oneAny;
+        return $this;
     }
 
     public function getOnePk() {
@@ -237,6 +249,7 @@ class RelationSettings
     */
     public function setOnePk($onePk) {
     	$this->onePk = $onePk;
+        return $this;
     }
 
     public function getOneTable() {
@@ -248,6 +261,7 @@ class RelationSettings
     */
     public function setOneTable($oneTable) {
     	$this->oneTable = $oneTable;
+        return $this;
     }
 
     /**
@@ -260,8 +274,9 @@ class RelationSettings
     /**
     * @param Table $one
     */
-    public function setOne(Table $one): void {
+    public function setOne(Table $one) {
     	$this->one = $one;
+        return $this;
     }
 
     /**
@@ -276,6 +291,84 @@ class RelationSettings
     */
     public function setCreatedModified(CreatedModified $createdModified) {
     	$this->createdModified = $createdModified;
+        return $this;
+    }
+
+    public function getManyManyIds() {
+    	return $this->manyManyIds;
+    }
+
+    /**
+    * @param $manyManyIds
+    */
+    public function setManyManyIds($manyManyIds) {
+    	$this->manyManyIds = $manyManyIds;
+        return $this;
+    }
+
+    /**
+     * Get the value of anyAny
+     */
+    public function getAnyAny() {
+        return $this->anyAny;
+    }
+
+    /**
+     * Set the value of anyAny
+     */
+    public function setAnyAny($anyAny): self {
+        $this->anyAny = $anyAny;
+        return $this;
+    }
+
+    /**
+     * Get the value of any
+     *
+     * @return ?Table
+     */
+    public function getAny(): ?Table {
+        return $this->any;
+    }
+
+    /**
+     * Set the value of any
+     *
+     * @param ?Table $any
+     *
+     * @return self
+     */
+    public function setAny(?Table $any): self {
+        $this->any = $any;
+        return $this;
+    }
+
+    /**
+     * Get the value of anyTable
+     */
+    public function getAnyTable() {
+        return $this->anyTable;
+    }
+
+    /**
+     * Set the value of anyTable
+     */
+    public function setAnyTable($anyTable): self {
+        $this->anyTable = $anyTable;
+        return $this;
+    }
+
+    /**
+     * Get the value of anyPk
+     */
+    public function getAnyPk() {
+        return $this->anyPk;
+    }
+
+    /**
+     * Set the value of anyPk
+     */
+    public function setAnyPk($anyPk): self {
+        $this->anyPk = $anyPk;
         return $this;
     }
 }
