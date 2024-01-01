@@ -14,20 +14,21 @@ class RelationSettings
 {
 
     public ?int $id;
-    public Relation $relation;
+    private Relation $relation;
     public $role;
-    public $keyField;
-    public bool $hasMany = false;
+    private $keyField;
+    private bool $hasMany = false;
     public TableItem $table;
-    public $otherTable;
+    private $tableId;
+    private $otherTable;
     public $mode;
     public Table $many;
-    private $manyId;
+    public $manyId;
     public $manyTable;
     public $manyFk;
     public $manyMany;
     public $manyManyIds;
-    private $anyId;
+    public $anyId;
     public $anyAny;
     public ?Table $any;
     public $anyTable;
@@ -35,13 +36,14 @@ class RelationSettings
     public $oneAny;
     public $onePk;
     public $oneTable;
-    private $oneId;
+    public $oneId;
     public Table $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = 0)
     {
         $this->id = $id;
+
     }
     /**
      * Get the value of id
@@ -151,6 +153,21 @@ class RelationSettings
         return $this;
     }
 
+     /**
+     * Get the value of tableId
+     */
+    public function getTableId() {
+        return $this->tableId;
+    }
+       /**
+     * Set the value of tableId
+     */
+    public function setTableId($tableId): self {
+        $this->tableId = $tableId;
+        return $this;
+    }
+
+
     public function getOtherTable()
     {
         return $this->otherTable;
@@ -173,15 +190,7 @@ class RelationSettings
     * @param $mode
     */
     public function setMode($mode) {
-        $currentMode = explode('__one_many__', $mode);
-        $this->mode = json_encode($currentMode);
-        /*
-        if ($this->table->getId() == $this->manyId) {
-            $this->mode == $currentMode[1];
-        } else {
-            $this->mode = $currentMode[0];
-        }
-        */
+        $this->mode = $mode;
         return $this;
     }
 
@@ -424,4 +433,17 @@ class RelationSettings
         $this->oneId = $oneId;
         return $this;
     }
+
+    public function rewriteMode($mode, $tableId, $manyId, $oneId) {
+        $currentMode = explode('__one_many__', $mode);
+        $this->setMode($currentMode[0]);
+        $this->setRole($currentMode[0]);
+        if ($tableId == $oneId) {
+            $this->setMode($currentMode[1]);
+            $this->setRole($currentMode[1]);
+        }
+        return $this;
+    }
+
+
 }

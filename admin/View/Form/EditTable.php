@@ -274,9 +274,11 @@ $this->createdModified($value);
 
                         <?php $data->$key = [];
                         $data->$key[0] = new \Model\RelationSettings();
+                        /*
                         if (!isset($data->$key[0]->relation)) {
                             $data->$key[0]->relation = new \Model\Relation();
                         }
+                        */
 
                         foreach ($data->$key[0] as $rdKey => $rdValue) {
                             if ($rdKey == 'relation') {
@@ -343,7 +345,7 @@ $this->createdModified($value);
                         <?php foreach ($av as $rdKey => $rdValue) {
                                     $rdName = "table[$key][$i][$rdKey]";
                                     $rdId = "table.$key.$i.$rdKey";
-
+/*
                                     if ($rdKey == 'relation') {?>
                         <tr>
                             <td class="col col-2"><?=$rdKey?></td>
@@ -367,7 +369,8 @@ foreach ($this->relations as $r) {
                             </td>
                         </tr>
                         <?php
-} else {?>
+} else { */
+?>
                         <tr>
                             <td class="col col-2"><?=$rdKey?></td>
                             <td>
@@ -383,7 +386,7 @@ foreach ($this->relations as $r) {
                                                 echo "$rdValue <input type='hidden' id='$rdId' name='$rdName' value='$rdValue'>";
                                             } else {
                                                 if ($rdKey != 'createdModified') {
-                                                    
+                                                    if (is_object($rdValue)) $rdValue = json_encode($rdValue);
                                                     echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
                                                 } else {
                                                     echo '<h4>Created & modified</h4>';
@@ -394,7 +397,7 @@ foreach ($this->relations as $r) {
                             </td>
                         </tr>
                         <?php
-}
+//}
                                 }
                                 ?>
 

@@ -56,7 +56,7 @@ class Read
             $where = ' WHERE' . implode(' AND', $w);
         }
 
-        $query = "SELECT t.id as rowid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
+        $query = "SELECT t.id as rowid, t.id as tid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
         f.id as fid, f.name as field,
         rd.id as rd_id, rd.role as rd_role, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when,
         r.id as rid, r.*,
@@ -97,7 +97,6 @@ class Read
                     ->setModifiedBy($row['rm_who'])
                     ->setModifiedWhen($row['rm_when']);
                 $relDetailsCreMod->__construct();
-
                 $relationSettings
                     ->setCreatedModified($relDetailsCreMod)
                     ->setId($row['rd_id'])
@@ -105,8 +104,10 @@ class Read
                     ->setRole($row['rd_role'])
                     ->setKeyField($row['key_field'])
                     ->setHasMany((bool) $row['hasMany'])
+                    ->setTableId($row['models_id'])
                     ->setOtherTable($row['other_table'])
-                    ->setMode($row['mode'])
+                    ->rewriteMode($row['mode'], $row['models_id'], $row['many_id'], $row['one_id'])
+                    ->setManyId($row['many_id'])
                     ->setManyTable($row['many_table'])
                     ->setManyFk($row['many_fk'])
                     ->setManyMany($row['many_many'])
@@ -119,7 +120,6 @@ class Read
                     ->setOneTable($row['one_table'])
                     ->setOneId($row['one_id'])
                     ;
-
                 }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();

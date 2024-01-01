@@ -19,10 +19,13 @@ class TableDTO
 
     public function __construct(Table $model, $mini = false)
     {
+        $tableItem = new TableItem($model);
+        $model->data->setTable($tableItem);
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
+
         if ($mini === false) {
             $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
             unset($this->data->table);
@@ -30,17 +33,21 @@ class TableDTO
 
                 unset($rdRow->table);
                 if ($rdRow->getRole() == 'belongsTo') {
+                    $rdRow->setTable($tableItem);
 
                     array_push($this->belongsTo, $rdRow);
                 }
                 if ($rdRow->getRole() == 'hasMany') {
                     array_push($this->hasMany, $rdRow);
+                    $rdRow->setTable($tableItem);
                 }
                 if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
                     array_push($this->hasManyAndBelongsTo, $rdRow);
+                    $rdRow->setTable($tableItem);
                 }
                 if ($rdRow->getRole() == 'hasAny') {
                     array_push($this->hasAny, $rdRow);
+                    $rdRow->setTable($tableItem);
                 }
             }
 
