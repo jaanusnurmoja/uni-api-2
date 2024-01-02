@@ -1,7 +1,6 @@
 <?php namespace Model;
 
 use Common\Model\CreatedModified;
-use Dto\TableDTO;
 use Dto\TableItem;
 
 /**
@@ -33,7 +32,6 @@ class RelationSettings
     private ?Table $any;
     private $anyTable;
     private $anyPk;
-    private $oneAny;
     private $onePk;
     private $oneTable;
     private $oneId;
@@ -153,20 +151,21 @@ class RelationSettings
         return $this;
     }
 
-     /**
+    /**
      * Get the value of tableId
      */
-    public function getTableId() {
+    public function getTableId()
+    {
         return $this->tableId;
     }
-       /**
+    /**
      * Set the value of tableId
      */
-    public function setTableId($tableId): self {
+    public function setTableId($tableId): self
+    {
         $this->tableId = $tableId;
         return $this;
     }
-
 
     public function getOtherTable()
     {
@@ -182,85 +181,95 @@ class RelationSettings
         return $this;
     }
 
-    public function getMode() {
-    	return $this->mode;
+    public function getMode()
+    {
+        return $this->mode;
     }
 
     /**
-    * @param $mode
-    */
-    public function setMode($mode) {
+     * @param $mode
+     */
+    public function setMode($mode)
+    {
         $this->mode = $mode;
         return $this;
     }
 
     /**
-    * @return Table
-    */
-    public function getMany(): Table {
-    	return $this->many;
+     * @return Table
+     */
+    public function getMany(): Table
+    {
+        return $this->many;
     }
 
     /**
-    * @param Table $many
-    */
-    public function setMany(Table $many) {
-    	$this->many = $many;
+     * @param Table $many
+     */
+    public function setMany(Table $many)
+    {
+        $this->many = $many;
         return $this;
     }
 
-    public function getManyTable() {
-    	return $this->manyTable;
+    public function getManyTable()
+    {
+        return $this->manyTable;
     }
 
     /**
-    * @param $manyTable
-    */
-    public function setManyTable($manyTable) {
+     * @param $manyTable
+     */
+    public function setManyTable($manyTable)
+    {
         if ($this->oneId == $this->tableId) {
             $this->otherTable = "/$manyTable";
         }
-    	$this->manyTable = $manyTable;
+        $this->manyTable = $manyTable;
         return $this;
     }
 
-    public function getManyFk() {
-    	return $this->manyFk;
+    public function getManyFk()
+    {
+        return $this->manyFk;
     }
 
     /**
-    * @param $manyFk
-    */
-    public function setManyFk($manyFk) {
+     * @param $manyFk
+     */
+    public function setManyFk($manyFk)
+    {
         if ($this->manyId == $this->tableId) {
             $this->keyField = $manyFk;
         }
-    	$this->manyFk = $manyFk;
+        $this->manyFk = $manyFk;
         return $this;
     }
 
-    public function getManyMany() {
-    	return $this->manyMany;
+    public function getManyMany()
+    {
+        return $this->manyMany;
     }
 
     /**
-    * @param $manyMany
-    */
-    public function setManyMany($manyMany) {
-        
+     * @param $manyMany
+     */
+    public function setManyMany($manyMany)
+    {
+
         $this->manyMany = $manyMany;
-    	if (!empty($manyMany)) {
+        if (!empty($manyMany)) {
             if (is_array($manyMany)) {
                 $tableId = $this->tableId;
 
                 if ($manyMany[0]->id == $tableId) {
-                    $this->otherTable = '/'.$manyMany[1]->table;
+                    $this->otherTable = '/' . $manyMany[1]->table;
                 }
                 if ($manyMany[1]->id == $tableId) {
-                    $this->otherTable = '/'.$manyMany[0]->table;
+                    $this->otherTable = '/' . $manyMany[0]->table;
                 }
             } else {
-                if (is_object($manyMany)) {$this->otherTable = '/'.$manyMany->table;}
+                if (is_object($manyMany)) {$this->otherTable = '/' . $manyMany->table;}
             }
         } else {
             unset($this->manyMany);
@@ -268,26 +277,16 @@ class RelationSettings
         return $this;
     }
 
-    public function getOneAny() {
-    	return $this->oneAny;
+    public function getOnePk()
+    {
+        return $this->onePk;
     }
 
     /**
-    * @param $oneAny
-    */
-    public function setOneAny($oneAny) {
-    	$this->oneAny = $oneAny;
-        return $this;
-    }
-
-    public function getOnePk() {
-    	return $this->onePk;
-    }
-
-    /**
-    * @param $onePk
-    */
-    public function setOnePk($onePk) {
+     * @param $onePk
+     */
+    public function setOnePk($onePk)
+    {
         if ($this->oneId == $this->tableId) {
             $this->keyField = $onePk;
         }
@@ -295,74 +294,84 @@ class RelationSettings
         return $this;
     }
 
-    public function getOneTable() {
-    	return $this->oneTable;
+    public function getOneTable()
+    {
+        return $this->oneTable;
     }
 
     /**
-    * @param $oneTable
-    */
-    public function setOneTable($oneTable) {
+     * @param $oneTable
+     */
+    public function setOneTable($oneTable)
+    {
         if ($this->manyId == $this->tableId) {
-            $this->otherTable = '/'.$oneTable;
+            $this->otherTable = '/' . $oneTable;
         }
-    	$this->oneTable = $oneTable;
+        $this->oneTable = $oneTable;
         return $this;
     }
 
     /**
-    * @return Table
-    */
-    public function getOne(): Table {
-    	return $this->one;
+     * @return Table
+     */
+    public function getOne(): Table
+    {
+        return $this->one;
     }
 
     /**
-    * @param Table $one
-    */
-    public function setOne(Table $one) {
-    	$this->one = $one;
+     * @param Table $one
+     */
+    public function setOne(Table $one)
+    {
+        $this->one = $one;
         return $this;
     }
 
     /**
-    * @return CreatedModified
-    */
-    public function getCreatedModified(): CreatedModified {
-    	return $this->createdModified;
+     * @return CreatedModified
+     */
+    public function getCreatedModified(): CreatedModified
+    {
+        return $this->createdModified;
     }
 
     /**
-    * @param CreatedModified $createdModified
-    */
-    public function setCreatedModified(CreatedModified $createdModified) {
-    	$this->createdModified = $createdModified;
+     * @param CreatedModified $createdModified
+     */
+    public function setCreatedModified(CreatedModified $createdModified)
+    {
+        $this->createdModified = $createdModified;
         return $this;
     }
 
-    public function getManyManyIds() {
-    	return $this->manyManyIds;
+    public function getManyManyIds()
+    {
+        return $this->manyManyIds;
     }
 
     /**
-    * @param $manyManyIds
-    */
-    public function setManyManyIds($manyManyIds) {
-    	$this->manyManyIds = $manyManyIds;
+     * @param $manyManyIds
+     */
+    public function setManyManyIds($manyManyIds)
+    {
+        $this->manyManyIds = $manyManyIds;
         return $this;
     }
 
     /**
      * Get the value of anyAny
      */
-    public function getAnyAny() {
+    public function getAnyAny()
+    {
         return $this->anyAny;
     }
 
     /**
      * Set the value of anyAny
      */
-    public function setAnyAny($anyAny): self {
+    public function setAnyAny($anyAny): self
+    {
         $this->anyAny = $anyAny;
         if (empty($anyAny)) {
             unset($this->anyAny);
@@ -375,7 +384,8 @@ class RelationSettings
      *
      * @return ?Table
      */
-    public function getAny(): ?Table {
+    public function getAny(): ?Table
+    {
         return $this->any;
     }
 
@@ -386,7 +396,8 @@ class RelationSettings
      *
      * @return self
      */
-    public function setAny(?Table $any): self {
+    public function setAny(?Table $any): self
+    {
         $this->any = $any;
         return $this;
     }
@@ -394,14 +405,19 @@ class RelationSettings
     /**
      * Get the value of anyTable
      */
-    public function getAnyTable() {
+    public function getAnyTable()
+    {
         return $this->anyTable;
     }
 
     /**
      * Set the value of anyTable
      */
-    public function setAnyTable($anyTable): self {
+    public function setAnyTable($anyTable): self
+    {
+        if (!empty($anyTable)) {
+            $this->otherTable = "/$anyTable";
+        }
         $this->anyTable = $anyTable;
         return $this;
     }
@@ -409,14 +425,16 @@ class RelationSettings
     /**
      * Get the value of anyPk
      */
-    public function getAnyPk() {
+    public function getAnyPk()
+    {
         return $this->anyPk;
     }
 
     /**
      * Set the value of anyPk
      */
-    public function setAnyPk($anyPk): self {
+    public function setAnyPk($anyPk): self
+    {
         $this->anyPk = $anyPk;
         return $this;
     }
@@ -424,14 +442,16 @@ class RelationSettings
     /**
      * Get the value of manyId
      */
-    public function getManyId() {
+    public function getManyId()
+    {
         return $this->manyId;
     }
 
     /**
      * Set the value of manyId
      */
-    public function setManyId($manyId): self {
+    public function setManyId($manyId): self
+    {
         $this->manyId = $manyId;
         return $this;
     }
@@ -439,14 +459,16 @@ class RelationSettings
     /**
      * Get the value of anyId
      */
-    public function getAnyId() {
+    public function getAnyId()
+    {
         return $this->anyId;
     }
 
     /**
      * Set the value of anyId
      */
-    public function setAnyId($anyId): self {
+    public function setAnyId($anyId): self
+    {
         $this->anyId = $anyId;
         return $this;
     }
@@ -454,19 +476,22 @@ class RelationSettings
     /**
      * Get the value of oneId
      */
-    public function getOneId() {
+    public function getOneId()
+    {
         return $this->oneId;
     }
 
     /**
      * Set the value of oneId
      */
-    public function setOneId($oneId): self {
+    public function setOneId($oneId): self
+    {
         $this->oneId = $oneId;
         return $this;
     }
 
-    public function rewriteMode($mode) {
+    public function rewriteMode($mode)
+    {
         $tableId = $this->tableId;
         $manyId = $this->manyId;
         $currentMode = explode('__one_many__', $mode);
@@ -478,6 +503,5 @@ class RelationSettings
         }
         return $this;
     }
-
 
 }
