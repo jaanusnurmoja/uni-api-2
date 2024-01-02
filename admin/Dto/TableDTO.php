@@ -53,7 +53,6 @@ class TableDTO
 
         } else {
         unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
-        */
     }
     }
 
