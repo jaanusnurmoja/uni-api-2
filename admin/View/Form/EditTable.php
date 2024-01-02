@@ -60,6 +60,9 @@ class EditTable
         if (empty($data)) {
             $data = $this->data;
         }
+        //echo '<pre>';
+        //print_r($data);
+        //echo '</pre>';
         ?>
 <h1>
     <?php echo $data->tableName ?>
@@ -245,7 +248,7 @@ $this->createdModified($value);
 
     <?php }
 
-                    $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'];
+                    $roles = ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny'];
 
                     if (in_array($key, $roles)) {
 
@@ -270,10 +273,12 @@ $this->createdModified($value);
                     <table>
 
                         <?php $data->$key = [];
-                        $data->$key[0] = new \Model\RelationDetails();
+                        $data->$key[0] = new \Model\RelationSettings();
+                        /*
                         if (!isset($data->$key[0]->relation)) {
                             $data->$key[0]->relation = new \Model\Relation();
                         }
+                        */
 
                         foreach ($data->$key[0] as $rdKey => $rdValue) {
                             if ($rdKey == 'relation') {
@@ -306,7 +311,8 @@ $this->createdModified($value);
                                 } else {
                                     if ($rdKey != "id") {
                                         //echo "<input type='hidden' name='new[$key][{{row-count-placeholder}}][$rdKey]'>";
-                                        //} else {
+                                        //} else 
+                                        //if ($rdKey == 'table') echo json_encode($rdValue);
                                         echo "<tr><td>$rdKey</td><td><input type='text' id='new.$key.{{row-count-placeholder}}.$rdKey' name='new[$key][{{row-count-placeholder}}][$rdKey]' value='$rdValue' /></td></tr>";
                                     }
                                 }
@@ -322,6 +328,7 @@ $this->createdModified($value);
             <?php $relDiff = [];
                         if (!empty($value)) {
                             foreach ($value as $i => $av) {
+                                
                                 ?>
 
             <tr class="trow">
@@ -338,7 +345,7 @@ $this->createdModified($value);
                         <?php foreach ($av as $rdKey => $rdValue) {
                                     $rdName = "table[$key][$i][$rdKey]";
                                     $rdId = "table.$key.$i.$rdKey";
-
+/*
                                     if ($rdKey == 'relation') {?>
                         <tr>
                             <td class="col col-2"><?=$rdKey?></td>
@@ -362,7 +369,8 @@ foreach ($this->relations as $r) {
                             </td>
                         </tr>
                         <?php
-} else {?>
+} else { */
+?>
                         <tr>
                             <td class="col col-2"><?=$rdKey?></td>
                             <td>
@@ -378,6 +386,7 @@ foreach ($this->relations as $r) {
                                                 echo "$rdValue <input type='hidden' id='$rdId' name='$rdName' value='$rdValue'>";
                                             } else {
                                                 if ($rdKey != 'createdModified') {
+                                                    if (is_array($rdValue) || is_object($rdValue)) $rdValue = json_encode($rdValue);
                                                     echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
                                                 } else {
                                                     echo '<h4>Created & modified</h4>';
@@ -388,7 +397,7 @@ foreach ($this->relations as $r) {
                             </td>
                         </tr>
                         <?php
-}
+//}
                                 }
                                 ?>
 
@@ -408,8 +417,8 @@ foreach ($this->relations as $r) {
                                 $acDiff = array_diff($ac1, $ac2);
                                 if (!empty($acDiff)) {
                                     foreach ($acDiff as $d) {
-                                        echo "DELETE FROM uasys_relation_details WHERE id=$d;";
-                                        $this->tableController->removeFromList('relation_details', $d);
+                                        echo "DELETE FROM uasys_relation_settings WHERE id=$d;";
+                                        $this->tableController->removeFromList('relation_settings', $d);
                                     }
                                     echo '<hr>see on reldiff: <hr>';}
                             }

@@ -3,3 +3,4 @@ config/social.ini
 api/config.php
 /nbproject/private/
 /admin/View.zip
+view

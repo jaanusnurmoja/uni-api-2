@@ -123,11 +123,12 @@ foreach ($field as $k => $v) {
                     }
                 }
 
-                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
+                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
+                        echo "<tr><td colspan='2' class='h5'>$av->otherTable</td></tr>";
                         foreach ($av as $rdKey => $rdValue) {
-                            if (is_object($rdValue)) {
+                            if (is_object($rdValue) || is_array($rdValue)) {
                                 $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
                             }
                             echo "<tr><td>$rdKey</td><td>$rdValue</td></tr>";
@@ -136,10 +137,7 @@ foreach ($field as $k => $v) {
                 }
             }
         }
-        ?>
-        </table>
-        <?php
-        echo $this->tableSingleOrList->makeSql();
+        echo '</table>';
     }
 
     /**

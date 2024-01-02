@@ -1,10 +1,6 @@
 <?php namespace Dto;
 
-use Common\Helper;
-use Controller\Table as ControllerTable;
 use \Model\Table;
-use Service\Read;
-use user\model\User;
 
 /**
  * Põhimudeli töötleja, sh on seosed teiste tabelitega jaotatud vastavalt tüübile
@@ -19,34 +15,45 @@ class TableDTO
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
-    private $sql;
-    private $joins = [];
-    protected $model;
+    public $hasAny = [];
 
-    public function __construct(Table $model)
+    public function __construct(Table $model, $mini = false)
     {
-        $this->model = $model;
+        $tableItem = new TableItem($model);
+        $model->data->setTable($tableItem);
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
-        $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
-        unset($this->data->table);
-        //$this->makeSql();
-        foreach ($model->getRelationDetails() as $rdRow) {
 
-            unset($rdRow->table);
-            if ($rdRow->getRole() == 'belongsTo') {
+        if ($mini === false) {
+            $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
+            unset($this->data->table);
+            foreach ($model->getRelationSettings() as $rdRow) {
 
-                array_push($this->belongsTo, $rdRow);
+                //unset($rdRow->table);
+                if ($rdRow->getMode() == 'belongsTo') {
+                    $rdRow->setTable($tableItem);
+
+                    array_push($this->belongsTo, $rdRow);
+                }
+                if ($rdRow->getMode() == 'hasMany') {
+                    array_push($this->hasMany, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
+                    array_push($this->hasManyAndBelongsTo, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasAny') {
+                    array_push($this->hasAny, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
             }
-            if ($rdRow->getRole() == 'hasMany') {
-                array_push($this->hasMany, $rdRow);
-            }
-            if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
-                array_push($this->hasManyAndBelongsTo, $rdRow);
-            }
-        }
+
+        } else {
+        unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
+    }
     }
 
     /**
@@ -173,133 +180,15 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
-    private function getModel() {
-        return $this->model;
-    }
 
-    public function getSql() {
-    	return $this->sql;
+    public function getHasAny() {
+    	return $this->hasAny;
     }
 
     /**
-    * @param $sql
+    * @param $hasAny
     */
-    public function setSql($sql) {
-    	$this->sql = $sql;
+    public function setHasAny($hasAny) {
+    	$this->hasAny = $hasAny;
     }
-
-    public function makeSql() {
-        $model = $this->getModel();
-        $sql = 'SELECT ';
-        $sql .= $this->queryFields($model, $this->tableName);
-        $sql .= " FROM $this->tableName";
-        $sql .= implode('
-         ', $this->joins);
-        return $sql;
-        //$this->setSql($sql);
-    }
-    public function queryFields(
-            $model = null,
-            $mainTable = null,
-            $parentTable = null,
-            $i = null,
-            $parentRelDetail = null,
-            $parentModel = null
-        ) {
-        $read = new Read();
-        $mainTablePref = '';
-        $mainTableAlias = '';
-        $sql = '';
-        $joinStmt = [];
-        $comma = '';
-
-        if ($mainTable) {
-            if ($parentTable) {
-                $mainTablePref = $mainTable . ':';
-                $mainTableAlias = $mainTable . '`.`';
-                $comma =', ';
-            } 
-        $pref = !isset($i) ? '' : "{$i}::";
-       // echo "$i parent: $parentTable, main: $mainTable";
-        //echo '<hr>';
-
-        // väljade loomise tingimuste algus
-        /* 
-        if (empty($parentModel) 
-        || ((isset($parentModel->relationDetails[$i-1]) && $parentModel->relationDetails[$i-1]->otherTable == $mainTable)
-        && (isset($parentModel->relationDetails[$i]) && $parentModel->relationDetails[$i]->otherTable != $mainTable))    )
-        {
-            */
-            if(empty($parentModel) || (isset($parentModel->relationDetails) && next($parentModel->relationDetails))) {
-            $sql .= "$comma'$model->pk' AS `$pref{$mainTablePref}pk_name`, 
-            `$pref{$mainTableAlias}{$model->pk}` AS `$pref{$mainTablePref}pk_value`, 
-            `$pref{$mainTableAlias}{$model->tableName}` AS `$pref{$mainTablePref}table_name`
-            ";
-            foreach ($model->data->fields as $dtoField => $dtoValue) {
-                $dtofSqlName = Helper::uncamelize($dtoField);
-                $sql .= ", `$pref{$mainTableAlias}$dtofSqlName` AS `$pref{$mainTablePref}$dtofSqlName`
-                ";
-            }
-            if (!isset($u)) $u = 0;
-            foreach($model->data->dataCreatedModified as $cmKey => $cmValue) {
-                $cmSqlName = Helper::uncamelize($cmKey);
-                $sql .= ", `$pref{$mainTableAlias}$cmSqlName` AS `$pref{$mainTablePref}$cmSqlName`";
-                if ($cmValue instanceof User) {
-                    $sql .= ", $u::users.id AS $u::users:id, $u::users.user_name AS $u::users:user_name
-                    ";
-                    $u++;
-                }
-            }
-        }
-            /*
-        }
-        */
-        // välja loomise tingimuste lõpp
-            
-            if (!empty($model->getRelationDetails())){
-                
-                if (isset($parentRelDetail->role) && $parentRelDetail->role == 'belongsTo'){
-                    unset($model->relationDetails);
-                }
-                if (isset($model->relationDetails)) {
-                foreach($model->relationDetails as $n => $relDetail) {
-                    $pref = "{$n}::";
-                        
-                    $otherTable = Helper::uncamelize($relDetail->otherTable);
-                    $dto = $read->getTables(null, ['table_name' => $otherTable]);
-                    if ($relDetail->role == 'belongsTo') {
-                        if (!empty($parentTable) && $otherTable == $parentTable) {
-                            
-                                array_push($this->joins, " LEFT JOIN $mainTable $pref{$mainTable} ON $pref{$mainTable}.{$relDetail->keyField} = $parentTable.{$parentModel->pk}");
-                            
-                        } else {
-                            if (!in_array($otherTable, [$mainTable, $parentTable])) {
-                                array_push($this->joins, " LEFT JOIN $otherTable $pref{$otherTable} ON $pref{$otherTable}.{$dto->pk} = $mainTable.{$relDetail->keyField}");
-                            }
-                        }
-
-                    }
-                    
-                        $sql .= $this->queryFields(
-                            $dto->getModel(),
-                            $dto->getModel()->tableName, 
-                            $mainTable,
-                            $n,
-                            $relDetail,
-                            $model
-                        );
-                        //$i++;
-                    }
-                }
-            }
-    }
-
-    //print_r( $this->joins);
-
-        return $sql;
-    }
-
-    //public function joins($mainTable, $mainKey, $otherTable, $otherKey, $i) {}
-
-
 }

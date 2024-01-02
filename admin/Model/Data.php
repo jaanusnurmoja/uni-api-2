@@ -1,17 +1,19 @@
 <?php namespace Model;
 
 use Common\Model\DataCreatedModified;
+use Dto\TableDTO;
+use Dto\TableItem;
 
 class Data
 {
-    public $table;
+    public TableItem $table;
     public $fields = [];
     public DataCreatedModified $dataCreatedModified;
 
     /**
      * Get the value of table
      */
-    public function getTable(): Table
+    public function getTable(): TableItem
     {
         return $this->table;
     }
@@ -19,7 +21,7 @@ class Data
     /**
      * Set the value of table
      */
-    public function setTable(Table $table): self
+    public function setTable(TableItem $table): self
     {
         $this->table = $table;
 
