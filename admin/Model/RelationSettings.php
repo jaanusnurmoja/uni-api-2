@@ -15,30 +15,29 @@ class RelationSettings
 
     public ?int $id;
     private Relation $relation;
-    private $role;
+    public $role;
     public $keyField;
-    public $otherKeyField;
-    private bool $hasMany = false;
+    public bool $hasMany = false;
     public TableItem $table;
     public $tableId;
     public $otherTable;
     public $mode;
-    private Table $many;
-    private $manyId;
-    private $manyTable;
-    private $manyFk;
+    public Table $many;
+    public $manyId;
+    public $manyTable;
+    public $manyFk;
     public $manyMany;
     public $manyManyIds;
-    private $anyId;
+    public $anyId;
     public $anyAny;
-    private ?Table $any;
-    private $anyTable;
-    private $anyPk;
-    private $oneAny;
-    private $onePk;
-    private $oneTable;
-    private $oneId;
-    private Table $one;
+    public ?Table $any;
+    public $anyTable;
+    public $anyPk;
+    public $oneAny;
+    public $onePk;
+    public $oneTable;
+    public $oneId;
+    public Table $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = 0)
@@ -177,35 +176,9 @@ class RelationSettings
     /**
      * @param $otherTable
      */
-    public function setOtherTable($manyTable, $anyTable, $oneTable)
+    public function setOtherTable($otherTable)
     {
-        if (!empty([$manyTable, $oneTable])){
-            $this->setManyTable($manyTable);
-            $this->setOneTable($oneTable);
-            if ($this->tableId == $this->oneId) {
-                $this->otherTable = $oneTable;
-            }
-            if ($this->tableId == $this->manyId) {
-                $this->otherTable = $manyTable;
-           }
-        } else {
-            if (!empty($anyTable)) {
-                $this->setAnyTable($anyTable);
-                $this->otherTable = $anyTable;
-            } else {
-                $manyMany = json_decode($this->manyMany);
-                if (is_array($manyMany)) {
-                    foreach ($manyMany as $model) {
-                        if ($model->id != $this->tableId) {
-                            $this->otherTable = $model->table; 
-                        }
-                    }
-                } else {
-                    $this->otherTable = $manyMany->table;
-                }
-            }
-        }
-        
+        $this->otherTable = $otherTable;
         return $this;
     }
 
@@ -463,71 +436,12 @@ class RelationSettings
 
     public function rewriteMode($mode, $tableId, $manyId, $oneId) {
         $currentMode = explode('__one_many__', $mode);
-        if (!empty($manyId) && !empty($oneId)){
-            if ($tableId == $oneId) {
-                $this->setMode($currentMode[0]);
-                $this->setRole($currentMode[0]);
-            } else {
-                $this->setMode($currentMode[1]);
-                $this->setRole($currentMode[1]);
-        
-            }
+        $this->setMode($currentMode[0]);
+        if ($tableId == $manyId) {
+            $this->setMode($currentMode[1]);
         }
         return $this;
     }
 
 
-
-    /**
-     * Get the value of otherKeyField
-     */
-    public function getOtherKeyField() {
-        return $this->otherKeyField;
-    }
-
-    /**
-     * Set the value of otherKeyField
-     */
-    public function setOtherKeyField($otherKeyField): self {
-        $this->otherKeyField = $otherKeyField;
-        return $this;
-    }
-
-
-    public function setCommonKeyFields($manyFk, $anyPk, $onePk): self
-    {
-        if (!empty($manyFk) && !empty($onePk)){
-            $this->setManyFk($manyFk);
-            $this->setOnePk($onePk);
-            if ($this->tableId == $this->manyId) {
-                $this->setKeyField($manyFk);
-                $this->setOtherKeyField($onePk);
-            }
-            if ($this->tableId == $this->oneId) {
-                $this->setKeyField($onePk);
-                $this->setOtherKeyField($manyFk);
-           }
-        } else {
-            if (!empty($anyPk)) {
-                $this->setAnyPk($anyPk);
-                $this->setKeyField($anyPk);
-            } else {
-                $manyMany = json_decode($this->manyMany);
-                if (is_array($manyMany)) {
-                    foreach ($manyMany as $model) {
-                        if ($model->id == $this->tableId) {
-                            $this->setKeyField($model->pk); 
-                        } else {
-                            $this->setOtherKeyField($model->pk);
-                        }
-                    }
-                } else {
-                    $this->setKeyField($manyMany->pk); 
-                    $this->setOtherKeyField($manyMany->pk);
-                }
-            }
-        }
-        
-        return $this;
-    }
 }

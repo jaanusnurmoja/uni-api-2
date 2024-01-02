@@ -102,22 +102,25 @@ class Read
                     ->setId($row['rd_id'])
                     ->setRelation($rel)
                     ->setRole($row['rd_role'])
+                    ->setKeyField($row['key_field'])
+                    ->setHasMany((bool) $row['hasMany'])
                     ->setTableId($row['models_id'])
+                    ->setOtherTable($row['other_table'])
+                    ->rewriteMode($row['mode'], $row['models_id'], $row['many_id'], $row['one_id'])
                     ->setManyId($row['many_id'])
-                    ->setMode($row['mode'])
+                    ->setManyTable($row['many_table'])
+                    ->setManyFk($row['many_fk'])
                     ->setManyMany($row['many_many'])
                     ->setManyManyIds($row['many_many_ids'])
                     ->setAnyId($row['any_id'])
                     ->setAnyAny($row['any_any'])
+                    ->setAnyTable($row['any_table'])
+                    ->setAnyPk($row['any_pk'])
+                    ->setOnePk($row['one_pk'])
+                    ->setOneTable($row['one_table'])
                     ->setOneId($row['one_id'])
-                    ->setHasMany((bool) $row['hasMany'])
                     ;
-                    $relationSettings
-                    ->setCommonKeyFields($row['many_fk'], $row['any_pk'], $row['one_pk'])
-                    ->setOtherTable($row['many_table'], $row['any_table'], $row['one_table'])
-                    ->rewriteMode($row['mode'], $row['models_id'], $row['many_id'], $row['one_id'])
-                    ;
-}
+                }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
