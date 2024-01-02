@@ -178,7 +178,7 @@ class RelationSettings
      */
     public function setOtherTable($otherTable)
     {
-        $this->otherTable = $otherTable;
+        $this->otherTable = "/$otherTable";
         return $this;
     }
 
@@ -218,7 +218,7 @@ class RelationSettings
     */
     public function setManyTable($manyTable) {
         if ($this->oneId == $this->tableId) {
-            $this->otherTable = $manyTable;
+            $this->otherTable = "/$manyTable";
         }
     	$this->manyTable = $manyTable;
         return $this;
@@ -254,13 +254,13 @@ class RelationSettings
                 $tableId = $this->tableId;
 
                 if ($manyMany[0]->id == $tableId) {
-                    $this->otherTable = $manyMany[1]->table;
+                    $this->otherTable = '/'.$manyMany[1]->table;
                 }
                 if ($manyMany[1]->id == $tableId) {
-                    $this->otherTable = $manyMany[0]->table;
+                    $this->otherTable = '/'.$manyMany[0]->table;
                 }
             } else {
-                if (is_object($manyMany)) {$this->otherTable = $manyMany->table;}
+                if (is_object($manyMany)) {$this->otherTable = '/'.$manyMany->table;}
             }
         } else {
             unset($this->manyMany);
@@ -304,7 +304,7 @@ class RelationSettings
     */
     public function setOneTable($oneTable) {
         if ($this->manyId == $this->tableId) {
-            $this->otherTable = $oneTable;
+            $this->otherTable = '/'.$oneTable;
         }
     	$this->oneTable = $oneTable;
         return $this;

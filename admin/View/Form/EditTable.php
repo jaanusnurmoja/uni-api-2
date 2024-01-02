@@ -4,6 +4,8 @@ use Common\Model\DataCreatedModified;
 
 //use Model\Data;
 
+$thisDir = dirname($_SERVER['SCRIPT_NAME']);
+
 class EditTable
 {
     /**
@@ -60,6 +62,7 @@ class EditTable
         if (empty($data)) {
             $data = $this->data;
         }
+        global $thisDir;
         //echo '<pre>';
         //print_r($data);
         //echo '</pre>';
@@ -343,7 +346,7 @@ $this->createdModified($value);
                         value="<?=$av->id?>">
                     <table id="<?=$key?>_<?=$i?>">
                         <?php foreach ($av as $rdKey => $rdValue) {
-                                    $rdName = "table[$key][$i][$rdKey]";
+                                  $rdName = "table[$key][$i][$rdKey]";
                                     $rdId = "table.$key.$i.$rdKey";
 /*
                                     if ($rdKey == 'relation') {?>
@@ -388,6 +391,9 @@ foreach ($this->relations as $r) {
                                                 if ($rdKey != 'createdModified') {
                                                     if (is_array($rdValue) || is_object($rdValue)) $rdValue = json_encode($rdValue);
                                                     echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
+                                                    if ($rdKey == 'otherTable') {
+                                                        echo " <a href='$thisDir/tables{$rdValue}/edit'>$rdValue</a>";
+                                                    }
                                                 } else {
                                                     echo '<h4>Created & modified</h4>';
                                                     $this->createdModified($rdValue);
