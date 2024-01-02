@@ -8,6 +8,7 @@ include_once __DIR__ . '/../Model/Table.php';
 include_once __DIR__ . '/../Model/Field.php';
 include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
+include_once __DIR__ . '/../Dto/TableItem.php';
 include_once __DIR__ . '/../../common/Model/CreatedModified.php';
 include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
 
