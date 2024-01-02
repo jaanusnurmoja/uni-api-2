@@ -5,6 +5,10 @@ use View\Form\EditTable;
 
 include_once __DIR__ . '/Form/EditTable.php';
 include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
+$thisDir = dirname($_SERVER['SCRIPT_NAME']);
+if (isset($_SERVER['PATH_INFO'])) {
+    $path = $_SERVER['PATH_INFO'];
+}
 
 /**
  * Table
@@ -34,6 +38,9 @@ class Table
      */
     public function tableDetails($confirmDelete = false)
     {
+        global $thisDir;
+        global $path;
+
         echo '<h1>' . $this->tableSingleOrList->tableName . '</h1>';
         if ($confirmDelete === true) {
             $origin = $_SERVER['HTTP_REFERER'];
@@ -123,11 +130,15 @@ foreach ($field as $k => $v) {
                     }
                 }
 
-                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo']) && !empty($value)) {
+                if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
+                        echo "<tr><td colspan='2' class='h5'>$av->otherTable</td></tr>";
                         foreach ($av as $rdKey => $rdValue) {
-                            if (is_object($rdValue)) {
+                            if ($rdKey == 'otherTable') {
+                                $rdValue = "<a href='$thisDir/tables{$rdValue}'>$rdValue</a>";
+                            }
+                            if (is_object($rdValue) || is_array($rdValue)) {
                                 $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
                             }
                             echo "<tr><td>$rdKey</td><td>$rdValue</td></tr>";
@@ -136,6 +147,7 @@ foreach ($field as $k => $v) {
                 }
             }
         }
+        echo '</table>';
     }
 
     /**
@@ -177,7 +189,7 @@ foreach ($this->tableSingleOrList as $row) {
                 $url = '';
                 foreach ($row as $key => $value) {
                     if ($key == 'tableName') {
-                        $url = isset($request[1]) ? $key : "tables/$value";
+                        $url = isset($request[1]) ? $value : "tables/$value";
                         $value = "<a href='$url' class='link-dark'>$value</a>";
                     }
                     if ($key == "data") {

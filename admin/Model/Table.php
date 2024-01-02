@@ -16,7 +16,7 @@ class Table
     public $pk = 'id';
     public $data;
     public CreatedModified $createdModified;
-    public $relationDetails = [];
+    public $relationSettings = [];
 
     public function __construct($id = null)
     {
@@ -107,22 +107,22 @@ class Table
     /**
      * @return array
      */
-    public function getRelationDetails(): array
+    public function getRelationSettings(): array
     {
-        return $this->relationDetails;
+        return $this->relationSettings;
     }
 
     /**
-     * @param array $relationDetails
+     * @param array $relationSettings
      */
-    public function setRelationDetails(array $relationDetails): void
+    public function setRelationSettings(array $relationSettings): void
     {
-        $this->relationDetails = $relationDetails;
+        $this->relationSettings = $relationSettings;
     }
 
-    public function addRelationDetails(RelationDetails $relationDetails)
+    public function addRelationSettings(RelationSettings $relationSettings)
     {
-        array_push($this->relationDetails, $relationDetails);
+        array_push($this->relationSettings, $relationSettings);
     }
 
 }

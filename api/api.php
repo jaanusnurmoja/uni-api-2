@@ -5,6 +5,8 @@ ini_set('display_errors', 0);
 //error_reporting(E_ALL);
 
 //require_once 'config.php';
+$thisDir = dirname($_SERVER['SCRIPT_NAME']);
+$path = $_SERVER['PATH_INFO'];
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];

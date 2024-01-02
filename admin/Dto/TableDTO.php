@@ -15,29 +15,45 @@ class TableDTO
     public $belongsTo = [];
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
+    public $hasAny = [];
 
-    public function __construct(Table $model)
+    public function __construct(Table $model, $mini = false)
     {
+        $tableItem = new TableItem($model);
+        $model->data->setTable($tableItem);
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
-        $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
-        unset($this->data->table);
-        foreach ($model->getRelationDetails() as $rdRow) {
 
-            unset($rdRow->table);
-            if ($rdRow->getRole() == 'belongsTo') {
+        if ($mini === false) {
+            $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
+            unset($this->data->table);
+            foreach ($model->getRelationSettings() as $rdRow) {
 
-                array_push($this->belongsTo, $rdRow);
+                //unset($rdRow->table);
+                if ($rdRow->getMode() == 'belongsTo') {
+                    $rdRow->setTable($tableItem);
+
+                    array_push($this->belongsTo, $rdRow);
+                }
+                if ($rdRow->getMode() == 'hasMany') {
+                    array_push($this->hasMany, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
+                    array_push($this->hasManyAndBelongsTo, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasAny') {
+                    array_push($this->hasAny, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
             }
-            if ($rdRow->getRole() == 'hasMany') {
-                array_push($this->hasMany, $rdRow);
-            }
-            if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
-                array_push($this->hasManyAndBelongsTo, $rdRow);
-            }
-        }
+
+        } else {
+        unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
+    }
     }
 
     /**
@@ -138,6 +154,11 @@ class TableDTO
         $this->belongsTo = $belongsTo;
     }
 
+    public function addBelongsTo($belongsTo)
+    {
+        array_push($this->belongsTo, $belongsTo);
+    }
+
     public function getHasMany()
     {
         return $this->hasMany;
@@ -151,6 +172,10 @@ class TableDTO
         $this->hasMany = $hasMany;
     }
 
+    public function addHasMany($hasMany)
+    {
+        array_push($this->hasMany, $hasMany);
+    }
     public function getHasManyAndBelongsTo()
     {
         return $this->hasManyAndBelongsTo;
@@ -164,4 +189,15 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
+
+    public function getHasAny() {
+    	return $this->hasAny;
+    }
+
+    /**
+    * @param $hasAny
+    */
+    public function setHasAny($hasAny) {
+    	$this->hasAny = $hasAny;
+    }
 }
