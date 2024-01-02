@@ -1,29 +1,43 @@
 <?php namespace user\model;
-include_once __DIR__.'/../../common/Helper.php';
-use \common\Helper;
-use \common\model\Person;
 
+include_once __DIR__ . '/../../common/Helper.php';
+include_once __DIR__ . '/../../common/Model/Person.php';
+use \Common\Helper;
+use \Common\Model\Person;
+
+/**
+ * Kasutaja 
+ * @property string $userName 
+ * @property string $email
+ * @property string $social
+ * @property Person $person  
+
+*/
 class User
 {
     // User class
     public $id;
     public $username;
     public $email;
-    public $password;
+    private $password;
     public $social;
-    public $userToken;
-    public $identityToken;
+    private $userToken;
+    private $identityToken;
     public $role = 'USER';
-    //public \Person $person;
+    public \Common\Model\Person $person;
 
-    public function __construct($userData = []) {
+    public function __construct($userData = [])
+    {
         if (!empty($userData)) {
             foreach ($userData as $key => $value) {
-                if ($key == 'ID') $key = 'id';
+                if ($key == 'ID') {
+                    $key = 'id';
+                }
+
                 $key = Helper::camelize($key, true);
-                //if (property_exists($this, $key)) {
+                if (property_exists($this, $key)) {
                     $this->$key = $value;
-                //}
+                }
             }
         }
     }
@@ -171,18 +185,16 @@ class User
         return $this;
     }
 
-    
-
 /**
-     * Get the value of person
-     *
-     * @return \Person
-     */
-/*     public function getPerson(): \Person
+ * Get the value of person
+ *
+ * @return \Person
+ */
+    public function getPerson(): \Common\Model\Person
     {
         return $this->person;
     }
- */
+
     /**
      * Set the value of person
      *
@@ -190,12 +202,12 @@ class User
      *
      * @return self
      */
-    /*
-    public function setPerson(\Person $person): self
+
+    public function setPerson(\Common\Model\Person $person): self
     {
         $this->person = $person;
 
         return $this;
     }
- */
- }
+
+}

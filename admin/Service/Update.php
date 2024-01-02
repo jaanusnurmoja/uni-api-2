@@ -1,0 +1,144 @@
+<?php namespace Service;
+
+use Common\Helper;
+use mysqli;
+
+class Update
+{
+    protected function cnn()
+    {
+        $cnf = parse_ini_file(__DIR__ . '/../../config/connection.ini');
+        return new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+
+    }
+
+    public function updateTable($table)
+    {
+        $whereId = $table['id'];
+        $sql = '';
+
+        $sql .= "UPDATE uasys_models SET modified_by = " . $table['createdModified']['modifiedBy'] . " WHERE id = $whereId;
+        ";
+        foreach ($table as $propName => $propContent) {
+            if ($propName == 'data' && isset($propContent['fields'])) {
+                foreach ($propContent['fields'] as $fieldName => $fieldProps) {
+                    if ($this->checkIfFieldExists($table['tableName'], $fieldName) === false) {
+                        $fieldName = Helper::uncamelize($fieldName);
+                    }
+
+                    $sql .= $this->changeColumn($table['tableName'], $fieldName, $fieldProps);
+                }
+            }
+
+            if (in_array($propName, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny'])) {
+                foreach ($propContent as $relationSettings) {
+                    $rdId = $relationSettings['id'];
+                    unset($relationSettings['id'], $relationSettings['table']);
+                    $sql .= $this->updateRelationSettings($relationSettings, $rdId);
+                }
+            }
+        }
+        echo 'uuendame tabelit: ' . $sql . "<hr>";
+        $this->makeQueries($sql);
+    }
+
+    public function makeQueries($sql)
+    {
+        $cnn = $this->cnn();
+        try
+        {
+            $cnn->multi_query($sql);
+            do {
+                /* store the result set in PHP */
+                if ($result = $cnn->store_result()) {
+                    while ($row = $result->fetch_row()) {
+                        printf("%s<hr>", $row[0]);
+                    }
+                }
+                /* print divider */
+                if ($cnn->more_results()) {
+                    printf("<hr>");
+                }
+            } while ($cnn->next_result());
+
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
+    }
+
+    public function changeColumn($tableName, $fieldName, $fieldProps)
+    {
+        $sql = "ALTER TABLE $tableName CHANGE COLUMN $fieldName ";
+        foreach ($fieldProps as $fpName => $fpValue) {
+            if ($fpName == 'name') {
+                $fpValue = Helper::uncamelize($fpValue);
+                $sql .= " $fpValue";
+            }
+            if ($fpName == 'type') {
+                $sql .= " $fpValue";
+            }
+            if ($fpName == 'defOrNull') {
+                $sql .= (bool) $fpValue === true ? " NULL" : " NOT NULL";
+            }
+            if ($fpName == 'defaultValue') {
+                if (empty($fpValue)) {
+                    $sql .= (bool) $fieldProps['defOrNull'] === true ? " DEFAULT NULL;
+                                " : "
+                                ";
+                } else {
+                    if ($fpValue != 'current_timestamp') {
+                        $fpValue = "'$fpValue'";
+                    }
+                    $sql .= " DEFAULT $fpValue
+                                ";
+                }
+            }
+        }
+        $sql .= ';';
+        return $sql;
+    }
+
+    public function updateRelationSettings($relationSettings, $rdId)
+    {
+        $sql = "UPDATE uasys_relation_settings SET ";
+        foreach ($relationSettings as $rdKey => $rdValue) {
+            if ($rdKey == 'createdModified') {
+                foreach ($rdValue as $cmKey => $cmValue) {
+                    $sqlKey = Helper::uncamelize($cmKey);
+                    $sql .= "$sqlKey = $cmValue";
+                    $sql .= next($relationSettings) ? ', ' : '';
+                }
+            } else {
+                $sqlKey = Helper::uncamelize($rdKey);
+                $sql .= "$sqlKey = $rdValue";
+                $sql .= next($relationSettings) ? ', ' : '';
+            }
+        }
+        $sql .= " WHERE id = $rdId;
+                ";
+        return $sql;
+
+    }
+
+    public function checkIfFieldExists($table, $field)
+    {
+        $read = new Read();
+        return $read->getDefaultFields($table, $field);
+    }
+
+    /**
+     * @TODO
+     * ALTER TABLE `systeem` DROP FOREIGN KEY `beers`;
+     * ALTER TABLE `systeem` ADD CONSTRAINT `beers` FOREIGN KEY (`beers_id`)
+     * REFERENCES `beers`(`id`)
+     * ON DELETE SET NULL
+     * ON UPDATE CASCADE;
+     * ALTER TABLE `systeem` DROP FOREIGN KEY `producers`;
+     * ALTER TABLE `systeem` ADD CONSTRAINT `producers` FOREIGN KEY (`producers_id`)
+     * REFERENCES `producers`(`id`)
+     * ON DELETE SET NULL
+     * ON UPDATE CASCADE;
+
+     */
+}

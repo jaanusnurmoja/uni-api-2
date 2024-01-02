@@ -1,5 +1,23 @@
 <?php
+/**
+ * @package uniapiplus
+ *
+ * @see api
+ * @see https://github.com/darioTecchia/uni-api
+ * 1) frontend
+ *
+ * 2) rest api
+ *
+ * 3) halduskeskkond - @see admin
+ *
+ * 4) kasutajate autentimine ainult id-kaardi või sotsiaalkontodega
+ *
+ * @author Jaanus Nurmoja <jaanus.nurmoja@gmail.com>
+
+ */
+
 session_start();
+require_once __DIR__ . '/admin/Autoload.php';
 
 $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = !empty($path) ? explode('/', $path) : [];
@@ -9,31 +27,40 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 $http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $siteBase = str_replace(['/admin', $path, '/index.php'], '', $_SERVER['PHP_SELF']);
 
-$siteBaseUrl = $http.$_SERVER['HTTP_HOST'].$siteBase;
+$siteBaseUrl = $http . $_SERVER['HTTP_HOST'] . $siteBase;
 
 $_SESSION['loginstart'] = str_replace('/index.php', '', $_SERVER['PHP_SELF']);
 
-if (!empty($_SERVER['QUERY_STRING']))
-{
-	$_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $_SESSION['fromQueryString'] = $_SERVER['QUERY_STRING'];
 }
 
 $_SESSION['urlComingFrom'] = $uri;
 $socialIni = parse_ini_file('config/social.ini', true);
 $oneAllSubDomain = $socialIni['OneAll']['subDomain'];
 $idCardAuthService = $socialIni['IdCard']['authService'];
-$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' .urlencode($siteBaseUrl) :'';
+$_SESSION['idCardAuthService'] = $idCardAuthService;
+$cb = (bool) $socialIni['IdCard']['callback'] === true ? '?cb=' . urlencode($siteBaseUrl) : '';
 
 include_once 'user/Session.php';
 
-if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCardData']])) {
+if (!empty([isset($_SESSION['currentPerson']), isset($_SESSION['userData']), isset($_SESSION['idCardData'])])) {
     new \user\Session();
+    /**
+     * Sisseloginud kasutaja, nagu ta avalikult kuvatakse
+     *
+     * PEREKONNANIMI,EESNIMI,34506070890 (10, eId:5)
+     */
     function loggedIn()
     {
-        if (isset($_SESSION['loggedIn']))
-        {
+        if (isset($_SESSION['loggedIn'])) {
             $u = $_SESSION['loggedIn']['userData'];
-            return $u->username . ' (' . $u->id . ', ' . $u->social . ')';
+            $sId = '';
+            if (isset($u->person->id)) {
+                $sId = ': ' . $u->person->id;
+            }
+            return $u->username . ' (' . $u->id . ', ' . $u->social . $sId . ')';
+
         }
     }
 }
@@ -45,8 +72,14 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
 
 <head>
     <title>
-        Jaanus Nurmoja uni-api projekt
+        Jaanus Nurmoja projekt UNIAPIPLUS
     </title>
+    <meta property="og:title" content="Jaanus Nurmoja projekt UNIAPIPLUS" />
+    <meta property="og:description" content="Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
+                    keerukate ja mitmekihiliste seostega (nagu mu varasemas näidisrakenduses https: //test.nurmoja.net.ee/repeat
+), võimalikult väheste  päringute hulgaga ning võimalikult lihtsama ja napima seadistusega (sh nt ilma võõrvõtmete määramiseta andmebaasis).
+    Aluseks on võetud üks lihtsa crud api https://github.com/darioTecchia/uni-api projekt ,
+    mida  paraku pole mitu aastat edasi arendatud. Osa funktsionaalsusi võtan kindlasti sealt üle." />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -89,28 +122,25 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     <a class="navbar-brand" href="/uni-api">Avaleht</a>
                 </li>
                 <?php
-					if (loggedIn())
-					{?>
+if (loggedIn()) {?>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
                         onclick="window.location.href='user/logout'"><?=loggedIn()?> | LOGOUT</button></li>
-                <?php }
-					else
-					{?>
+                <?php } else {?>
                 <li class="nav-item navbar-brand">Sisene: </li>
                 <li><button class="btn btn-warning" style="margin-top:-2px;"
-                        onclick="window.location.href='<?=$idCardAuthService.$cb?>'">Estonian
-                        ID CARD</button></li>
+                        onclick="window.location.href='<?=$idCardAuthService . $cb?>'">Eesti
+                        ID kaardiga</button></li>
                 <li class="nav-item"><button id="oa_social_login_link" class="btn btn-warning"
                         style="margin-top:-2px;"><img src="https://secure.oneallcdn.com/img/favicon.png"
-                            style="max-height:16px"><span
-                            style="vertical-align:top; padding-left:2px">OTHER</span></button>
+                            style="max-height:16px"><span style="vertical-align:top; padding-left:2px">MUUL VIISIL |
+                            OTHER</span></button>
                     <script type="text/javascript">
                     var _oneall = _oneall || [];
                     _oneall.push(['social_login', 'set_callback_uri',
-                        '<?php echo $siteBaseUrl?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
+                        '<?php echo $siteBaseUrl ?>/user/social/oneall/callback.php?cb=<?=urlencode($uri)?>'
                     ]);
-                    _oneall.push(['social_login', 'set_providers', ['github', 'google', 'windowslive', 'openid',
-                        'twitter'
+                    _oneall.push(['social_login', 'set_providers', [
+                        'google', 'facebook', 'twitter', 'windowslive', 'openid', 'github'
                     ]]);
                     _oneall.push(['social_login', 'set_custom_css_uri',
                         'https://secure.oneallcdn.com/css/api/themes/beveled_connect_w208_h30_wc_v1.css'
@@ -120,6 +150,13 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
                     </script>
                 </li>
                 <?php }?>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="/uni-api/docs/php">Hetkeseisu dokumentatsioon</a>
+                </li>
+                <li class="nav-item">
+                    <a class="navbar-brand" href="<?=$siteBaseUrl?>
+/docs/presentation/uniapiplus.pptx">Hetkeseisu ESITLUS</a>
+                </li>
             </ul>
             <a class="navbar-brand" href="/uni-api/admin">Admin</a>
 
@@ -127,7 +164,7 @@ if (!empty([$_SESSION['currentPerson'], $_SESSION['userData'], $_SESSION['idCard
     </nav>
     <div class="container">
         <div class="row">
-            <h2>Jaanus Nurmoja: uni-api</h2>
+            <h2 id="title">Jaanus Nurmoja: uniapiplus</h2>
             <div class="col-sm">
                 <?php
 echo 'Uuri asja lähemalt siit: <a href="README.md">UNI-API RAKENDUS</a>';
@@ -143,7 +180,7 @@ foreach (json_decode($rel) as $table => $params) {
 }
 ?>
                 </table>
-                <h4>uni-api algsete funktsionaalsuste näide</h4>
+                <h4>uni-api algsete funktsionaalsuste näide (avanemine pole paraku tagatud)</h4>
                 <table class="table table-striped">
                     <tr>
                         <td>Õllele id-ga 1 vastavad sündmused</td>
@@ -156,7 +193,7 @@ foreach (json_decode($rel) as $table => $params) {
                 </table>
             </div>
             <div class="col-md">
-                <p>Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
+                <p id="lead">Eesmärk on luua universaalne php & mysql crud api, mis edastab andmeid kuitahes
                     keerukate ja mitmekihiliste seostega (nagu mu <a
                         href="https://test.nurmoja.net.ee/repeat/">varasemas näidisrakenduses</a>), võimalikult väheste
                     päringute hulgaga ning võimalikult
@@ -171,18 +208,54 @@ foreach (json_decode($rel) as $table => $params) {
                     lihtsamaid vahendeid ning ka vajalikke php-teeke.
                 </p>
                 <div>
-                    <h4 class="bg-warning">Valmimas: halduskeskkond ja kasutajate automaatne registreerimine</h4>
+                    <h4 id="new" class="bg-warning">UUS: kasutajate automaatne registreerimine</h4>
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
                         pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
-                        automaatselt ka saidi kasutajaks, kui ta seda juba ei ole. Traditsioonilist
+                        automaatselt ka saidi kasutajaks, kui ta seda juba ei ole. <span class="bg-warning">ID-kaardiga
+                            sisseloginu kohta moodustatakse lisaks isikuprofiil, millega saab see kasutaja hiljem
+                            seostada ka kõik oma teised kontod. </span>Traditsioonilist
                         "kasutajanimi:parool" tüüpi sisselogimist ning vormi kaudu kasutajaks registreerumist ma hetkel
-                        ei plaani, küll aga võimalust hallata riikliku tuvastusvahendiga sisse loginuna oma
-                        isikuprofiili ning seostada sellega kõik oma kasutajakontod.
+                        ei plaani.
                     </p>
+                    <p> &#xF33B; Lahenduse sai hiljaaegu probleem, kus esmasel sisselogimisel ID kaardiga tuli pärast
+                        autentimist veel ühele "Jätka" lingile klikata, sest kasutaja moodustamise protsess seiskus. See
+                        jätkamislink oli ajutine lahendus.</p>
+                    <h4 class="bg-warning">TEOKSIL: halduskeskkond</h4>
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
-                        või kaasata olemasolevaid ning tekitada nende vahele soovitud andmeseoseid.
+                        või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid. SISULISELT
+                        OLEMAS.
+                    </p>
+                    <p>
+                        <mark>Seisuga 16.12.2023</mark> kaasatud tabelite loetellu saab kirjeid lisada, muuta ja
+                        kustutada.Tabelikirjete sees saab uusi infovälju lisada, muuta ja kustutada, samamoodi on
+                        seosekirjetega.
+                    </p>
+                    <p>
+                        <mark>Seisuga 12.12.2023</mark> toimub sisuhaldussüsteemis uute tabelite loomine koos vaikimisi
+                        väljadega, milleks on lisaks primaarvõtmele ka kirje loomise ja muutmise andmed (kasutaja id ja
+                        vastavad ajatemplid)
+
+                    </p>
+                    <p>
+                        <mark>Alates 29.11.2023</mark> on autori fookuses sisuhaldusse kaasatavate tabelite ja nende
+                        juurde kuuluva haldamine (st muutmine) üheainsa vormi vahendusel sarnaselt uue tabeli
+                        sisestamisega. Tõenäoliselt ei jää see üksainus vorm ainsaks variandiks, kuid tekib esimesena.
+                    </p>
+                    <p>
+                        Oluline väljakutse - muudatuste sisestamise korral peavad $_POST andmetest käiku minema vaid
+                        need, mida tegelikult soovitakse muuta (või ka lisada). Seda püüab autor lahendada javascripti
+                        abil - et vormivälja
+                        muuta, tuleb see kõigepealt aktiivseks teha, sest muutmisvormis on iga väli vaikimisi
+                        'disabled'. Sel moel
+                        kaasatakse $_POST muutujasse tõepoolest vaid vajalikud, st muudetavad või lisatavad väljad.
+                        Iseküsimus, kuidas
+                        talitada vormis toimetava kasutaja id-ga, sest selle jaoks ette nähtud väli on loomulikult
+                        peidetud, kuid peab
+                        samuti muutuma
+                        aktiivseks, kui vähemalt üks sama tabeli väli on aktiivne. Sama kehtib tabeli primaarvõtme
+                        väärtusega välja kohta.
                     </p>
                 </div>
                 <div>
@@ -190,12 +263,11 @@ foreach (json_decode($rel) as $table => $params) {
                     <ol>
                         <li>
                             json seadistusfailis <a href='api/relations.json'>relations.json</a> on defineeritud
-                            vaid
-                            tabelite nimed ning iga
-                            tabeli many-to-one või many-to-many seosed. Väljade nimedest on ära toodud vaid primaar-
-                            ja
-                            võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed. PLAANIS:
-                            andmebaasipõhine haldus json faili asemel.</li>
+                            vaid tabelite nimed ning iga tabeli many-to-one või many-to-many seosed. Väljade nimedest on
+                            ära toodud vaid primaar-
+                            ja võõrvõtmed. many-to-one põhjal genereeritakse omakorda one-to-many seosed.
+                            <strong>TEOKSIL: andmebaasipõhine haldus json faili asemel.</strong>
+                        </li>
                         <li>
                             päringu väljade loetelud genereeritakse üldise seadistuse põhjal dünaamiliselt,
                             kasutades

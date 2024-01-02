@@ -1,7 +1,13 @@
 <?php namespace Model;
+
 include 'Data.php';
+
+use Common\Model\CreatedModified;
 use Model\Data as DataFields;
 
+/**
+ * Halduskeskkonna peamine mudel
+ */
 class Table
 {
 
@@ -9,13 +15,17 @@ class Table
     public $tableName;
     public $pk = 'id';
     public $data;
-    public $relationDetails = [];
+    public CreatedModified $createdModified;
+    public $relationSettings = [];
 
     public function __construct($id = null)
     {
         if ($id == $this->id || $id == 0) {
-            if ( $id == 0 && empty($this->data)) {
-                $this->data = new Data();
+            if ($id == 0 && empty($this->data)) {
+                $this->data = new DataFields();
+            }
+            if (empty($this->createdModified)) {
+                $this->createdModified = new CreatedModified();
             }
             return $this;
         }
@@ -42,9 +52,9 @@ class Table
     /**
      * @param $name
      */
-    public function setTableName($name)
+    public function setTableName($tableName)
     {
-        $this->tableName = $name;
+        $this->tableName = $tableName;
     }
 
     public function getPk()
@@ -63,7 +73,7 @@ class Table
     /**
      * @return Data
      */
-    public function getData(): Data
+    public function getData(): DataFields
     {
         return $this->data;
     }
@@ -71,27 +81,48 @@ class Table
     /**
      * @param Data $data
      */
-    public function setData(Data $data): void
+    public function setData(DataFields $data): void
     {
         $this->data = $data;
     }
 
+    /**
+     * Get the value of createdModified
+     */
+    public function getCreatedModified(): CreatedModified
+    {
+        return $this->createdModified;
+    }
 
     /**
-    * @return array
-    */
-    public function getRelationDetails(): array {
-    	return $this->relationDetails;
+     * Set the value of createdModified
+     */
+    public function setCreatedModified(CreatedModified $createdModified): self
+    {
+        $this->createdModified = $createdModified;
+
+        return $this;
     }
 
     /**
-    * @param array $relationDetails
-    */
-    public function setRelationDetails(array $relationDetails): void {
-    	$this->relationDetails = $relationDetails;
+     * @return array
+     */
+    public function getRelationSettings(): array
+    {
+        return $this->relationSettings;
     }
 
-    public function addRelationDetails(RelationDetails $relationDetails) {
-        array_push($this->relationDetails, $relationDetails);
+    /**
+     * @param array $relationSettings
+     */
+    public function setRelationSettings(array $relationSettings): void
+    {
+        $this->relationSettings = $relationSettings;
     }
+
+    public function addRelationSettings(RelationSettings $relationSettings)
+    {
+        array_push($this->relationSettings, $relationSettings);
+    }
+
 }

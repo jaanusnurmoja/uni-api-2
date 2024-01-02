@@ -1,24 +1,33 @@
 <?php namespace Service;
 
-use mysqli;
-include_once __DIR__ . '/../Model/RelationDetails.php';
+use Common\Helper;
+use Common\Model\DataCreatedModified;
+include_once __DIR__ . '/../Model/RelationSettings.php';
 include_once __DIR__ . '/../Model/Relation.php';
 include_once __DIR__ . '/../Model/Table.php';
 include_once __DIR__ . '/../Model/Field.php';
 include_once __DIR__ . '/../Dto/TableDTO.php';
 include_once __DIR__ . '/../Dto/ListDTO.php';
+include_once __DIR__ . '/../../common/Model/CreatedModified.php';
+include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
 
+use mysqli;
+use \Common\Model\CreatedModified;
 use \Dto\ListDTO;
 use \Dto\TableDTO;
 use \Model\Data;
 use \Model\Field;
 use \Model\Relation;
-use \Model\RelationDetails;
+use \Model\RelationSettings;
 use \Model\Table;
+use \user\model\User;
+use Dto\TableItem;
 
+/**
+ * Andmete lugemine andmebaasitabelitest
+ */
 class Read
 {
-
     protected function cnn()
     {
         // require __DIR__ . '/../../api/config.php';
@@ -28,7 +37,14 @@ class Read
 
     }
 
-    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationDetails $relationDetails = null, TableDTO $tableDTO = null)
+    protected function getCurrentUser()
+    {
+        if (isset($_SESSION['userData'])) {
+            return new User($_SESSION['userData']);
+        }
+    }
+
+    public function getTables(Table $model = null, $params = [], Relation $rel = null, RelationSettings $relationSettings = null, TableDTO $tableDTO = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
@@ -41,10 +57,20 @@ class Read
             $where = ' WHERE' . implode(' AND', $w);
         }
 
-        $query = "SELECT t.id as rowid, t.*, f.id as fid, f.name as field, rd.id as rd_id, rd.*, r.id as rid, r.* FROM models t
+        $query = "SELECT t.id as rowid, t.id as tid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
+        f.id as fid, f.name as field,
+        rd.id as rd_id, rd.role as rd_role, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when,
+        r.id as rid, r.*,
+        tcu.id as tcu_id, tcu.username as tcu_name, tcu.email as tcu_email, tcu.password as tcu_password, tcu.social as tcu_social, tcu.user_token as tcu_usertoken, tcu.identity_token as tcu_id_token, tcu.role as tcu_role,
+        rcu.id as rcu_id, rcu.username as rcu_name, rcu.email as rcu_email, rcu.password as rcu_password, rcu.social as rcu_social, rcu.user_token as rcu_usertoken, rcu.identity_token as rcu_id_token, rcu.role as rcu_role
+
+        FROM uasys_models t
         LEFT JOIN fields f ON f.models_id = t.id
-        LEFT JOIN relation_details rd ON rd.models_id = t.id
-        LEFT JOIN relations r ON r.id = rd.relations_id
+        LEFT JOIN uasys_relation_settings rd 
+        ON (rd.many_id = t.id OR rd.one_id = t.id OR rd.any_id = t.id OR JSON_CONTAINS(rd.many_many_ids, t.id))
+        LEFT JOIN uasys_relations r ON r.id = rd.relations_id
+        LEFT JOIN uasys_users tcu ON tcu.id = t.created_by
+        LEFT JOIN uasys_users rcu ON rcu.id = rd.created_by
         $where";
         $q = $db->query($query);
 
@@ -53,42 +79,77 @@ class Read
         $single = null;
 
         while ($row = $q->fetch_assoc()) {
-            unset($row['id']);
+            unset($row['id'], $row['role'], $row['created_by'], $row['created_when'], $row['modified_by'], $row['modified_when']);
             $rowsDebug[] = $row;
-            while ($row['rd_id'] != null && (empty($relationDetails) || $relationDetails->getId() != $row['rd_id'])) {
-                $relationDetails = new RelationDetails();
+            while ($row['rd_id'] != null && (empty($relationSettings) || $relationSettings->getId() != $row['rd_id'])) {
+                $relationSettings = new RelationSettings();
                 $rel = new Relation();
                 $rel->setId($row['rid']);
                 $rel->setType($row['type']);
                 $rel->setAllowHasMany((bool) $row['allow_has_many']);
                 $rel->setIsInner((bool) $row['is_inner']);
 
-                $relationDetails->setId($row['rd_id']);
-                $relationDetails->setRelation($rel);
-                $relationDetails->setRole($row['role']);
-                $relationDetails->setKeyField($row['key_field']);
-                $relationDetails->setHasMany((bool) $row['hasMany']);
-                $relationDetails->setOtherTable($row['other_table']);
-            }
+                $rcUser = new User;
+                $rcUser->setId($row['rcu_id'])->setUsername($row['rcu_name'])->setEmail($row['rcu_email'])->setPassword($row['rcu_password'])->setSocial($row['rcu_social'])->setUserToken($row['rcu_usertoken'])->setIdentityToken($row['rcu_id_token'])->setRole($row['rcu_role']);
+
+                $relDetailsCreMod = new CreatedModified($row['rd_id'], 'relation_settings');
+                $relDetailsCreMod->setCreatedBy($rcUser)
+                    ->setCreatedWhen($row['rc_when'])
+                    ->setModifiedBy($row['rm_who'])
+                    ->setModifiedWhen($row['rm_when']);
+                $relDetailsCreMod->__construct();
+                $relationSettings
+                    ->setCreatedModified($relDetailsCreMod)
+                    ->setId($row['rd_id'])
+                    ->setTableId($row['rowid'])
+                    ->setManyId($row['many_id'])
+                    ->setAnyId($row['any_id'])
+                    ->setOneId($row['one_id'])
+                    ->setRelation($rel)
+                    ->setRole($row['rd_role'])
+                    ->setKeyField($row['key_field'])
+                    ->setHasMany((bool) $row['hasMany'])
+                    //->setOtherTable($row['other_table'])
+                    ->rewriteMode($row['mode'])
+                    ->setManyTable($row['many_table'])
+                    ->setManyFk($row['many_fk'])
+                    ->setManyMany(!empty($row['many_many']) ? json_decode($row['many_many']) :  null)
+                    ->setManyManyIds(!empty($row['many_many_ids']) ? json_decode($row['many_many_ids']): null)
+                    ->setAnyAny($row['any_any'])
+                    ->setAnyTable($row['any_table'])
+                    ->setAnyPk($row['any_pk'])
+                    ->setOnePk($row['one_pk'])
+                    ->setOneTable($row['one_table'])
+                    ;
+                }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
                 $model->setTableName($row['table_name']);
                 $model->setPk($row['pk']);
                 $data = new Data();
-                $data->setTable($model);
+                $modelItem = new TableItem($model);
+                $data->setTable($modelItem);
+                $fields = $this->getDefaultFields($row['table_name']);
                 if ($row['field_data'] == 'default') {
-                    $fields = $this->getDefaultFields($row['table_name']);
-                    $data->setFields($fields);
+                    $data->setFields($fields['dataFields']);
                 }
+                $data->setDataCreatedModified($fields['dataCreatedModified']);
+
+                $tcUser = new User;
+                $tcUser->setId($row['tcu_id'])->setUsername($row['tcu_name'])->setEmail($row['tcu_email'])->setPassword($row['tcu_password'])->setSocial($row['tcu_social'])->setUserToken($row['tcu_usertoken'])->setIdentityToken($row['tcu_id_token'])->setRole($row['tcu_role']);
+
+                $tableCreMod = new CreatedModified($row['rowid'], 'uasys_models');
+                $tableCreMod->setCreatedBy($tcUser)->setCreatedWhen($row['tc_when'])->setModifiedBy($row['tm_who'])->setModifiedWhen($row['tm_when']);
                 $model->setData($data);
+                $model->setCreatedModified($tableCreMod);
 
             }
-            if (!empty($relationDetails)) {
-                $relationDetails->setTable($model);
-                if ($relationDetails->getTable()->getId() == $row['rowid'] && $relationDetails->getId() == $row['rd_id']) {
+            if (!empty($relationSettings)) {
+                $relationSettings->setTable($modelItem);
+                if ($relationSettings->table->id == $row['rowid'] && $relationSettings->getId() == $row['rd_id']) {
 
-                    $model->addRelationDetails($relationDetails);
+                    $model->addRelationSettings($relationSettings);
                 }
             }
 
@@ -103,20 +164,60 @@ class Read
 
     }
 
-    public function getDefaultFields($table)
+    public function getExistingTables($used = [])
+    {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        $db = $this->cnn();
+        $query = "SHOW TABLES";
+        $q = $db->query($query);
+        $r = [];
+        while ($row = $q->fetch_assoc()) {
+            $r[] = array_pop($row);
+        }
+        $diff = array_diff($r, $used);
+        return $diff;
+    }
+
+    public function getDefaultFields($table, $checkField = null)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
         $query = "SHOW COLUMNS FROM $table";
         $q = $db->query($query);
         $fields = [];
+        $fields['indexes'] = [];
+        if (!empty($checkField)) {
+            $return = false;
+        }
+
         while ($row = $q->fetch_assoc()) {
-            if (empty($row['Key'])) {
-                $field = new Field();
-                $field->setName($row['Field']);
-                $field->setType($row['Type']);
-                $fields[$row['Field']] = $field;
+            if (!empty($checkField)) {
+                if ($row['Field'] == $checkField) {
+                    $return = true;
+                }
             }
+            if (empty($row['Key'])) {
+                $fieldName = Helper::camelize($row['Field'], true);
+                $field = new Field($fieldName, $row['Type']);
+                $fields['dataCreatedModified'] = new DataCreatedModified();
+                if (in_array($row['Field'], ['created_by', 'created_when', 'modified_by', 'modified_when'])) {
+                    $setField = 'set' . Helper::camelize($row['Field']);
+                    $fields['dataCreatedModified']->$setField($field);
+                } else {
+                    $field->setDefOrNull($row['Null'] == 'YES' ? true : false);
+                    $field->setDefaultValue($row['Default']);
+                    $fields['dataFields'][$fieldName] = $field;
+                }
+            } else {
+                if ($row['Key'] == 'PRI') {
+                    $fields['pk'] = $row['Field'];
+                } else {
+                    array_push($fields['indexes'], $row['Field']);
+                }
+            }
+        }
+        if (!empty($checkField)) {
+            return $return;
         }
         return $fields;
     }
@@ -127,7 +228,7 @@ class Read
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $db = $this->cnn();
 
-        $query = "SELECT * FROM relations";
+        $query = "SELECT * FROM uasys_relations";
         $q = $db->query($query);
 
         while ($row = $q->fetch_assoc()) {
@@ -144,7 +245,7 @@ class Read
     }
 
     /**See https: //www.barattalo.it/coding/php-to-get-enum-set-values-from-mysql-field/
- */
+     */
     public function setAndEnumValues($table, $field)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
