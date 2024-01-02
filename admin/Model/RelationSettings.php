@@ -16,11 +16,10 @@ class RelationSettings
     public ?int $id;
     private Relation $relation;
     public $role;
+    public $keyField;
     public bool $hasMany = false;
     public TableItem $table;
     public $tableId;
-    public $keyField;
-    public $otherKeyField;
     public $otherTable;
     public $mode;
     public Table $many;
@@ -435,76 +434,14 @@ class RelationSettings
         return $this;
     }
 
-    /**
-     * Get the value of otherKeyField
-     */
-    public function getOtherKeyField() {
-        return $this->otherKeyField;
-    }
-
-    /**
-     * Set the value of otherKeyField
-     */
-    public function setOtherKeyField($otherKeyField): self {
-        $this->otherKeyField = $otherKeyField;
-        return $this;
-    }
-
     public function rewriteMode($mode, $tableId, $manyId, $oneId) {
-        //hasMany__one_many__belongs_to
         $currentMode = explode('__one_many__', $mode);
         $this->setMode($currentMode[0]);
-        if ($tableId == $oneId) {
+        if ($tableId == $manyId) {
             $this->setMode($currentMode[1]);
-        } else {
-            $this->setMode($currentMode[0]);
         }
         return $this;
     }
 
-    /**
-     * @param $otherTable
-     */
-    public function setTablesAndKeyFields()
-    {
-        $manyMany = json_decode($this->manyMany);
-        if (!empty($manyMany)) {
-            if (is_array($manyMany)) {
-                foreach($manyMany as $mm) {
-                    if ($mm->id != $this->tableId) {
-                        $this->setKeyField($mm->pk);
-                        $this->setOtherKeyField($mm->pk);
-                        $this->setOtherTable($mm->table);
-                    }
-                }
-            } else {
-                if ($manyMany->id == $this->tableId) {
-                    $this->setKeyField($manyMany->pk);
-                    $this->setOtherKeyField($manyMany->pk);
-                    $this->setOtherTable($manyMany->table);
-                }
-            }
-        } else {
-            if (!empty($this->anyId)) {
-                $this->setKeyField($this->anyPk);
-                $this->setOtherKeyField($this->anyPk);
-                $this->setOtherTable($this->anyTable);
-            } else {
-                if (!empty($this->oneId) && !empty($this->manyId)) {
-                    if ($this->oneId == $this->tableId) {
-                        $this->setKeyField($this->manyFk);
-                        $this->setOtherKeyField($this->onePk);
-                        $this->setOtherTable($this->oneTable);        
-                    }
-                    if ($this->manyId == $this->tableId) {
-                        $this->setKeyField($this->onePk);
-                        $this->setOtherKeyField($this->manyFk);
-                        $this->setOtherTable($this->manyTable);        
-                    }
-                }
-            }
-        }
-        return $this;
-    }
 
 }

@@ -105,7 +105,7 @@ class Read
                     ->setKeyField($row['key_field'])
                     ->setHasMany((bool) $row['hasMany'])
                     ->setTableId($row['models_id'])
-                    ->setOtherTable($row['other_table'] )
+                    ->setOtherTable($row['other_table'])
                     ->rewriteMode($row['mode'], $row['models_id'], $row['many_id'], $row['one_id'])
                     ->setManyId($row['many_id'])
                     ->setManyTable($row['many_table'])
@@ -120,8 +120,6 @@ class Read
                     ->setOneTable($row['one_table'])
                     ->setOneId($row['one_id'])
                     ;
-
-                    $relationSettings->setTablesAndKeyFields();
                 }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
