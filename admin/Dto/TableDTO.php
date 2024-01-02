@@ -53,6 +53,7 @@ class TableDTO
 
         } else {
         unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
+        */
     }
     }
 
@@ -154,6 +155,11 @@ class TableDTO
         $this->belongsTo = $belongsTo;
     }
 
+    public function addBelongsTo($belongsTo)
+    {
+        array_push($this->belongsTo, $belongsTo);
+    }
+
     public function getHasMany()
     {
         return $this->hasMany;
@@ -167,6 +173,10 @@ class TableDTO
         $this->hasMany = $hasMany;
     }
 
+    public function addHasMany($hasMany)
+    {
+        array_push($this->hasMany, $hasMany);
+    }
     public function getHasManyAndBelongsTo()
     {
         return $this->hasManyAndBelongsTo;
