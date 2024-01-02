@@ -14,16 +14,13 @@ use mysqli;
 use \Common\Model\CreatedModified;
 use \Dto\ListDTO;
 use \Dto\TableDTO;
-use Model\BelongsTo;
 use \Model\Data;
 use \Model\Field;
-use Model\HasAny;
 use \Model\Relation;
 use \Model\RelationSettings;
 use \Model\Table;
 use \user\model\User;
-use Model\HasManyAndBelongsTo;
-use Model\HasMany;
+use Dto\TableItem;
 
 /**
  * Andmete lugemine andmebaasitabelitest
@@ -59,16 +56,18 @@ class Read
             $where = ' WHERE' . implode(' AND', $w);
         }
 
-        $query = "SELECT t.id as rowid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
+        $query = "SELECT t.id as rowid, t.id as tid, t.*, t.created_by as tc_who, t.created_when as tc_when, t.modified_by as tm_who, t.modified_when as tm_when,
         f.id as fid, f.name as field,
-        rd.id as rd_id, rd.mode as rd_mode, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when,
+        rd.id as rd_id, rd.role as rd_role, rd.*, rd.created_by as rc_who, rd.created_when as rc_when, rd.modified_by as rm_who, t.modified_when as rm_when,
+        r.id as rid, r.*,
         tcu.id as tcu_id, tcu.username as tcu_name, tcu.email as tcu_email, tcu.password as tcu_password, tcu.social as tcu_social, tcu.user_token as tcu_usertoken, tcu.identity_token as tcu_id_token, tcu.role as tcu_role,
         rcu.id as rcu_id, rcu.username as rcu_name, rcu.email as rcu_email, rcu.password as rcu_password, rcu.social as rcu_social, rcu.user_token as rcu_usertoken, rcu.identity_token as rcu_id_token, rcu.role as rcu_role
 
         FROM uasys_models t
         LEFT JOIN fields f ON f.models_id = t.id
         LEFT JOIN uasys_relation_settings rd 
-        ON t.id IN (rd.many_id, rd.one_id, rd.any_id) OR JSON_CONTAINS(rd.many_many_ids, t.id)
+        ON (rd.many_id = t.id OR rd.one_id = t.id OR rd.any_id = t.id OR JSON_CONTAINS(rd.many_many_ids, t.id))
+        LEFT JOIN uasys_relations r ON r.id = rd.relations_id
         LEFT JOIN uasys_users tcu ON tcu.id = t.created_by
         LEFT JOIN uasys_users rcu ON rcu.id = rd.created_by
         $where";
@@ -81,19 +80,13 @@ class Read
         while ($row = $q->fetch_assoc()) {
             unset($row['id'], $row['role'], $row['created_by'], $row['created_when'], $row['modified_by'], $row['modified_when']);
             $rowsDebug[] = $row;
-            $rel = [];
-            $belongsTo = null;
-            $hasMany = null;
-            $hmabt = null;
-            $any = null;
-
-            $relationSettings = null;
             while ($row['rd_id'] != null && (empty($relationSettings) || $relationSettings->getId() != $row['rd_id'])) {
-                $relationSettings = new RelationSettings($row['rd_id']);
-                $belongsTo = new BelongsTo;
-                $hasMany = new HasMany;
-                $hmabt = new HasManyAndBelongsTo;
-                $hasAny = new HasAny;
+                $relationSettings = new RelationSettings();
+                $rel = new Relation();
+                $rel->setId($row['rid']);
+                $rel->setType($row['type']);
+                $rel->setAllowHasMany((bool) $row['allow_has_many']);
+                $rel->setIsInner((bool) $row['is_inner']);
 
                 $rcUser = new User;
                 $rcUser->setId($row['rcu_id'])->setUsername($row['rcu_name'])->setEmail($row['rcu_email'])->setPassword($row['rcu_password'])->setSocial($row['rcu_social'])->setUserToken($row['rcu_usertoken'])->setIdentityToken($row['rcu_id_token'])->setRole($row['rcu_role']);
@@ -104,70 +97,38 @@ class Read
                     ->setModifiedBy($row['rm_who'])
                     ->setModifiedWhen($row['rm_when']);
                 $relDetailsCreMod->__construct();
-
                 $relationSettings
                     ->setCreatedModified($relDetailsCreMod)
                     ->setId($row['rd_id'])
-                    ->setMode($row['rd_mode'])
+                    ->setTableId($row['rowid'])
+                    ->setManyId($row['many_id'])
+                    ->setAnyId($row['any_id'])
+                    ->setOneId($row['one_id'])
+                    ->setRelation($rel)
+                    ->setRole($row['rd_role'])
+                    ->setKeyField($row['key_field'])
+                    ->setHasMany((bool) $row['hasMany'])
+                    //->setOtherTable($row['other_table'])
+                    ->rewriteMode($row['mode'])
                     ->setManyTable($row['many_table'])
                     ->setManyFk($row['many_fk'])
-                    ->setManyMany($row['many_many'])
+                    ->setManyMany(json_decode($row['many_many']))
+                    ->setManyManyIds(json_decode($row['many_many_ids']))
                     ->setAnyAny($row['any_any'])
+                    ->setAnyTable($row['any_table'])
+                    ->setAnyPk($row['any_pk'])
                     ->setOnePk($row['one_pk'])
                     ->setOneTable($row['one_table'])
                     ;
-                
-                if ($row['many_id'] == $row['rowid']) {
-                    $belongsTo->setRole($row['rd_mode'])
-                    ->setThisTable($row['many_table'])
-                    ->setKeyField($row['many_fk'])
-                    ->setOtherKeyField($row['one_pk'])
-                    ->setOtherTable($row['one_table'])
-                    ->setId($row['rd_id'])
-                    ->setCreatedModified($relDetailsCreMod);
-                   // echo '<pre>';
-                    //echo json_encode($belongsTo);
-                    //echo '</pre>';
-                    $rel['belongsTo'][] = $belongsTo;
-
                 }
-                
-                if ($row['one_id'] == $row['rowid']) {
-                    $hasMany->setRole($row['rd_mode'])
-                    ->setThisTable($row['one_table'])
-                    ->setKeyField($row['one_pk'])
-                    ->setOtherKeyField($row['many_fk'])
-                    ->setOtherTable($row['many_table'])
-                    ->setId($row['rd_id'])
-                    ->setCreatedModified($relDetailsCreMod);
-                    //echo '<pre>';
-                    //echo json_encode($hasMany);
-                    //echo '</pre>';
-                    $rel['hasMany'][] = $hasMany;
-                }
-
-                if ($row['any_id'] == $row['rowid']) {
-                    $hasAny->setRole($row['rd_mode'])
-                    ->setAnyAny($row['any_any'])
-                    ->setKeyField($row['any_pk'])
-                    ->setThisTable($row['many_table'])
-                    ->setId($row['rd_id'])
-                    ->setCreatedModified($relDetailsCreMod);
-                    //echo '<pre>';
-                    //echo json_encode($hasAny);
-                    //echo '</pre>';
-                    $rel['hasAny'][] = $hasAny;
-                }
-
-            }
-            $smallModel = null;
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
                 $model->setTableName($row['table_name']);
                 $model->setPk($row['pk']);
                 $data = new Data();
-                $data->setTable($model);
+                $modelItem = new TableItem($model);
+                $data->setTable($modelItem);
                 $fields = $this->getDefaultFields($row['table_name']);
                 if ($row['field_data'] == 'default') {
                     $data->setFields($fields['dataFields']);
@@ -180,52 +141,15 @@ class Read
                 $tableCreMod = new CreatedModified($row['rowid'], 'uasys_models');
                 $tableCreMod->setCreatedBy($tcUser)->setCreatedWhen($row['tc_when'])->setModifiedBy($row['tm_who'])->setModifiedWhen($row['tm_when']);
                 $model->setData($data);
-                $smallModel = $model;
-                unset($smallModel->relationSettings,$smallModel->data->dataCreatedModified);
                 $model->setCreatedModified($tableCreMod);
 
             }
             if (!empty($relationSettings)) {
-                $one = null;
-                $many = null;
-                $manyMany = null;
-                $any = null;
-                
-                if ($relationSettings->getManyTable() == $row['table_name'] && !empty($smallModel)) {
-                    foreach ($rel['belongsTo'] as $k=>$v) {
-                    $v->setTable($smallModel);
-                    $rel['belongsTo'][$k] = $v;
-                    }
-                }
-                if ($relationSettings->getOneTable() == $row['table_name']  && !empty($smallModel)) {
-                    foreach ($rel['hasMany'] as $k=>$v) {
-                        $v->setTable($smallModel);
-                        $rel['hasMany'][$k] = $v;
-                        }
-                }
-                if (!empty($relationSettings->getManyManyIds()) && in_array($row['rowid'], json_decode($relationSettings->getManyManyIds()))) {
-                    foreach ($rel['hasManyAndBelongsTo'] as $k=>$v) {
-                        $v->setTable($smallModel);
-                        $rel['hasManyAndBelongsTo'][$k] = $v;
-                        }
-                    
-                }
-                if ($relationSettings->getAnyTable() == $row['table_name']  && !empty($smallModel)) {
-                    foreach ($rel['hasAny'] as $k=>$v) {
-                        $v->setTable($model);
-                        $rel['hasAny'][$k] = $v;
-                        }
-                }
+                $relationSettings->setTable($modelItem);
+                if ($relationSettings->table->id == $row['rowid'] && $relationSettings->getId() == $row['rd_id']) {
 
- //               if (in_array($row['rowid'], [$one, $many, $manyMany, $any]) && $relationSettings->getId() == $row['rd_id']) {
-
-                    //$model->addRelationSettings($relationSettings);
-                    $model->setRelationSettings($rel);
-                    //               }
-                    echo '<pre>';
-                    print_r($rel);
-                    echo '</pre>';
-            
+                    $model->addRelationSettings($relationSettings);
+                }
             }
 
             $single = new TableDTO($model);

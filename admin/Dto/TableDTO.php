@@ -1,9 +1,5 @@
 <?php namespace Dto;
 
-use \Model\BelongsTo;
-use \Model\HasAny;
-use \Model\HasMany;
-use \Model\HasManyAndBelongsTo;
 use \Model\Table;
 
 /**
@@ -21,57 +17,44 @@ class TableDTO
     public $hasManyAndBelongsTo = [];
     public $hasAny = [];
 
-    public function __construct(Table $model)
+    public function __construct(Table $model, $mini = false)
     {
+        $tableItem = new TableItem($model);
+        $model->data->setTable($tableItem);
         $this->id = $model->getId() ? $model->getId() : null;
         $this->tableName = $model->getTableName() ? $model->getTableName() : null;
         $this->pk = $model->getPk() ? $model->getPk() : null;
         $this->data = $model->getData() ? $model->getData() : null;
-        $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
-        unset($this->data->table);
 
-        $rels = $model->getRelationSettings();
+        if ($mini === false) {
+            $this->createdModified = $model->getCreatedModified() ? $model->getCreatedModified() : null;
+            unset($this->data->table);
+            foreach ($model->getRelationSettings() as $rdRow) {
 
-        /*
-        echo '<pre>';
-        print_r($rels);
-        echo '</pre>';
+                //unset($rdRow->table);
+                if ($rdRow->getMode() == 'belongsTo') {
+                    $rdRow->setTable($tableItem);
+
+                    array_push($this->belongsTo, $rdRow);
+                }
+                if ($rdRow->getMode() == 'hasMany') {
+                    array_push($this->hasMany, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
+                    array_push($this->hasManyAndBelongsTo, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+                if ($rdRow->getMode() == 'hasAny') {
+                    array_push($this->hasAny, $rdRow);
+                    $rdRow->setTable($tableItem);
+                }
+            }
+
+        } else {
+        unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
         */
-
-        if (isset($rels['belongsTo'])) $this->setBelongsTo($rels['belongsTo']);
-        if (isset($rels['hasMany']))$this->setHasMany($rels['hasMany']);
-        if (isset($rels['hasManyAndBelongsTo'])) $this->setHasManyAndBelongsTo($rels['hasManyAndBelongsTo']);
-        if (isset($rels['hasAny'])) $this->setHasAny($rels['hasAny']);
-    /*    
-        foreach ($model->getRelationSettings() as $rdRow) {
-
-            if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getMany()->getId()) {
-                $bt = new BelongsTo($rdRow->getId());
-                if ($bt instanceof $rdRow) {
-                    array_push($this->belongsTo, $bt);
-                }
-            }
-            if ($rdRow->getMode() == 'one_hasMany___many_belongsTo' && $this->id == $rdRow->getOne()->getId()) {
-                $hm = new HasMany($rdRow->getId());
-                $hm = $rdRow;
-                //if ($hm instanceof $rdRow) {
-                    array_push($this->hasMany, $hm);
-                //}
-            }
-            if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
-                $hmabt = new HasManyAndBelongsTo($rdRow->getId());
-                if ($hmabt instanceof $rdRow){
-                    array_push($this->hasManyAndBelongsTo, $hmabt);
-                }
-            }
-            if ($rdRow->getMode() == 'hasAny') {
-                $ha = new HasAny($rdRow->getId());
-                if ($ha instanceof $rdRow){
-                    array_push($this->hasAny, $ha);
-                }
-            }
-        }
-        */
+    }
     }
 
     /**
@@ -207,11 +190,6 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
-    public function addHasManyAndBelongsTo($hasManyAndBelongsTo)
-    {
-        array_push($this->hasManyAndBelongsTo, $hasManyAndBelongsTo);
-    }
-
 
     public function getHasAny() {
     	return $this->hasAny;
@@ -222,9 +200,5 @@ class TableDTO
     */
     public function setHasAny($hasAny) {
     	$this->hasAny = $hasAny;
-    }
-
-    public function addHasAny($hasAny) {
-        array_push($this->hasAny, $hasAny);
     }
 }

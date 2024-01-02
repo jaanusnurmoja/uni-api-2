@@ -30,7 +30,7 @@ class Update
                 }
             }
 
-            if (in_array($propName, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo'])) {
+            if (in_array($propName, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny'])) {
                 foreach ($propContent as $relationSettings) {
                     $rdId = $relationSettings['id'];
                     unset($relationSettings['id'], $relationSettings['table']);
