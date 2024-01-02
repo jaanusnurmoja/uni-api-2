@@ -126,6 +126,7 @@ foreach ($field as $k => $v) {
                 if (in_array($key, ['belongsTo', 'hasMany', 'hasManyAndBelongsTo', 'hasAny']) && !empty($value)) {
                     echo '<tr><td colspan="2" class="h4">' . $key . '</td></tr>';
                     foreach ($value as $ak => $av) {
+                        echo "<tr><td colspan='2' class='h5'>$av->otherTable</td></tr>";
                         foreach ($av as $rdKey => $rdValue) {
                             if (is_object($rdValue) || is_array($rdValue)) {
                                 $rdValue = json_encode($rdValue, JSON_PRETTY_PRINT);
@@ -136,6 +137,7 @@ foreach ($field as $k => $v) {
                 }
             }
         }
+        echo '</table>';
     }
 
     /**

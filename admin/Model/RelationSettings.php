@@ -15,29 +15,29 @@ class RelationSettings
 
     public ?int $id;
     private Relation $relation;
-    public $role;
+    private $role;
     public $keyField;
-    public bool $hasMany = false;
+    private bool $hasMany = false;
     public TableItem $table;
     public $tableId;
     public $otherTable;
     public $mode;
-    public Table $many;
-    public $manyId;
-    public $manyTable;
-    public $manyFk;
+    private Table $many;
+    private $manyId;
+    private $manyTable;
+    private $manyFk;
     public $manyMany;
     public $manyManyIds;
-    public $anyId;
+    private $anyId;
     public $anyAny;
-    public ?Table $any;
-    public $anyTable;
-    public $anyPk;
-    public $oneAny;
-    public $onePk;
-    public $oneTable;
-    public $oneId;
-    public Table $one;
+    private ?Table $any;
+    private $anyTable;
+    private $anyPk;
+    private $oneAny;
+    private $onePk;
+    private $oneTable;
+    private $oneId;
+    private Table $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = 0)
@@ -217,6 +217,9 @@ class RelationSettings
     * @param $manyTable
     */
     public function setManyTable($manyTable) {
+        if ($this->oneId == $this->tableId) {
+            $this->otherTable = $manyTable;
+        }
     	$this->manyTable = $manyTable;
         return $this;
     }
@@ -229,6 +232,9 @@ class RelationSettings
     * @param $manyFk
     */
     public function setManyFk($manyFk) {
+        if ($this->manyId == $this->tableId) {
+            $this->keyField = $manyFk;
+        }
     	$this->manyFk = $manyFk;
         return $this;
     }
@@ -241,7 +247,24 @@ class RelationSettings
     * @param $manyMany
     */
     public function setManyMany($manyMany) {
-    	$this->manyMany = $manyMany;
+        
+        $this->manyMany = $manyMany;
+    	if (!empty($manyMany)) {
+            if (is_array($manyMany)) {
+                $tableId = $this->tableId;
+
+                if ($manyMany[0]->id == $tableId) {
+                    $this->otherTable = $manyMany[1]->table;
+                }
+                if ($manyMany[1]->id == $tableId) {
+                    $this->otherTable = $manyMany[0]->table;
+                }
+            } else {
+                if (is_object($manyMany)) {$this->otherTable = $manyMany->table;}
+            }
+        } else {
+            unset($this->manyMany);
+        }
         return $this;
     }
 
@@ -265,7 +288,10 @@ class RelationSettings
     * @param $onePk
     */
     public function setOnePk($onePk) {
-    	$this->onePk = $onePk;
+        if ($this->oneId == $this->tableId) {
+            $this->keyField = $onePk;
+        }
+        $this->onePk = $onePk;
         return $this;
     }
 
@@ -277,6 +303,9 @@ class RelationSettings
     * @param $oneTable
     */
     public function setOneTable($oneTable) {
+        if ($this->manyId == $this->tableId) {
+            $this->otherTable = $oneTable;
+        }
     	$this->oneTable = $oneTable;
         return $this;
     }
@@ -335,6 +364,9 @@ class RelationSettings
      */
     public function setAnyAny($anyAny): self {
         $this->anyAny = $anyAny;
+        if (empty($anyAny)) {
+            unset($this->anyAny);
+        }
         return $this;
     }
 
@@ -434,11 +466,15 @@ class RelationSettings
         return $this;
     }
 
-    public function rewriteMode($mode, $tableId, $manyId, $oneId) {
+    public function rewriteMode($mode) {
+        $tableId = $this->tableId;
+        $manyId = $this->manyId;
         $currentMode = explode('__one_many__', $mode);
-        $this->setMode($currentMode[0]);
+        $this->mode = $currentMode[0];
         if ($tableId == $manyId) {
-            $this->setMode($currentMode[1]);
+            $this->mode = $currentMode[1];
+        } else {
+            $this->mode = $currentMode[0];
         }
         return $this;
     }

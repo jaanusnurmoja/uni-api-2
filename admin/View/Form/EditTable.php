@@ -386,7 +386,7 @@ foreach ($this->relations as $r) {
                                                 echo "$rdValue <input type='hidden' id='$rdId' name='$rdName' value='$rdValue'>";
                                             } else {
                                                 if ($rdKey != 'createdModified') {
-                                                    if (is_object($rdValue)) $rdValue = json_encode($rdValue);
+                                                    if (is_array($rdValue) || is_object($rdValue)) $rdValue = json_encode($rdValue);
                                                     echo "<input type='text' id='$rdName' name='$rdName' value='$rdValue' disabled/>";
                                                 } else {
                                                     echo '<h4>Created & modified</h4>';
