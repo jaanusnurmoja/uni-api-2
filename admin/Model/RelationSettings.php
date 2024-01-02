@@ -32,7 +32,6 @@ class RelationSettings
     private ?Table $any;
     private $anyTable;
     private $anyPk;
-    private $oneAny;
     private $onePk;
     private $oneTable;
     private $oneId;
@@ -275,20 +274,6 @@ class RelationSettings
         } else {
             unset($this->manyMany);
         }
-        return $this;
-    }
-
-    public function getOneAny()
-    {
-        return $this->oneAny;
-    }
-
-    /**
-     * @param $oneAny
-     */
-    public function setOneAny($oneAny)
-    {
-        $this->oneAny = $oneAny;
         return $this;
     }
 
