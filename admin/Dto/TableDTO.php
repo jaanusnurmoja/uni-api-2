@@ -31,21 +31,21 @@ class TableDTO
             unset($this->data->table);
             foreach ($model->getRelationSettings() as $rdRow) {
 
-                unset($rdRow->table);
-                if ($rdRow->getRole() == 'belongsTo') {
+                //unset($rdRow->table);
+                if ($rdRow->getMode() == 'belongsTo') {
                     $rdRow->setTable($tableItem);
 
                     array_push($this->belongsTo, $rdRow);
                 }
-                if ($rdRow->getRole() == 'hasMany') {
+                if ($rdRow->getMode() == 'hasMany') {
                     array_push($this->hasMany, $rdRow);
                     $rdRow->setTable($tableItem);
                 }
-                if ($rdRow->getRole() == 'hasManyAndBelongsTo') {
+                if ($rdRow->getMode() == 'hasManyAndBelongsTo') {
                     array_push($this->hasManyAndBelongsTo, $rdRow);
                     $rdRow->setTable($tableItem);
                 }
-                if ($rdRow->getRole() == 'hasAny') {
+                if ($rdRow->getMode() == 'hasAny') {
                     array_push($this->hasAny, $rdRow);
                     $rdRow->setTable($tableItem);
                 }
