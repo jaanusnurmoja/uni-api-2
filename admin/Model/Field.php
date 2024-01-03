@@ -1,6 +1,8 @@
 <?php
 namespace Model;
 
+use Common\Helper;
+
 class Field
 {
     public $id;
@@ -9,8 +11,11 @@ class Field
     public bool $defOrNull = false;
     public $defaultValue = null;
     public $htmlDefaults = [];
+    public $table;
+    public $sqlSelect;
+    public $sqlAlias;
 
-    public function __construct($name = null, $type = null)
+    public function __construct($name = null, $type = null, $table = null)
     {
         $this->name = $name;
         if (!empty($type)) {
@@ -28,8 +33,13 @@ class Field
                 $this->defOrNull = true;
             }
         }
+        if (!empty($table)) {
+            $this->table = $table;
+        }
+        $htmlName = Helper::uncamelize($name);
+        $this->sqlSelect = "$table.$htmlName";
+        $this->sqlAlias = "$table:$name";
     }
-
     public function getId()
     {
         return $this->id;
@@ -121,4 +131,39 @@ class Field
         $this->htmlDefaults = $htmlDefaults;
     }
 
+    /**
+     * Get the value of sqlSelect
+     */
+    public function getSqlSelect()
+    {
+        return $this->sqlSelect;
+    }
+
+    /**
+     * Set the value of sqlSelect
+     */
+    public function setSqlSelect($sqlSelect = null): self
+    {
+        $this->sqlSelect = $sqlSelect;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of sqlAlias
+     */
+    public function getSqlAlias()
+    {
+        return $this->sqlAlias;
+    }
+
+    /**
+     * Set the value of sqlAlias
+     */
+    public function setSqlAlias($sqlAlias = null): self
+    {
+        $this->sqlAlias = $sqlAlias;
+
+        return $this;
+    }
 }

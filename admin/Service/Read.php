@@ -12,6 +12,7 @@ include_once __DIR__ . '/../Dto/TableItem.php';
 include_once __DIR__ . '/../../common/Model/CreatedModified.php';
 include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
 
+use Dto\TableItem;
 use mysqli;
 use \Common\Model\CreatedModified;
 use \Dto\ListDTO;
@@ -22,7 +23,6 @@ use \Model\Relation;
 use \Model\RelationSettings;
 use \Model\Table;
 use \user\model\User;
-use Dto\TableItem;
 
 /**
  * Andmete lugemine andmebaasitabelitest
@@ -67,7 +67,7 @@ class Read
 
         FROM uasys_models t
         LEFT JOIN fields f ON f.models_id = t.id
-        LEFT JOIN uasys_relation_settings rd 
+        LEFT JOIN uasys_relation_settings rd
         ON (rd.many_id = t.id OR rd.one_id = t.id OR rd.any_id = t.id OR JSON_CONTAINS(rd.many_many_ids, t.id))
         LEFT JOIN uasys_relations r ON r.id = rd.relations_id
         LEFT JOIN uasys_users tcu ON tcu.id = t.created_by
@@ -114,15 +114,15 @@ class Read
                     ->rewriteMode($row['mode'])
                     ->setManyTable($row['many_table'])
                     ->setManyFk($row['many_fk'])
-                    ->setManyMany(!empty($row['many_many']) ? json_decode($row['many_many']) :  null)
-                    ->setManyManyIds(!empty($row['many_many_ids']) ? json_decode($row['many_many_ids']): null)
+                    ->setManyMany(!empty($row['many_many']) ? json_decode($row['many_many']) : null)
+                    ->setManyManyIds(!empty($row['many_many_ids']) ? json_decode($row['many_many_ids']) : null)
                     ->setAnyAny($row['any_any'])
                     ->setAnyTable($row['any_table'])
                     ->setAnyPk($row['any_pk'])
                     ->setOnePk($row['one_pk'])
                     ->setOneTable($row['one_table'])
-                    ;
-                }
+                ;
+            }
             if (empty($model) || (empty($model->getId()) || $model->getId() != $row['rowid'])) {
                 $model = new Table();
                 $model->setId($row['rowid']);
@@ -199,7 +199,7 @@ class Read
             }
             if (empty($row['Key'])) {
                 $fieldName = Helper::camelize($row['Field'], true);
-                $field = new Field($fieldName, $row['Type']);
+                $field = new Field($fieldName, $row['Type'], $table);
                 $fields['dataCreatedModified'] = new DataCreatedModified();
                 if (in_array($row['Field'], ['created_by', 'created_when', 'modified_by', 'modified_when'])) {
                     $setField = 'set' . Helper::camelize($row['Field']);
