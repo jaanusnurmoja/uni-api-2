@@ -225,7 +225,17 @@ foreach (json_decode($rel) as $table => $params) {
                     <p>
                         Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
                         või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid. SISULISELT
-                        OLEMAS.
+                        OLEMAS. 03.01.2024 - plaanis luua päringumall hallatavate andmebaasitabelite jaoks. Päringuid
+                        peaks genereerima kas admini klass Table.php (või TabelDTO.php) või mõni eraldi klass, kasutades
+                        eelmainitud struktuure.
+                    </p>
+
+                    <p>
+                        Seisuga 03.01.2024 on halduskeskkonnas ja koodis olulisi täiendusi, sh seosesätetes, kus
+                        päris andmed asuvad seose tüübile vastavates väljades tabelis relation_settings, kuid kasutajale
+                        näidatakse neid vaikimisi väljade infona.Nt sõltumata sellest, kas teise tabeli nimi asub
+                        füüsiliselt väljas one_table või many_table, seda näidatakse välja otherTable all. Asjasse
+                        mittepuutuvaid välju ei näidata.
                     </p>
                     <p>
                         <mark>Seisuga 16.12.2023</mark> kaasatud tabelite loetellu saab kirjeid lisada, muuta ja
