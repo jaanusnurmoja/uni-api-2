@@ -36,7 +36,7 @@ class Field
         if (!empty($table)) {
             $this->table = $table;
         }
-        $htmlName = Helper::uncamelize($name);
+        $htmlName = !empty($name) ? Helper::uncamelize($name) : $name;
         $this->sqlSelect = "$table.$htmlName";
         $this->sqlAlias = "$table:$name";
     }
