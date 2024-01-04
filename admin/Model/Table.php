@@ -14,6 +14,7 @@ class Table
     public $id;
     public $tableName;
     public $pk = 'id';
+    public bool $isMain = false;
     public $data;
     public CreatedModified $createdModified;
     public $relationSettings = [];
@@ -125,4 +126,21 @@ class Table
         array_push($this->relationSettings, $relationSettings);
     }
 
+    /**
+     * Get the value of isMain
+     */
+    public function getIsMain(): bool
+    {
+        return $this->isMain;
+    }
+
+    /**
+     * Set the value of isMain
+     */
+    public function setIsMain($isMain): self
+    {
+        $this->isMain = $isMain;
+
+        return $this;
+    }
 }

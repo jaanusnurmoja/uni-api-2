@@ -10,6 +10,7 @@ class TableDTO
     public $id;
     public $tableName;
     public $pk;
+    public $isMain;
     public $data;
     public $createdModified;
     public $belongsTo = [];
@@ -52,8 +53,8 @@ class TableDTO
             }
 
         } else {
-        unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
-    }
+            unset($this->data, $this->createdModified, $this->belongsTo, $this->hasMany, $this->hasManyAndBelongsTo, $this->hasAny);
+        }
     }
 
     /**
@@ -189,15 +190,16 @@ class TableDTO
         $this->hasManyAndBelongsTo = $hasManyAndBelongsTo;
     }
 
-
-    public function getHasAny() {
-    	return $this->hasAny;
+    public function getHasAny()
+    {
+        return $this->hasAny;
     }
 
     /**
-    * @param $hasAny
-    */
-    public function setHasAny($hasAny) {
-    	$this->hasAny = $hasAny;
+     * @param $hasAny
+     */
+    public function setHasAny($hasAny)
+    {
+        $this->hasAny = $hasAny;
     }
 }

@@ -1,5 +1,8 @@
 {
     "php.suggest.basic": true,
     "php.validate.enable": false,
-    "mysql.connection.database": "test"
+    "mysql.connection.database": "test",
+    "cSpell.enableFiletypes": [
+        "!sql"
+    ]
 }

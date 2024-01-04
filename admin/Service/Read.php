@@ -11,6 +11,8 @@ include_once __DIR__ . '/../Dto/ListDTO.php';
 include_once __DIR__ . '/../Dto/TableItem.php';
 include_once __DIR__ . '/../../common/Model/CreatedModified.php';
 include_once __DIR__ . '/../../common/Model/DataCreatedModified.php';
+include_once __DIR__ . '/../../user/model/User.php';
+
 
 use Dto\TableItem;
 use mysqli;

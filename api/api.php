@@ -1,4 +1,8 @@
 <?php
+
+include_once './src/Service/QueryMaker.php';
+use \Api\Model\QueryMaker;
+
 ini_set('always_populate_raw_post_data', -1);
 ini_set('display_errors', 0);
 
@@ -6,11 +10,18 @@ ini_set('display_errors', 0);
 
 //require_once 'config.php';
 $thisDir = dirname($_SERVER['SCRIPT_NAME']);
-$path = $_SERVER['PATH_INFO'];
+if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
-$request = explode('/', $_SERVER['PATH_INFO']);
+if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
+
+//temp debug
+if (isset($_GET['api'])) {
+$qMaker = new QueryMaker($request[1]);
+print_r($qMaker->__toString());exit;
+}
+//end temp debug
 
 $input = json_decode(file_get_contents('php://input'), true);
 

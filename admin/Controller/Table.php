@@ -44,15 +44,18 @@ class Table
         return $read->getExistingTables($used);
     }
 
-    public function getTableByIdOrName($api = false)
+    public function getTableByIdOrName($api = false, $idOrName = null)
     {
         global $request;
         $read = new Read;
+        if (empty($idOrName)) {
+            $idOrName = $request[2];
+        }
         if ($request[2] != 'new') {
-            $key = is_numeric($request[2]) ? 't.id' : 't.table_name';
+            $key = is_numeric($idOrName) ? 't.id' : 't.table_name';
             // $table = array_pop($read->getTables(null, [$key => $request[2]])->list);
-            ([$key => $request[2]]);
-            $table = $read->getTables(null, [$key => $request[2]]);
+            ([$key => $idOrName]);
+            $table = $read->getTables(null, [$key => $idOrName]);
             $tableDetails = new TableListOrDetails($table);
             if ($api === true) {
                 return $table;
