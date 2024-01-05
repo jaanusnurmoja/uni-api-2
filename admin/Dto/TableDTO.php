@@ -17,6 +17,8 @@ class TableDTO
     public $hasMany = [];
     public $hasManyAndBelongsTo = [];
     public $hasAny = [];
+    private $pkSelect;
+    private $pkAlias;
 
     public function __construct(Table $model, $mini = false)
     {
@@ -201,5 +203,49 @@ class TableDTO
     public function setHasAny($hasAny)
     {
         $this->hasAny = $hasAny;
+    }
+
+    /**
+     * Get the value of pkSelect
+     */
+    public function getPkSelect()
+    {
+        if (!$this->pkSelect) {
+            $this->setPkSelect("{$this->tableName}.{$this->pk}");
+        }
+        return $this->pkSelect;
+    }
+
+    /**
+     * Get the value of pkAlias
+     */
+    public function getPkAlias()
+    {
+        if (!$this->pkAlias) {
+            $this->setPkAlias("{$this->tableName}:{$this->pk}");
+        }
+        return $this->pkAlias;
+    }
+
+
+    /**
+     * Set the value of pkSelect
+     */
+    public function setPkSelect($pkSelect): self
+    {
+        $this->pkSelect = $pkSelect;
+
+        return $this;
+    }
+
+
+    /**
+     * Set the value of pkAlias
+     */
+    public function setPkAlias($pkAlias): self
+    {
+        $this->pkAlias = $pkAlias;
+
+        return $this;
     }
 }
