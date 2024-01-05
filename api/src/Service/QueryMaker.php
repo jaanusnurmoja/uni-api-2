@@ -63,10 +63,41 @@ class QueryMaker
                     = $tableName.{$btItem->getManyFk()}");
                 }
                 
-                $this->seq ++;
+                $this->seq++;
             }
         }
-    
+        if ($model->hasManyAndBelongsTo != []) {
+            $seq = $this->seq;
+            foreach ($model->hasManyAndBelongsTo as $hmabtItem) {
+                $thisTable = $hmabtItem->table->tableName;
+                $thisPk = $hmabtItem->table->pk;
+                $otherTable = null;
+                $otherPk = null;
+                if ($hmabtItem->otherTable != '/'.$parentName) {
+                    switch(is_array($hmabtItem->manyMany)) {
+                        case false:
+                            $this->getQueryDataFromModels($thisTable, $tableName, $seq . '__related_');
+                            array_push($this->join, "LEFT JOIN uasys_crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.$thisTable'), $thisTable.$thisPk)
+                            LEFT JOIN $thisTable {$seq}__related_$thisTable
+                            ON (JSON_CONTAINS(JSON_EXTRACT(table_value, '$.$thisTable'), {$seq}__related_$thisTable.$thisPk) 
+                            AND {$seq}__related_$thisTable.$thisPk <> $thisTable.$thisPk)");
+                        case true:
+                            foreach ($hmabtItem->manyMany as $manyManyPart) {
+                                if ($manyManyPart->table != $hmabtItem->table->tableName) {
+                                    $otherTable = $manyManyPart->table;
+                                    $otherPk = $manyManyPart->pk;
+                                }
+                            }
+                            $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
+                            array_push($this->join, "LEFT JOIN uasys_crossref ON JSON_CONTAINS_PATH(table_value, 'ALL','$.$thisTable','$.$otherTable')
+                            AND JSON_EXTRACT(table_value, '$.$thisTable') = $thisTable.$thisPk
+                            LEFT JOIN $otherTable {$seq}__$otherTable ON JSON_EXTRACT(table_value, '$.$otherTable') = {$seq}__$otherTable.$otherPk");
+                    }
+
+                }
+                $seq++;
+           }
+        }
     }
 
     public function getFieldsForQuery($data, $start = false, $seqPref = null) {
