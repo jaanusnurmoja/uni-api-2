@@ -8,7 +8,7 @@ class TableItem
     public $tableName;
     public $pk;
     private $data;
-    public function __construct(Table $table) {
+    public function __construct($table) {
         
         $this->id = $table->id;
         $this->tableName = $table->tableName;

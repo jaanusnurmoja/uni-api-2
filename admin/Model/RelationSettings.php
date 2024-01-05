@@ -21,7 +21,7 @@ class RelationSettings
     public $tableId;
     public $otherTable;
     public $mode;
-    private Table $many;
+    private TableItem $many;
     private $manyId;
     private $manyTable;
     private $manyFk;
@@ -29,19 +29,21 @@ class RelationSettings
     public $manyManyIds;
     private $anyId;
     public $anyAny;
-    private ?Table $any;
+    private ?TableItem $any;
     private $anyTable;
     private $anyPk;
     private $onePk;
     private $oneTable;
     private $oneId;
-    private Table $one;
+    private TableItem $one;
     public CreatedModified $createdModified;
 
     public function __construct(?int $id = 0)
     {
         $this->id = $id;
-
+        $this->one = new TableItem(new Table($this->oneId));
+        $this->many = new TableItem(new Table($this->manyId));
+        $this->any = new TableItem(new Table($this->anyId));
     }
     /**
      * Get the value of id
@@ -198,15 +200,15 @@ class RelationSettings
     /**
      * @return Table
      */
-    public function getMany(): Table
+    public function getMany(): TableItem
     {
         return $this->many;
     }
 
     /**
-     * @param Table $many
+     * @param TableItem $many
      */
-    public function setMany(Table $many)
+    public function setMany(TableItem $many)
     {
         $this->many = $many;
         return $this;
@@ -312,9 +314,9 @@ class RelationSettings
     }
 
     /**
-     * @return Table
+     * @return TableItem
      */
-    public function getOne(): Table
+    public function getOne(): TableItem
     {
         return $this->one;
     }
@@ -487,6 +489,8 @@ class RelationSettings
     public function setOneId($oneId): self
     {
         $this->oneId = $oneId;
+        if ($oneId != null && !isset($this->one)) {
+        }
         return $this;
     }
 
