@@ -2,6 +2,7 @@
 
 include_once __DIR__.'/../../../admin/Controller/Table.php';
 include_once __DIR__.'/../../../common/Check.php';
+use Common\Helper;
 
 class QueryMaker
 {
@@ -30,37 +31,38 @@ class QueryMaker
             $model = $this->model;
             $mainTable = $tableName;
             $check->makeHasManyList($mainTable);
-            $this->select = "SELECT {$model->getPkSelect()}, {$this->getFieldsForQuery($model->data, true)}" ;
-            $this->from = "FROM $mainTable";
+            $pkSelect = Helper::sqlQuotes($model->getPkSelect());
+            $this->select = "SELECT $pkSelect, {$this->getFieldsForQuery($model->data, true)}" ;
+            $this->from = "FROM `$mainTable`";
         } else {
             $aCtrl = new \Controller\Table;
             $model = $aCtrl->getTableByIdOrName(true, $tableName);
-            $this->select .= ", $seqPref{$model->getPkSelect()} AS $seqPref{$model->getPkAlias()}, {$this->getFieldsForQuery($model->data, false, $seqPref)}";
+            $pkSelect = Helper::sqlQuotes($seqPref . $model->getPkSelect());
+            $this->select .= ", $pkSelect AS `$seqPref{$model->getPkAlias()}`, {$this->getFieldsForQuery($model->data, false, $seqPref)}";
         }
-
 
         if ($model->hasMany != [] && !$noHasMany) {
             foreach ($model->hasMany as $hmItem) {
                 if ($check->makeHasManyList($hmItem->getManyTable()) === true && $hmItem->getOneTable() == $tableName) {
                     // $this->select .= ", {$hmItem->getManyTable()}.*";
+                    array_push($this->join, "LEFT JOIN `{$hmItem->getManyTable()}`
+                    ON `{$hmItem->getManyTable()}`.`{$hmItem->getManyFk()}`
+                    = `$tableName`.`{$hmItem->getOnePk()}`");
                     $this->getQueryDataFromModels($hmItem->getManyTable(), $tableName);
-                    array_push($this->join, "LEFT JOIN {$hmItem->getManyTable()}
-                    ON {$hmItem->getManyTable()}.{$hmItem->getManyFk()}
-                    = $tableName.{$hmItem->getOnePk()}");
                 }
             }
         }
         
         if ($model->belongsTo != []) {
             foreach($model->belongsTo as $btItem) {
-                $asAlias = isset($mainTable) ? null : " AS $tableName:{$btItem->keyField}";
-                $this->select .= ", $tableName.{$btItem->keyField}$asAlias";
+                $asAlias = isset($mainTable) ? null : " AS `{$seqPref}$tableName:{$btItem->keyField}`";
+                $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
                 
                 if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
+                    array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$this->seq}__{$btItem->getOneTable()}`
+                    ON `{$this->seq}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
+                    = `{$seqPref}$tableName`.`{$btItem->getManyFk()}`");
                     $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $this->seq . '__', true);
-                    array_push($this->join, "LEFT JOIN {$btItem->getOneTable()} {$this->seq}__{$btItem->getOneTable()}
-                    ON {$this->seq}__{$btItem->getOneTable()}.{$btItem->getOnePk()}
-                    = $tableName.{$btItem->getManyFk()}");
                 }
                 
                 $this->seq++;
@@ -76,11 +78,11 @@ class QueryMaker
                 if ($hmabtItem->otherTable != '/'.$parentName) {
                     switch(is_array($hmabtItem->manyMany)) {
                         case false:
+                            array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
+                            LEFT JOIN `$thisTable` `{$seq}__related_$thisTable`
+                            ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$seq}__related_$thisTable`.`$thisPk`) 
+                            AND `{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
                             $this->getQueryDataFromModels($thisTable, $tableName, $seq . '__related_');
-                            array_push($this->join, "LEFT JOIN uasys_crossref ON JSON_CONTAINS(JSON_EXTRACT(table_value, '$.$thisTable'), $thisTable.$thisPk)
-                            LEFT JOIN $thisTable {$seq}__related_$thisTable
-                            ON (JSON_CONTAINS(JSON_EXTRACT(table_value, '$.$thisTable'), {$seq}__related_$thisTable.$thisPk) 
-                            AND {$seq}__related_$thisTable.$thisPk <> $thisTable.$thisPk)");
                         case true:
                             foreach ($hmabtItem->manyMany as $manyManyPart) {
                                 if ($manyManyPart->table != $hmabtItem->table->tableName) {
@@ -88,23 +90,26 @@ class QueryMaker
                                     $otherPk = $manyManyPart->pk;
                                 }
                             }
+                            array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
+                            AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
+                            LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
                             $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
-                            array_push($this->join, "LEFT JOIN uasys_crossref ON JSON_CONTAINS_PATH(table_value, 'ALL','$.$thisTable','$.$otherTable')
-                            AND JSON_EXTRACT(table_value, '$.$thisTable') = $thisTable.$thisPk
-                            LEFT JOIN $otherTable {$seq}__$otherTable ON JSON_EXTRACT(table_value, '$.$otherTable') = {$seq}__$otherTable.$otherPk");
                     }
 
                 }
                 $seq++;
-           }
+        }        
         }
+
+
     }
 
     public function getFieldsForQuery($data, $start = false, $seqPref = null) {
         $fields = [];
         foreach ($data->fields as $fname => $field ) {
-        $aliasOrNot = $start ? null : ' AS ' . $seqPref . $field->sqlAlias;
-            $fields[] = "$seqPref{$field->sqlSelect}$aliasOrNot";
+            $alias = Helper::sqlQuotes($seqPref.$field->sqlAlias);
+            $aliasOrNot = $start ? null : " AS $alias";
+            $fields[] = Helper::sqlQuotes($seqPref.$field->sqlSelect) . $aliasOrNot;
         }
         return implode(', ', $fields);
     }

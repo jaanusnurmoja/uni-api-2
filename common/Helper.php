@@ -76,4 +76,18 @@ class Helper
         return $result;
     }
 
+    public static function sqlQuotes($item) {
+        $res = null;
+        if (strpos($item, '.')) {
+            $parts = explode('.', $item);
+            foreach ($parts as $i => $name) {
+                $parts[$i] = "`$name`";
+            }
+            $res = implode('.', $parts);
+        } else {
+            $res = "`$item`";
+        }
+        return $res;
+    }
+
 }
