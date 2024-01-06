@@ -1,8 +1,11 @@
-<?php namespace Api\Model;
+<?php namespace Api\Service;
 
 include_once __DIR__.'/../../../admin/Controller/Table.php';
 include_once __DIR__.'/../../../common/Check.php';
-use Common\Helper;
+include_once __DIR__.'/DbRead.php';
+use \Common\Helper;
+use \Api\Service\DbRead;
+use stdClass;
 
 class QueryMaker
 {
@@ -24,7 +27,7 @@ class QueryMaker
         }
     }
     
-    public function getQueryDataFromModels($tableName, $parentName = null, $seqPref = null, $noHasMany = false) {
+    public function getQueryDataFromModels($tableName, $parentName = null, $seqPref = null, $noHasMany = false, $any = false, $data = null) {
         if (!isset($check)) $check = new \Common\Check;
         $mainTable = null;
         if ($tableName == $this->model->tableName && $tableName != $parentName) {
@@ -52,9 +55,7 @@ class QueryMaker
             $this->makeHasManyAndBelongsTo($model->hasManyAndBelongsTo, $parentName);
         }
         if ($model->hasAny != []) {
-            echo '<pre>';
-            print_r($model->hasAny);
-            echo '</pre>';
+            $this->makeHasAny($model->hasAny, $tableName);
         }
 
     }
@@ -121,7 +122,35 @@ class QueryMaker
         }        
     }
 
-    public function getFieldsForQuery($data, $start = false, $seqPref = null) {
+    public function makeHasAny($hasAny, $tableName) {
+        echo "Funktsioon on, sisu veel mitte. Tabel on ja sisuga";
+        echo '<pre>';
+        //print_r($hasAny);
+        echo '</pre>';
+        $dbRead = new DbRead;
+        $data = new \stdClass;
+        foreach ($hasAny as $hasAnyItem) {
+            $items = $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
+            foreach ($items as $i => $item) {
+                $anyFields = $dbRead->getColumns($item->any_table);
+                $item->pk = $anyFields->pk;
+                unset($anyFields->pk);
+                $data->fields = array_keys(get_object_vars($anyFields));
+                $items[$i] = $item;
+                $sql = "LEFT JOIN `uasys_anyref`
+                ON `uasys_anyref`.`orig_table` = '$tableName'
+                AND `uasys_anyref`.`orig_pk` = `$tableName`.`{$hasAnyItem->table->pk}`
+                LEFT JOIN `{$item->any_table}` 
+                ON `{$item->any_table}`.`{$item->pk}` = `uasys_anyref`.`any_pk`";
+                array_push($this->join, $sql);
+            }
+            echo '<pre>';
+            print_r($items);
+            echo '</pre>';
+        }
+}
+
+    public function getFieldsForQuery($data, $start = false, $seqPref = null, $any = false) {
         $fields = [];
         foreach ($data->fields as $fname => $field ) {
             $alias = Helper::sqlQuotes($seqPref.$field->sqlAlias);
