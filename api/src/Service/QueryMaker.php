@@ -36,7 +36,7 @@ class QueryMaker
             $mainTable = $tableName;
             $check->makeHasManyList($mainTable);
             $pkSelect = Helper::sqlQuotes($model->getPkSelect());
-            $this->select = "SELECT $pkSelect, {$this->getFieldsForQuery($model->data, true)}" ;
+            $this->select = "SELECT `$mainTable`.`$model->pk` AS `rowid`, $pkSelect, {$this->getFieldsForQuery($model->data, true)}" ;
             $this->from = "FROM `$mainTable`";
         } else {
             $aCtrl = new \Controller\Table;

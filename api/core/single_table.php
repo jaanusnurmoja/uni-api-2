@@ -75,6 +75,9 @@ switch ($table) {
                  * $request[2] on tabeli nimi url -is - nt http://minusrv.ee/uni-api/api/tabelinimi
                  */
                 $sql = buildQuery($request[2]);
+                
+                // Allpool on pöördumine funktsiooni poole, mis kasutab adminipõhist päringut.
+                //$sql = newBuildQuery();
                 break;
 
             case 'PUT':

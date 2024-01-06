@@ -16,12 +16,14 @@ if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 $method = $_SERVER['REQUEST_METHOD'];
 if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
 
+/*
 //temp debug
 if (isset($_GET['api'])) {
 $qMaker = new QueryMaker($request[1]);
 print_r($qMaker->__toString());exit;
 }
 //end temp debug
+*/
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -269,6 +271,11 @@ function getJoinColumns($table, $tableData, $parent, $tableAlias = null, $cols =
     return $cols;
 }
 
+function newBuildQuery() {
+    global $request;
+    $qMaker = new QueryMaker($request[1]);
+    return $qMaker;
+}
 /**
  * Andmebaasipäringu keskne moodustaja.
  * @param mixed $rowid
