@@ -27,7 +27,7 @@ class QueryMaker
     public function getQueryDataFromModels($tableName, $parentName = null, $seqPref = null, $noHasMany = false) {
         if (!isset($check)) $check = new \Common\Check;
         $mainTable = null;
-        if ($tableName == $this->model->tableName) {
+        if ($tableName == $this->model->tableName && $tableName != $parentName) {
             $model = $this->model;
             $mainTable = $tableName;
             $check->makeHasManyList($mainTable);
@@ -73,27 +73,27 @@ class QueryMaker
             foreach ($model->hasManyAndBelongsTo as $hmabtItem) {
                 $thisTable = $hmabtItem->table->tableName;
                 $thisPk = $hmabtItem->table->pk;
-                $otherTable = null;
-                $otherPk = null;
                 if ($hmabtItem->otherTable != '/'.$parentName) {
-                    switch(is_array($hmabtItem->manyMany)) {
-                        case false:
+                    if (is_object($hmabtItem->manyMany)) {
                             array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
                             LEFT JOIN `$thisTable` `{$seq}__related_$thisTable`
                             ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$seq}__related_$thisTable`.`$thisPk`) 
                             AND `{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
-                            $this->getQueryDataFromModels($thisTable, $tableName, $seq . '__related_');
-                        case true:
+                            $this->getQueryDataFromModels($tableName, $tableName, $seq . '__related_');
+                    } else {
+                                $otherTable = null;
+                                $otherPk = null;
                             foreach ($hmabtItem->manyMany as $manyManyPart) {
                                 if ($manyManyPart->table != $hmabtItem->table->tableName) {
                                     $otherTable = $manyManyPart->table;
                                     $otherPk = $manyManyPart->pk;
                                 }
+                                print_r($manyManyPart);
                             }
-                            array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
-                            AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
-                            LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
-                            $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
+                        array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
+                        AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
+                        LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
+                        $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
                     }
 
                 }
