@@ -43,7 +43,7 @@ class QueryMaker
 
         if ($model->hasMany != [] && !$noHasMany) {
             $this->makeHasMany($tableName, $model->hasMany, $check);
-        }
+        } 
         
         if ($model->belongsTo != []) {
             $this->makeBelongsTo($tableName, $model->belongsTo, $parentName, $seqPref, $mainTable);
@@ -51,7 +51,11 @@ class QueryMaker
         if ($model->hasManyAndBelongsTo != []) {
             $this->makeHasManyAndBelongsTo($model->hasManyAndBelongsTo, $parentName);
         }
-
+        if ($model->hasAny != []) {
+            echo '<pre>';
+            print_r($model->hasAny);
+            echo '</pre>';
+        }
 
     }
 

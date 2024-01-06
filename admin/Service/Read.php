@@ -118,7 +118,7 @@ class Read
                     ->setManyFk($row['many_fk'])
                     ->setManyMany(!empty($row['many_many']) ? json_decode($row['many_many']) : null)
                     ->setManyManyIds(!empty($row['many_many_ids']) ? json_decode($row['many_many_ids']) : null)
-                    ->setAnyAny($row['any_any'])
+                    ->setAnyAny(!empty($row['any_any']) ? json_decode($row['any_any']) : null)
                     ->setAnyTable($row['any_table'])
                     ->setAnyPk($row['any_pk'])
                     ->setOnePk($row['one_pk'])
