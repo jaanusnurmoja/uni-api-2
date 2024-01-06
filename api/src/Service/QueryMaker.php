@@ -5,6 +5,7 @@ include_once __DIR__.'/../../../common/Check.php';
 include_once __DIR__.'/DbRead.php';
 use \Common\Helper;
 use \Api\Service\DbRead;
+use Service\Read;
 use stdClass;
 
 class QueryMaker
@@ -27,7 +28,7 @@ class QueryMaker
         }
     }
     
-    public function getQueryDataFromModels($tableName, $parentName = null, $seqPref = null, $noHasMany = false, $any = false, $data = null) {
+    public function getQueryDataFromModels($tableName, $parentName = null, $seqPref = null, $noHasMany = false, $any = false, $dataFields = null) {
         if (!isset($check)) $check = new \Common\Check;
         $mainTable = null;
         if ($tableName == $this->model->tableName && $tableName != $parentName) {
@@ -40,8 +41,18 @@ class QueryMaker
         } else {
             $aCtrl = new \Controller\Table;
             $model = $aCtrl->getTableByIdOrName(true, $tableName);
-            $pkSelect = Helper::sqlQuotes($seqPref . $model->getPkSelect());
-            $this->select .= ", $pkSelect AS `$seqPref{$model->getPkAlias()}`, {$this->getFieldsForQuery($model->data, false, $seqPref)}";
+            if ($any) {
+                $pkToSelect = $tableName . '.' . $dataFields->pk;
+                $pkAlias = $tableName . ':' . $dataFields->pk;
+
+            } else {
+                $pkToSelect = $model->getPkSelect();
+                $pkAlias = $model->getPkAlias();
+            }
+            $pkSelect = Helper::sqlQuotes($seqPref . $pkToSelect);
+            $fields = $any ? $dataFields : $model->data;
+
+            $this->select .= ", $pkSelect AS `$seqPref{$pkAlias}`, {$this->getFieldsForQuery($fields, false, $seqPref)}";
         }
 
         if ($model->hasMany != [] && !$noHasMany) {
@@ -54,7 +65,7 @@ class QueryMaker
         if ($model->hasManyAndBelongsTo != []) {
             $this->makeHasManyAndBelongsTo($model->hasManyAndBelongsTo, $parentName);
         }
-        if ($model->hasAny != []) {
+        if ($model->hasAny != [] && !$noHasMany) {
             $this->makeHasAny($model->hasAny, $tableName);
         }
 
@@ -123,34 +134,30 @@ class QueryMaker
     }
 
     public function makeHasAny($hasAny, $tableName) {
-        echo "Funktsioon on, sisu veel mitte. Tabel on ja sisuga";
-        echo '<pre>';
-        //print_r($hasAny);
-        echo '</pre>';
+
         $dbRead = new DbRead;
-        $data = new \stdClass;
+        $adminRead = new Read;
+
         foreach ($hasAny as $hasAnyItem) {
             $items = $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
             foreach ($items as $i => $item) {
-                $anyFields = $dbRead->getColumns($item->any_table);
-                $item->pk = $anyFields->pk;
-                unset($anyFields->pk);
-                $data->fields = array_keys(get_object_vars($anyFields));
+                $anyFields = (object) $adminRead->getDefaultFields($item->any_table);
+                $anyFields->fields = (object) $anyFields->dataFields;
+                unset($anyFields->dataFields);
+                
+                $this->getQueryDataFromModels($item->any_table, $tableName, null, true, true, $anyFields);
                 $items[$i] = $item;
                 $sql = "LEFT JOIN `uasys_anyref`
                 ON `uasys_anyref`.`orig_table` = '$tableName'
                 AND `uasys_anyref`.`orig_pk` = `$tableName`.`{$hasAnyItem->table->pk}`
                 LEFT JOIN `{$item->any_table}` 
-                ON `{$item->any_table}`.`{$item->pk}` = `uasys_anyref`.`any_pk`";
+                ON `{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
                 array_push($this->join, $sql);
             }
-            echo '<pre>';
-            print_r($items);
-            echo '</pre>';
         }
 }
 
-    public function getFieldsForQuery($data, $start = false, $seqPref = null, $any = false) {
+    public function getFieldsForQuery($data, $start = false, $seqPref = null) {
         $fields = [];
         foreach ($data->fields as $fname => $field ) {
             $alias = Helper::sqlQuotes($seqPref.$field->sqlAlias);
