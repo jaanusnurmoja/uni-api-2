@@ -88,7 +88,6 @@ class QueryMaker
                                     $otherTable = $manyManyPart->table;
                                     $otherPk = $manyManyPart->pk;
                                 }
-                                print_r($manyManyPart);
                             }
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
                         AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
