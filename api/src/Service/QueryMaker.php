@@ -42,65 +42,79 @@ class QueryMaker
         }
 
         if ($model->hasMany != [] && !$noHasMany) {
-            foreach ($model->hasMany as $hmItem) {
-                if ($check->makeHasManyList($hmItem->getManyTable()) === true && $hmItem->getOneTable() == $tableName) {
-                    // $this->select .= ", {$hmItem->getManyTable()}.*";
-                    array_push($this->join, "LEFT JOIN `{$hmItem->getManyTable()}`
-                    ON `{$hmItem->getManyTable()}`.`{$hmItem->getManyFk()}`
-                    = `$tableName`.`{$hmItem->getOnePk()}`");
-                    $this->getQueryDataFromModels($hmItem->getManyTable(), $tableName);
-                }
-            }
+            $this->makeHasMany($tableName, $model->hasMany, $check);
         }
         
         if ($model->belongsTo != []) {
-            foreach($model->belongsTo as $btItem) {
-                $asAlias = isset($mainTable) ? null : " AS `{$seqPref}$tableName:{$btItem->keyField}`";
-                $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
-                
-                if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
-                    array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$this->seq}__{$btItem->getOneTable()}`
-                    ON `{$this->seq}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
-                    = `{$seqPref}$tableName`.`{$btItem->getManyFk()}`");
-                    $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $this->seq . '__', true);
-                }
-                
-                $this->seq++;
-            }
+            $this->makeBelongsTo($tableName, $model->belongsTo, $parentName, $seqPref, $mainTable);
         }
         if ($model->hasManyAndBelongsTo != []) {
-            $seq = $this->seq;
-            foreach ($model->hasManyAndBelongsTo as $hmabtItem) {
-                $thisTable = $hmabtItem->table->tableName;
-                $thisPk = $hmabtItem->table->pk;
-                if ($hmabtItem->otherTable != '/'.$parentName) {
-                    if (is_object($hmabtItem->manyMany)) {
-                            array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                            LEFT JOIN `$thisTable` `{$seq}__related_$thisTable`
-                            ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$seq}__related_$thisTable`.`$thisPk`) 
-                            AND `{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
-                            $this->getQueryDataFromModels($tableName, $tableName, $seq . '__related_');
-                    } else {
-                                $otherTable = null;
-                                $otherPk = null;
-                            foreach ($hmabtItem->manyMany as $manyManyPart) {
-                                if ($manyManyPart->table != $hmabtItem->table->tableName) {
-                                    $otherTable = $manyManyPart->table;
-                                    $otherPk = $manyManyPart->pk;
-                                }
-                            }
-                        array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
-                        AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
-                        LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
-                        $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
-                    }
-
-                }
-                $seq++;
-        }        
+            $this->makeHasManyAndBelongsTo($model->hasManyAndBelongsTo, $parentName);
         }
 
 
+    }
+
+    public function makeHasMany($tableName, $hasMany, $check) {
+        foreach ($hasMany as $hmItem) {
+            if ($check->makeHasManyList($hmItem->getManyTable()) === true && $hmItem->getOneTable() == $tableName) {
+                // $this->select .= ", {$hmItem->getManyTable()}.*";
+                array_push($this->join, "LEFT JOIN `{$hmItem->getManyTable()}`
+                ON `{$hmItem->getManyTable()}`.`{$hmItem->getManyFk()}`
+                = `$tableName`.`{$hmItem->getOnePk()}`");
+                $this->getQueryDataFromModels($hmItem->getManyTable(), $tableName);
+            }
+        }
+
+    }
+
+    public function makeBelongsTo($tableName, $belongsTo, $parentName, $seqPref, $mainTable) {
+        foreach($belongsTo as $btItem) {
+            $asAlias = isset($mainTable) ? null : " AS `{$seqPref}$tableName:{$btItem->keyField}`";
+            $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
+            
+            if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
+                array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$this->seq}__{$btItem->getOneTable()}`
+                ON `{$this->seq}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
+                = `{$seqPref}$tableName`.`{$btItem->getManyFk()}`");
+                $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $this->seq . '__', true);
+            }
+            
+            $this->seq++;
+        }
+
+    }
+
+    public function makeHasManyAndBelongsTo($hmAbt, $parentName) {
+        $seq = $this->seq;
+        foreach ($hmAbt as $hmabtItem) {
+            $thisTable = $hmabtItem->table->tableName;
+            $thisPk = $hmabtItem->table->pk;
+            if ($hmabtItem->otherTable != '/'.$parentName) {
+                if (is_object($hmabtItem->manyMany)) {
+                        array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
+                        LEFT JOIN `$thisTable` `{$seq}__related_$thisTable`
+                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$seq}__related_$thisTable`.`$thisPk`) 
+                        AND `{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
+                        $this->getQueryDataFromModels($thisTable, $thisTable, $seq . '__related_');
+                } else {
+                            $otherTable = null;
+                            $otherPk = null;
+                        foreach ($hmabtItem->manyMany as $manyManyPart) {
+                            if ($manyManyPart->table != $hmabtItem->table->tableName) {
+                                $otherTable = $manyManyPart->table;
+                                $otherPk = $manyManyPart->pk;
+                                array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
+                                AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
+                                LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
+                                $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
+                            }
+                        }
+                }
+
+            }
+            $seq++;
+        }        
     }
 
     public function getFieldsForQuery($data, $start = false, $seqPref = null) {
