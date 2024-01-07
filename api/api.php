@@ -23,7 +23,7 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
 if (isset($_GET['api'])) {
 $qMaker = new QueryMaker($request[1]);
 $dbRead = new DbRead();
-echo json_encode($qMaker->__toString());exit;
+echo json_encode(['sql' => $qMaker->__toString()]);exit;
 }
 //end temp debug
 
