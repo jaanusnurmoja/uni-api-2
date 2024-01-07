@@ -6,7 +6,7 @@ use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
 
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 //error_reporting(E_ALL);
 
@@ -18,7 +18,7 @@ if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 $method = $_SERVER['REQUEST_METHOD'];
 if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
 
-/*
+
 //temp debug
 if (isset($_GET['api'])) {
 $qMaker = new QueryMaker($request[1]);
@@ -30,7 +30,7 @@ echo json_encode([
 ]);exit;
 }
 //end temp debug
-*/
+
 
 
 $input = json_decode(file_get_contents('php://input'), true);
