@@ -27,7 +27,6 @@ $dbRead = new DbRead();
 $testSql = $qMaker->__toString();
 echo json_encode([
     'sql' => $testSql,
-    'res' => $dbRead->anySelect($testSql)
 ]);exit;
 }
 //end temp debug
