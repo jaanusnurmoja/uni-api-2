@@ -57,7 +57,7 @@ class QueryMaker
 
         if ($model->hasMany != [] && !$noHasMany) {
             $this->makeHasMany($tableName, $model->hasMany, $check);
-        } 
+        }
         
         if ($model->belongsTo != []) {
             $this->makeBelongsTo($tableName, $model->belongsTo, $parentName, $seqPref, $mainTable);
@@ -90,10 +90,10 @@ class QueryMaker
             $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
             
             if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
-                array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$this->seq}__{$btItem->getOneTable()}`
-                ON `{$this->seq}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
+                array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `belongsTo_{$this->seq}__{$btItem->getOneTable()}`
+                ON `belongsTo_{$this->seq}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
                 = `{$seqPref}$tableName`.`{$btItem->getManyFk()}`");
-                $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $this->seq . '__', true);
+                $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, 'belongsTo_' . $this->seq . '__', true);
             }
             
             $this->seq++;
@@ -109,10 +109,10 @@ class QueryMaker
             if ($hmabtItem->otherTable != '/'.$parentName) {
                 if (is_object($hmabtItem->manyMany)) {
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                        LEFT JOIN `$thisTable` `{$seq}__related_$thisTable`
-                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$seq}__related_$thisTable`.`$thisPk`) 
-                        AND `{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
-                        $this->getQueryDataFromModels($thisTable, $thisTable, $seq . '__related_');
+                        LEFT JOIN `$thisTable` `hmabt_{$seq}__related_$thisTable`
+                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `hmabt_{$seq}__related_$thisTable`.`$thisPk`) 
+                        AND `hmabt_{$seq}__related_$thisTable`.`$thisPk` <> `$thisTable`.`$thisPk`)");
+                        $this->getQueryDataFromModels($thisTable, $thisTable, 'hmabt_' . $seq . '__related_');
                 } else {
                             $otherTable = null;
                             $otherPk = null;
@@ -122,8 +122,8 @@ class QueryMaker
                                 $otherPk = $manyManyPart->pk;
                                 array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
                                 AND JSON_EXTRACT(table_value, '$.$thisTable') = `$thisTable`.`$thisPk`
-                                LEFT JOIN `$otherTable` `{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$seq}__$otherTable`.`$otherPk`");
-                                $this->getQueryDataFromModels($otherTable, $thisTable, $seq . '__');
+                                LEFT JOIN `$otherTable` `hmabt_{$seq}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `hmabt_{$seq}__$otherTable`.`$otherPk`");
+                                $this->getQueryDataFromModels($otherTable, $thisTable, 'hmabt_' . $seq . '__');
                             }
                         }
                 }
@@ -145,14 +145,14 @@ class QueryMaker
                 $anyFields->fields = (object) $anyFields->dataFields;
                 unset($anyFields->dataFields);
                 
-                $this->getQueryDataFromModels($item->any_table, $tableName, null, true, true, $anyFields);
                 $items[$i] = $item;
                 $sql = "LEFT JOIN `uasys_anyref`
                 ON `uasys_anyref`.`orig_table` = '$tableName'
                 AND `uasys_anyref`.`orig_pk` = `$tableName`.`{$hasAnyItem->table->pk}`
-                LEFT JOIN `{$item->any_table}` 
-                ON `{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
+                LEFT JOIN `{$item->any_table}` `any_{$i}__{$item->any_table}`
+                ON `any_{$i}__{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
                 array_push($this->join, $sql);
+                $this->getQueryDataFromModels($item->any_table, $tableName, 'any_'.$i.'__', true, true, $anyFields);
             }
         }
 }
