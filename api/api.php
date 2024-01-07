@@ -26,9 +26,11 @@ if (isset($_GET['api'])) {
     $dbRead = new DbRead();
     $testSql = $qMaker->__toString();
     echo json_encode([
-        'sql' => $testSql,'res' => $dbRead->anySelect($testSql)
+        'sql' => $testSql
     ]);
-    //print_r($dbRead->anySelect($testSql));
+    echo '<pre>';
+    print_r($dbRead->anySelect($testSql));
+    echo '</pre>';
     exit;
 }
 //end temp debug
