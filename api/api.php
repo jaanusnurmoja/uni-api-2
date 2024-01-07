@@ -19,17 +19,18 @@ if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 $method = $_SERVER['REQUEST_METHOD'];
 if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
 
-
-//temp debug
-if (isset($_GET['api'])) {
     $qMaker = new QueryMaker($request[1]);
     $dbRead = new DbRead();
     $testSql = $qMaker->__toString();
+    $testRes = $dbRead->anySelect($testSql);
+
+//temp debug
+if (isset($_GET['api'])) {
     echo json_encode([
         'sql' => $testSql
     ]);
     echo '<pre>';
-    print_r($dbRead->anySelect($testSql));
+    print_r($testRes);
     echo '</pre>';
     exit;
 }
