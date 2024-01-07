@@ -45,7 +45,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $cnf = parse_ini_file('../config/connection.ini');
 $link = new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
 
-mysqli_set_charset($link, 'utf8');
+mysqli_set_charset($link, 'utf8mb4');
 
 /**
  * Set response status code and print an JS Object with error's info

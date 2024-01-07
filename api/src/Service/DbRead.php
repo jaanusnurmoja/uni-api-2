@@ -4,7 +4,9 @@ class DbRead
 {
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
-        return new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+        $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
+        $mysqli->set_charset('utf8mb4');
+        return $mysqli;
     }
 
     public function anySelect($query) {
@@ -14,7 +16,7 @@ class DbRead
         while ($row = $res->fetch_object()) {
             $rows[] = $row;
         }
-        //$db->close();
+        $db->close();
         return $rows;
     }
 

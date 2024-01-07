@@ -74,8 +74,7 @@ switch ($table) {
                  * Päring, mis moodustatakse api.php -s funktsioonis buildQuery()
                  * $request[2] on tabeli nimi url -is - nt http://minusrv.ee/uni-api/api/tabelinimi
                  */
-                //$sql = buildQuery($request[2]);
-                $sql = $testSql;
+                $sql = buildQuery($request[2]);
                 
                 // Allpool on pöördumine funktsiooni poole, mis kasutab adminipõhist päringut.
                 //$sql = newBuildQuery();
