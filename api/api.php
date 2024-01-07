@@ -6,7 +6,7 @@ use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
 
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
 
 //error_reporting(E_ALL);
 
