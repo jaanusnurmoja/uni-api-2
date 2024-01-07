@@ -1,6 +1,7 @@
 <?php
 
 include_once './src/Service/QueryMaker.php';
+include_once './src/Service/DbRead.php';
 
 use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
