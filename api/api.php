@@ -27,11 +27,8 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
 //temp debug
 if (isset($_GET['api'])) {
     echo json_encode([
-        'sql' => $testSql
+        'sql' => $testSql, 'res' => $testRes
     ]);
-    echo '<pre>';
-    print_r($testRes);
-    echo '</pre>';
     exit;
 }
 //end temp debug
