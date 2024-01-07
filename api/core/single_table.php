@@ -2,7 +2,7 @@
 // retrieve the table and key from the path
 //$table = preg_replace('/[^a-z0-9_]+/i', '', $request[1]);
 $table = $request[1];
-header('Content-Type: application/json');
+//header('Content-Type: application/json');
 if ($table == "") {
     echo (json_encode(array('error' => 'Invalid Endpoint!')));
     http_response_code(501);
