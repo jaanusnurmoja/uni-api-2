@@ -1,6 +1,8 @@
 <?php
 
 include_once './src/Service/QueryMaker.php';
+
+use Api\Service\DbRead;
 use \Api\Service\QueryMaker;
 
 ini_set('always_populate_raw_post_data', -1);
@@ -20,7 +22,9 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
 //temp debug
 if (isset($_GET['api'])) {
 $qMaker = new QueryMaker($request[1]);
-print_r($qMaker->__toString());exit;
+//print_r($qMaker->__toString());exit;
+$dbRead = new DbRead;
+echo json_encode($dbRead->anySelect($qMaker->__toString()));exit;
 }
 //end temp debug
 
