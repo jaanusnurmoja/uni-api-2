@@ -28,7 +28,7 @@ if (isset($_GET['api'])) {
     echo json_encode([
         'sql' => $testSql,'res' => $dbRead->anySelect($testSql)
     ]);
-    print_r($dbRead->anySelect($testSql));
+    //print_r($dbRead->anySelect($testSql));
     exit;
 }
 //end temp debug
