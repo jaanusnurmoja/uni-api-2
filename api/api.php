@@ -1,8 +1,9 @@
 <?php
 
 include_once './src/Service/QueryMaker.php';
+include_once './src/Service/DbRead.php';
 
-use Api\Service\DbRead;
+use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
 
 ini_set('always_populate_raw_post_data', -1);
@@ -18,15 +19,20 @@ if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 $method = $_SERVER['REQUEST_METHOD'];
 if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
 
+    $qMaker = new QueryMaker($request[1]);
+    $dbRead = new DbRead();
+    $testSql = $qMaker->__toString();
+    $testRes = $dbRead->anySelect($testSql);
 
 //temp debug
 if (isset($_GET['api'])) {
-$qMaker = new QueryMaker($request[1]);
-//print_r($qMaker->__toString());exit;
-$dbRead = new DbRead;
-echo json_encode($dbRead->anySelect($qMaker->__toString()));exit;
+    echo json_encode([
+        'sql' => $testSql, 'res' => $testRes
+    ]);
+    exit;
 }
 //end temp debug
+
 
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -36,7 +42,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $cnf = parse_ini_file('../config/connection.ini');
 $link = new mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
 
-mysqli_set_charset($link, 'utf8');
+mysqli_set_charset($link, 'utf8mb4');
 
 /**
  * Set response status code and print an JS Object with error's info
