@@ -22,12 +22,14 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
 
 //temp debug
 if (isset($_GET['api'])) {
-$qMaker = new QueryMaker($request[1]);
-$dbRead = new DbRead();
-$testSql = $qMaker->__toString();
-echo json_encode([
-    'sql' => $testSql,
-]);exit;
+    $qMaker = new QueryMaker($request[1]);
+    $dbRead = new DbRead();
+    $testSql = $qMaker->__toString();
+    echo json_encode([
+        'sql' => $testSql,
+    ]);
+    print_r($dbRead->anySelect($testSql));
+    exit;
 }
 //end temp debug
 

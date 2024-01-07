@@ -14,7 +14,7 @@ class DbRead
         while ($row = $res->fetch_object()) {
             $rows[] = $row;
         }
-        $db->close();
+        //$db->close();
         return $rows;
     }
 
