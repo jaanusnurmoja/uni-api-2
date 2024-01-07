@@ -2,7 +2,7 @@
 
 include_once './src/Service/QueryMaker.php';
 
-use Api\Service\DbRead;
+use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
 
 ini_set('always_populate_raw_post_data', -1);
