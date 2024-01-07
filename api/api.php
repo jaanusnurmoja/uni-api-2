@@ -1,10 +1,12 @@
 <?php
 
-include_once './src/Service/QueryMaker.php';
 include_once './src/Service/DbRead.php';
+include_once './src/Service/QueryMaker.php';
+include_once './src/Service/Result.php';
 
 use \Api\Service\DbRead;
 use \Api\Service\QueryMaker;
+use Api\Service\Result;
 
 ini_set('always_populate_raw_post_data', -1);
 ini_set('display_errors', 0);
@@ -19,15 +21,16 @@ if (isset($_SERVER['PATH_INFO'])) $path = $_SERVER['PATH_INFO'];
 $method = $_SERVER['REQUEST_METHOD'];
 if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO']);
 
-    $qMaker = new QueryMaker($request[1]);
-    $dbRead = new DbRead();
-    $testSql = $qMaker->__toString();
-    $testRes = $dbRead->anySelect($testSql);
+    //$qMaker = new QueryMaker($request[1]);
+    //$dbRead = new DbRead();
+    //$testRes = $dbRead->anySelect($testSql);
+    $result = new Result($request[1]);
+    $testSql = $result->__toString();
 
 //temp debug
 if (isset($_GET['api'])) {
     echo json_encode([
-        'sql' => $testSql, 'res' => $testRes
+        'sql' => $testSql, 'res' => $result->getData()
     ]);
     exit;
 }
