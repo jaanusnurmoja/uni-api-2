@@ -1,8 +1,12 @@
 ﻿# uni-api
 
-Nagu öeldud, toetub valmiv projekt samanimelisele lihtsa **REST API** php kriptile, mis kasutab MySQL andmebaasi.
+Nagu öeldud, toetub valmiv projekt samanimelisele lihtsa **REST API** php skriptile, mis kasutab MySQL andmebaasi.
 
 Oodatava lõpptulemusena on võimalik kasutada kõiki http meetodeid  **GET**, **POST**, **PATCH**, **PUT** and **DELETE**, kuid hetkel keskendun ainult GETile.
+
+# NB! Allolev osa kehtib ainult nö vanale versioonile. 
+
+Uuenduste järel on API hallatav halduskeskkonna vahendusel ning seal genereeritakse ka päringumall
 
 # Paigaldamine
 

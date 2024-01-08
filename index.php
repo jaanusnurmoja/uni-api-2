@@ -198,6 +198,7 @@ foreach (json_decode($rel) as $table => $params) {
                         href="https://test.nurmoja.net.ee/repeat/">varasemas näidisrakenduses</a>), võimalikult väheste
                     päringute hulgaga ning võimalikult
                     lihtsama ja napima seadistusega (sh nt ilma võõrvõtmete määramiseta andmebaasis).
+                    Väljundina saadav json kujul teave peaks muuhulgas olema piltlikult öeles "pimesi loetav" - andmeid tarbiv väline veebisait "ei tea", milliste nimedega on infoväljad tarbitavas voos, kuid teab, mismoodi seda lugeda, sest andmete struktuur järgib ühtset standardit.
                     Aluseks on võetud üks "lihtsa crud api" <a
                         href="https://github.com/darioTecchia/uni-api">projekt</a> ,
                     mida
@@ -223,16 +224,11 @@ foreach (json_decode($rel) as $table => $params) {
                         jätkamislink oli ajutine lahendus.</p>
                     <h4 class="bg-warning">TEOKSIL: halduskeskkond</h4>
                     <p>
-                        Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid
-                        või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid. SISULISELT
-                        OLEMAS. <mark>Alates 03.01.2024</mark> on plaanis luua päringumall hallatavate
-                        andmebaasitabelite
-                        jaoks.
-                        Päringuid
-                        peaks genereerima kas admini klass Table.php (või TabelDTO.php) või mõni eraldi klass, kasutades
-                        eelmainitud struktuure.
+                        Halduskeskkonda peaks tekkima võimalus luua api sisutüüpide loomiseks uusi andmebaasitabeleid või kaasata olemasolevaid ning tekitada tabelite vahele soovitud andmeseoseid. SISULISELT OLEMAS.
                     </p>
-
+                    <p>
+                    <mark>Seisuga 07.01.2024</mark> moodustavad halduskeskkonna mallid andmebaasipäringu vastavalt sellele, milline tabel on peatabel ning milliste tabelitega on selle tabeli ja alamate tabelite jaoks andmeseosed seadistatud. API poolel on loodud objektid, mis päringu realiseerivad ja (tulevikus) tulemusi nende soovitavas struktuuris kasutajale vahendavad. 
+                    </p>
                     <p>
                         <mark>Seisuga 03.01.2024</mark> on halduskeskkonnas ja koodis olulisi täiendusi, sh
                         seosesätetes, kus
