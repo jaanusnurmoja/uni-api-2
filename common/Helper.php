@@ -90,4 +90,19 @@ class Helper
         return $res;
     }
 
+    public static function bigKeySplitter($bigKey) {
+        
+        $result = new \stdClass;
+        $tableAliasAndField = explode(':',$bigKey);
+        $tableAlias = $tableAliasAndField[0];
+        $result->field = $tableAliasAndField[1];
+        $tableAliasParts = explode('__', $tableAlias);
+        $result->mode = $tableAliasParts[0];
+        $result->id = $tableAliasParts[1];
+        $result->table = $tableAliasParts[2];
+        $result->tableAlias = $tableAlias;
+
+        return $result;
+    }
+
 }
