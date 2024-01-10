@@ -175,8 +175,9 @@ class QueryMaker
     }
 
     public function byId($id) {
+        if (!empty($id)) {
         $pk = $this->model->pk;
-        $this->addWhere("{$this->model->tableName}.$pk = $id");
+        $this->addWhere("{$this->model->tableName}.$pk = $id");}
         return $this;
     }
 
