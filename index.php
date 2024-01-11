@@ -175,7 +175,7 @@ $rel = file_get_contents('api/relations.json'); ?>
 foreach (json_decode($rel) as $table => $params) {
     if ($table != 'hasManyAndBelongsTo') {
 
-        echo "<tr><td class='warning'><a href='api/$table'>$table</a></td><td>$params->description</td></tr>";
+        echo "<tr><td class='warning'><a href='api/$table'>$table</a></td><td>$params->description</td><td style='white-space:nowrap'><a class='btn btn-small btn-warning' href='api/$table/?testapi'>Uus test</a></td></tr>";
     }
 }
 ?>
