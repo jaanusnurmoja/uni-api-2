@@ -115,10 +115,10 @@ class QueryMaker
             if ($hmabtItem->otherTable != '/'.$parentName) {
                 if (is_object($hmabtItem->manyMany)) {
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                        LEFT JOIN `$thisTable` `hmabt__{$hmabtItem->id}__related_$thisTable`
-                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `hmabt__{$hmabtItem->id}__related_$thisTable`.`$thisPk`) 
-                        AND `hmabt__{$hmabtItem->id}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
-                        $this->getQueryDataFromModels($thisTable, $thisTable, 'hmabt__' . $hmabtItem->id . '__related_');
+                        LEFT JOIN `$thisTable` `hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`
+                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk`) 
+                        AND `hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
+                        $this->getQueryDataFromModels($thisTable, $thisTable, 'hasManyAndBelongsTo__' . $hmabtItem->id . '__related_');
                 } else {
                             $otherTable = null;
                             $otherPk = null;
@@ -128,8 +128,8 @@ class QueryMaker
                                 $otherPk = $manyManyPart->pk;
                                 array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
                                 AND JSON_EXTRACT(table_value, '$.$thisTable') = `{$seqPref}{$thisTable}`.`$thisPk`
-                                LEFT JOIN `$otherTable` `hmabt__{$hmabtItem->id}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `hmabt__{$hmabtItem->id}__$otherTable`.`$otherPk`");
-                                $this->getQueryDataFromModels($otherTable, $thisTable, 'hmabt__' . $hmabtItem->id . '__');
+                                LEFT JOIN `$otherTable` `hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable`.`$otherPk`");
+                                $this->getQueryDataFromModels($otherTable, $thisTable, 'hasManyAndBelongsTo__' . $hmabtItem->id . '__');
                             }
                         }
                 }
