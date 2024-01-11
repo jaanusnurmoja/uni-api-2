@@ -14,7 +14,7 @@ class DbRead
         $rows = [];
         $res = $db->query($query);
         while ($row = $res->fetch_object()) {
-            $rows[] = $row;
+            $rows[$row->rowid][] = $row;
         }
         $db->close();
         return $rows;
