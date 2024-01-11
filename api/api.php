@@ -28,9 +28,9 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
     $testSql = $result->__toString();
 
 //temp debug
-if (isset($_GET['api'])) {
+if (isset($_GET['testapi'])) {
     echo json_encode([
-        'sql' => $testSql, 'res' => $result->getData()
+        'sql' => $testSql, 'res' => $result->getDataSetsFromQuery()
     ]);
     exit;
 }

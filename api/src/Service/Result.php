@@ -12,7 +12,7 @@ class Result extends QueryMaker
         parent::__construct($tableName);
     }
 
-    public function getData() {
+    public function getDataSetsFromQuery() {
         $dbRead = new DbRead;
         $query = $this->__toString();
         $resultRows = $dbRead->anySelect($query);
