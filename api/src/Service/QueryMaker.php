@@ -37,10 +37,11 @@ class QueryMaker
         if ($tableName == $this->model->tableName && $tableName != $parentName) {
             $model = $this->model;
             $mainTable = $tableName;
+            $seqPref = 'entity__';
             $check->makeHasManyList($mainTable);
             $pkSelect = Helper::sqlQuotes($model->getPkSelect());
-            $this->select = "SELECT `$mainTable`.`$model->pk` AS `rowid`, $pkSelect, {$this->getFieldsForQuery($model->data, true)}" ;
-            $this->from = "FROM `$mainTable`";
+            $this->select = "SELECT `{$seqPref}$mainTable`.`$model->pk` AS `rowid`, `{$seqPref}$mainTable`.`$model->pk` AS `{$seqPref}$mainTable:$model->pk`, {$this->getFieldsForQuery($model->data, false, $seqPref)}" ;
+            $this->from = "FROM `$mainTable` `entity__$mainTable`";
         } else {
             $aCtrl = new \Controller\Table;
             $model = $aCtrl->getTableByIdOrName(true, $tableName);
