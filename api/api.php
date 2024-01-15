@@ -25,6 +25,10 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
     //$dbRead = new DbRead();
     //$testRes = $dbRead->anySelect($testSql);
     $result = new Result($request[1]);
+    if (isset($request[2])) {
+        $result->byId($request[2]);
+    }
+
     $testSql = $result->__toString();
 
 //temp debug
