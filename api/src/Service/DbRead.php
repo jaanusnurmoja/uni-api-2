@@ -14,7 +14,11 @@ class DbRead
         $rows = [];
         $res = $db->query($query);
         while ($row = $res->fetch_object()) {
-            $rows[$row->rowid][] = $row;
+            if (isset($row->rowid)) {
+                $rows[$row->rowid][] = $row;
+            } else {
+                $rows[] = $row;
+            }
         }
         $db->close();
         return $rows;
