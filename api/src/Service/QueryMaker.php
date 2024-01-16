@@ -116,7 +116,7 @@ class QueryMaker
                 if (is_object($hmabtItem->manyMany)) {
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
                         LEFT JOIN `$thisTable` `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`
-                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk`) 
+                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk`) 
                         AND `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
                         $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__related_');
                 } else {
