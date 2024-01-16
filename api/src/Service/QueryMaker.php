@@ -90,7 +90,9 @@ class QueryMaker
     public function makeBelongsTo($tableName, $belongsTo, $parentName, $seqPref, $mainTable) {
         $seq = 0;
         foreach($belongsTo as $btItem) {
-            $asAlias = isset($mainTable) ? null : " AS `{$seqPref}$tableName:{$btItem->keyField}`";
+            $sp = isset($mainTable) ? 'entity__' : $seqPref;
+            //$asAlias = isset($mainTable) ? null : " AS `{$seqPref}$tableName:{$btItem->keyField}`";
+            $asAlias = " AS `{$sp}$tableName:{$btItem->keyField}`";
             $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
             
             if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
