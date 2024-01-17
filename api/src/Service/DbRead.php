@@ -1,5 +1,12 @@
 <?php namespace Api\Service;
 
+include_once __DIR__ . '/../Model/Entity.php';
+include_once __DIR__ . '/../Model/Pk.php';
+include_once __DIR__ . '/../Model/Join.php';
+use Api\Model\Entity;
+use Api\Model\Pk;
+use \Api\Model\Join;
+
 class DbRead
 {
     public array $tables;
@@ -17,6 +24,7 @@ class DbRead
         //$results = new Result();
         $res = $db->query($query);
         $fields = [];
+        $joins = [];
         $tables = [];
         $pks = [];
         foreach($res->fetch_fields() as $field) {
@@ -25,12 +33,10 @@ class DbRead
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
                 $tables[$field->orgtable]['pk'] = $field->orgname;
                 $parts = explode('__', $field->table);
-                    if ($parts[1] == 'belongsTo') {
-                        $tables[$parts[0]]['parent'][$parts[2]] = $parts[3];
-                    }
-                    else {
-                        $tables[$parts[0]]['child'][$parts[2]] = $parts[3];
-                    }
+                if (count($parts) == 4) {
+                    $join = new Join($parts[2], $parts[1], $parts[0], $parts[3]);
+                    $joins[$parts[0]][$parts[2]] = $join;
+                }
             }
             $fields[$field->name] = $field;
         }
@@ -39,6 +45,7 @@ class DbRead
                 $rows[0]['pks'] = $pks;
                 $rows[0]['tables'] = $tables;
                 $rows[0]['fields'] = $fields;
+                $rows[0]['joins'] = $joins;
                 foreach ($row as $key => $value) {
                     $table = $fields[$key]->orgtable;
                     $pk = $pks[$table];
