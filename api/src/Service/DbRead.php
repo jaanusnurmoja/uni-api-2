@@ -33,9 +33,9 @@ class DbRead
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
                 $tables[$field->orgtable]['pk'] = $field->orgname;
                 $parts = explode('__', $field->table);
-                if (count($parts) == 4) {
-                    $join = new Join($parts[2], $parts[1], $parts[0], $parts[3]);
-                    $joins[$parts[0]][$parts[2]] = $join;
+                if (count($parts) == 5) {
+                    $join = new Join($parts[3], $parts[2], $parts[0], $parts[1], $parts[4]);
+                    $joins[$parts[0]][$parts[3]] = $join;
                 }
             }
             $fields[$field->name] = $field;
