@@ -78,10 +78,10 @@ class QueryMaker
         foreach ($hasMany as $hmItem) {
             if ($check->makeHasManyList($hmItem->getManyTable()) === true && $hmItem->getOneTable() == $tableName) {
                 // $this->select .= ", {$hmItem->getManyTable()}.*";
-                array_push($this->join, "LEFT JOIN `{$hmItem->getManyTable()}` `{$tableName}__hasMany__{$hmItem->id}__{$hmItem->getManyTable()}`
-                ON `{$tableName}__hasMany__{$hmItem->id}__{$hmItem->getManyTable()}`.`{$hmItem->getManyFk()}`
+                array_push($this->join, "LEFT JOIN `{$hmItem->getManyTable()}` `{$tableName}__{$hmItem->keyField}__hasMany__{$hmItem->id}__{$hmItem->getManyTable()}`
+                ON `{$tableName}__{$hmItem->getOnePk()}__hasMany__{$hmItem->id}__{$hmItem->getManyTable()}`.`{$hmItem->getManyFk()}`
                 = `{$seqPref}{$tableName}`.`{$hmItem->getOnePk()}`");
-                $this->getQueryDataFromModels($hmItem->getManyTable(), $tableName, $tableName.'__hasMany__'.$hmItem->id.'__');
+                $this->getQueryDataFromModels($hmItem->getManyTable(), $tableName, $tableName.'__'.$hmItem->getOnePk().'__hasMany__'.$hmItem->id.'__');
             }
         }
 
@@ -96,10 +96,10 @@ class QueryMaker
             $this->select .= ", `{$seqPref}{$tableName}`.`{$btItem->keyField}`$asAlias";
             
             if (!in_array($btItem->getOneTable(), [$mainTable, $tableName, $parentName])) {
-                array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$tableName}__belongsTo__{$btItem->id}__{$btItem->getOneTable()}`
-                ON `{$tableName}__belongsTo__{$btItem->id}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
+                array_push($this->join, "LEFT JOIN `{$btItem->getOneTable()}` `{$tableName}__{$btItem->getManyFk()}__belongsTo__{$btItem->id}__{$btItem->getOneTable()}`
+                ON `{$tableName}__{$btItem->getManyFk()}__belongsTo__{$btItem->id}__{$btItem->getOneTable()}`.`{$btItem->getOnePk()}`
                 = `{$seqPref}$tableName`.`{$btItem->getManyFk()}`");
-                $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $tableName.'__belongsTo__' . $btItem->id . '__', true);
+                $this->getQueryDataFromModels($btItem->getOneTable(), $tableName, $tableName.'__'.$btItem->getManyFk().'__belongsTo__' . $btItem->id . '__', true);
             }
             
             //$this->seq++;
@@ -117,10 +117,10 @@ class QueryMaker
             if ($hmabtItem->otherTable != '/'.$parentName) {
                 if (is_object($hmabtItem->manyMany)) {
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                        LEFT JOIN `$thisTable` `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`
+                        LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`
                         ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk`) 
-                        AND `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
-                        $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__related_');
+                        AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
+                        $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__related_');
                 } else {
                             $otherTable = null;
                             $otherPk = null;
@@ -130,8 +130,8 @@ class QueryMaker
                                 $otherPk = $manyManyPart->pk;
                                 array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
                                 AND JSON_EXTRACT(table_value, '$.$thisTable') = `{$seqPref}{$thisTable}`.`$thisPk`
-                                LEFT JOIN `$otherTable` `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable`.`$otherPk`");
-                                $this->getQueryDataFromModels($otherTable, $thisTable, $thisTable.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__');
+                                LEFT JOIN `$otherTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__$otherTable`.`$otherPk`");
+                                $this->getQueryDataFromModels($otherTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__');
                             }
                         }
                 }
@@ -157,10 +157,10 @@ class QueryMaker
                     $sql = "LEFT JOIN `uasys_anyref`
                     ON `uasys_anyref`.`orig_table` = '$tableName'
                     AND `uasys_anyref`.`orig_pk` = `$tableName`.`{$hasAnyItem->table->pk}`
-                    LEFT JOIN `{$item->any_table}` `{$tableName}__hasAny__{$hasAnyItem->id}_{$i}__{$item->any_table}`
+                    LEFT JOIN `{$item->any_table}` `{$tableName}__{$hasAnyItem->table->pk}__hasAny__{$hasAnyItem->id}_{$i}__{$item->any_table}`
                     ON `{$tableName}__hasAny__{$hasAnyItem->id}_{$i}__{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
                     array_push($this->join, $sql);
-                    $this->getQueryDataFromModels($item->any_table, $tableName, $tableName.'__hasAny__'.$hasAnyItem->id.'_'.$i.'__', true, true, $anyFields);
+                    $this->getQueryDataFromModels($item->any_table, $tableName, $tableName.'__'.$hasAnyItem->table->pk.'__hasAny__'.$hasAnyItem->id.'_'.$i.'__', true, true, $anyFields);
 
             }
         }
