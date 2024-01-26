@@ -1,6 +1,7 @@
 <?php namespace Api\Service;
 
 use Api\Model\Entity;
+use Api\Service\DbRead;
 
 class Result extends QueryMaker
 {
