@@ -6,15 +6,18 @@ class Join
     public $mode;
     public $thisTable;
     public $keyField;
+    public $keyValue;
+    public $otherKeyField;
     public $otherTable;
     public ?Entity $item;
     public ?array $items;
 
-    public function __construct($id=null, $mode=null, $thisTable=null, $keyField = null, $otherTable=null) {
+    public function __construct($id=null, $mode=null, $thisTable=null, $keyField = null, $otherKeyField = null, $otherTable=null) {
         $this->id = $id;
         $this->mode = $mode;
         $this->thisTable = $thisTable;
         $this->keyField = $keyField;
+        $this->otherKeyField = $otherKeyField;
         $this->otherTable = $otherTable;
         if (in_array($mode, ['belongsTo', 'hasAny'])) {
             $this->item = new Entity($otherTable);
@@ -158,4 +161,58 @@ class Join
     }
 
 
+
+    /**
+     * Get the value of keyValue
+     *
+     * @return ?int
+     */
+    public function getKeyValue()
+    {
+        return $this->keyValue;
+    }
+
+    /**
+     * Set the value of keyValue
+     *
+     * @param ?int $keyValue
+     *
+     * @return self
+     */
+    public function setKeyValue($keyValue): self
+    {
+        if (isset($this->items)){
+            if (!isset($this->keyValue)){
+                $this->keyValue = [];
+            }
+            if (!in_array($keyValue, $this->keyValue)){
+                array_push($this->keyValue, $keyValue);
+            }
+        }
+        if (isset($this->item)){
+            $this->keyValue = $keyValue;
+        }
+
+        return $this;
+    }
+
+    
+
+    /**
+     * Get the value of otherKeyField
+     */
+    public function getOtherKeyField()
+    {
+        return $this->otherKeyField;
+    }
+
+    /**
+     * Set the value of otherKeyField
+     */
+    public function setOtherKeyField($otherKeyField): self
+    {
+        $this->otherKeyField = $otherKeyField;
+
+        return $this;
+    }
 }

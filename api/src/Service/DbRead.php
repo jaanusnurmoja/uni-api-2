@@ -1,8 +1,12 @@
 <?php namespace Api\Service;
 
+include_once __DIR__ . '/../Model/CreatedModified.php';
+include_once __DIR__ . '/../Model/Data.php';
 include_once __DIR__ . '/../Model/Entity.php';
 include_once __DIR__ . '/../Model/Pk.php';
 include_once __DIR__ . '/../Model/Join.php';
+use Api\Model\CreatedModified;
+use Api\Model\Data;
 use Api\Model\Entity;
 use Api\Model\Pk;
 use \Api\Model\Join;
@@ -33,27 +37,44 @@ class DbRead
             if ($field->orgname == $this->getPk($field->orgtable)) {
                 $pks[$field->orgtable] = $field->name;
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
-                $tables[$field->orgtable]['pk'] = $field->orgname;
+                $tables[$field->orgtable]['pk'] = $field->apiName;
                 $parts = explode('__', $field->table);
-                if (count($parts) == 5) {
-                    $join = new Join($parts[3], $parts[2], $parts[0], $parts[1], $parts[4]);
-                    $joins[$parts[0]][$parts[3]] = $join;
-                }
             }
-            $fields[$field->name] = $field;
+            if (count($parts) == 6) {
+                $join = new Join($parts[3], $parts[2], $parts[0], $parts[1], $parts[4], $parts[5]);
+                //$joins['all'][$parts[3]][] = $join;
+                $joins['this'][$parts[0]][$parts[2]][$parts[3]] = $join;
+                $joins['other'][$parts[5]][$parts[2]][$parts[3]] = $join;
+            }
+        $fields[$field->name] = $field;
+            $tables[$field->orgtable]['fields'][$field->apiName] = $field;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
                 $rows[0]['pks'] = $pks;
                 $rows[0]['tables'] = $tables;
-                $rows[0]['fields'] = $fields;
+                //$rows[0]['fields'] = $fields;
                 $rows[0]['joins'] = $joins;
                 foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
+                    
+                    while ($table = $fields[$key]->orgtable) {
+                        //$table = $fields[$key]->orgtable;
+                        $pk = $pks[$table];
+                        $pkField = $tables[$table]['pk'];
+                        $entityPk = isset($entityPk) ? $entityPk : new Pk($table, $pkField, $row->$pk);
+                        unset($rows[$row->rowid][$fields[$key]->orgtable][$row->$pk]->$pk);
+                        if ($key != $pk) {
+                            $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
+                            if (count($rows[$row->rowid][$table][$row->$pk]) == count($tables[$table]['fields'])) {
+                                $entityData = new Data($table, $entityPk, $rows[$row->rowid][$table][$row->$pk]);
+                                $thisEntity = new Entity($table, $entityPk, $entityData);
+                                $rows[$row->rowid][$table][$row->$pk]['entity'] = $thisEntity;
+                            }
+                            next($rows[$row->rowid][$table]);
+                        }
+                        break;
+                    }
                 }
-                //$rows[$row->rowid][] = $row;
             } else {
                 $rows[] = $row;
             }
