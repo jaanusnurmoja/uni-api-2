@@ -6,6 +6,7 @@ include_once __DIR__ . '/../Model/Join.php';
 use Api\Model\Entity;
 use Api\Model\Pk;
 use \Api\Model\Join;
+use Common\Helper;
 
 class DbRead
 {
@@ -28,6 +29,7 @@ class DbRead
         $tables = [];
         $pks = [];
         foreach($res->fetch_fields() as $field) {
+            $field->apiName = Helper::camelize($field->orgname, true);
             if ($field->orgname == $this->getPk($field->orgtable)) {
                 $pks[$field->orgtable] = $field->name;
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
@@ -49,7 +51,7 @@ class DbRead
                 foreach ($row as $key => $value) {
                     $table = $fields[$key]->orgtable;
                     $pk = $pks[$table];
-                    $rows[$row->rowid][$table][$row->$pk][$fields[$key]->orgname] = $value;
+                    $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
                 }
                 //$rows[$row->rowid][] = $row;
             } else {
