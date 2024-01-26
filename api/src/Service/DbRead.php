@@ -62,24 +62,9 @@ class DbRead
                 //$rows[0]['fields'] = $fields;
                 $rows[0]['joins'] = $joins;
                 foreach ($row as $key => $value) {
-                    
-                    while ($table = $fields[$key]->orgtable) {
-                        //$table = $fields[$key]->orgtable;
-                        $pk = $pks[$table];
-                        $pkField = $tables[$table]['pk'];
-                        $entityPk = isset($entityPk) ? $entityPk : new Pk($table, $pkField, $row->$pk);
-                        unset($rows[$row->rowid][$fields[$key]->orgtable][$row->$pk]->$pk);
-                        if ($key != $pk) {
-                            $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
-                            if (count($rows[$row->rowid][$table][$row->$pk]) == count($tables[$table]['fields'])) {
-                                $entityData = new Data($table, $entityPk, $rows[$row->rowid][$table][$row->$pk]);
-                                $thisEntity = new Entity($table, $entityPk, $entityData);
-                                $rows[$row->rowid][$table][$row->$pk]['entity'] = $thisEntity;
-                            }
-                            next($rows[$row->rowid][$table]);
-                        }
-                        break;
-                    }
+                    $table = $fields[$key]->orgtable;
+                    $pk = $pks[$table];
+                    $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
                 }
             } else {
                 $rows[] = $row;
