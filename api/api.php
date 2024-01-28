@@ -45,7 +45,8 @@ $queryAndResults['readme'] =
 "res[0]: ühendusi kirjeldavad objektid (klass Join.php) kasutamiseks andmete klassis Entity.php ühenduse liikide kaupa.",
 "EESMÄRK: päringutulemused on kantud Entity.php klassi ning rühmitatud Join.php abiga rowid ja tabelite kaupa nii, et andmed on OMA peamise tabeli all",
 ["nt orchestras, orchestras->hasMany->{joinid}->items->{pk}->conductors, orchestras->hasMany->{joinid}->items->{pk}->instruments, orchestras->hasMany{joinid}->->items->{pk}->instruments->hasMany->{joinid}->items->{pk}->players",
-"Infoks: Entity klass on näiteks kujul table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->misiganes: misiganes, hasMany"]];
+"Infoks: Entity klass on näiteks kujul table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->misiganes: misiganes, hasMany",
+"Kui db aliase eesliide on entity__, siis see on peatabeli kirje; peatabeli nimi on urlis ja sellega algavad ka seotud andmete aliased"]];
 
 $queryAndResults['sql'] = $testSql;
 
