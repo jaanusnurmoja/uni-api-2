@@ -14,7 +14,9 @@ class Result extends QueryMaker
     }
 
     public function getDataSetsFromQuery() {
-        return (new DbRead)->anySelect($this->__toString());
+        $read = new DbRead;
+        $read->anySelect($this->__toString());
+        return $read;
     }
     
 }

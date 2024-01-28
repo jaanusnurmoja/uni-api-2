@@ -32,12 +32,34 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
     }
 
     $testSql = $result->__toString();
+    $dbResults = $result->getDataSetsFromQuery();
 
 //temp debug
+$queryAndResults = [];
+$orig = false;
+
+$queryAndResults['readme'] = 
+["Päringustringid - kõik: ?testapi, ainult sql + orig: ?testapi&orig, ainult sql + res: ?testapi&res",
+"Orig: päringutulemused oma algsel kujul, kuid rühmitatud peamise tabeli pk väärtuse (rowid) kaupa",
+"Res: päringutulemused rühmitatult rowid ja tabelite kaupa",
+"res[0]: ühendusi kirjeldavad objektid (klass Join.php) kasutamiseks andmete klassis Entity.php ühenduse liikide kaupa.",
+"EESMÄRK: päringutulemused on kantud Entity.php klassi ning rühmitatud Join.php abiga rowid ja tabelite kaupa nii, et andmed on OMA peamise tabeli all",
+["nt orchestras, orchestras->hasMany->{joinid}->items->{pk}->conductors, orchestras->hasMany->{joinid}->items->{pk}->instruments, orchestras->hasMany{joinid}->->items->{pk}->instruments->hasMany->{joinid}->items->{pk}->players",
+"Infoks: Entity klass on näiteks kujul table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->misiganes: misiganes, hasMany"]];
+
+$queryAndResults['sql'] = $testSql;
+
+//echo '<pre>' . $dbRead->anySelect($testSql) . '</pre>';
+
+if (!isset($_GET['res'])) {
+    $queryAndResults['orig'] = $dbResults->origRows;
+}
+if (!isset($_GET['orig'])) {
+    $queryAndResults['res'] = $dbResults->rows;
+}
+
 if (isset($_GET['testapi'])) {
-    echo json_encode([
-        'sql' => $testSql, 'res' => $result->getDataSetsFromQuery()
-    ]);
+    echo json_encode($queryAndResults);
     exit;
 }
 //end temp debug
@@ -872,4 +894,5 @@ switch (count($request)) {
         break;
 }
 // close mysql connection
+
 mysqli_close($link);

@@ -16,6 +16,8 @@ class DbRead
 {
     public array $tables;
     public array $pks;
+    public array $rows;
+    public array $origRows;
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -57,21 +59,23 @@ class DbRead
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
-                $rows[0]['pks'] = $pks;
-                $rows[0]['tables'] = $tables;
+            $this->origRows[$row->rowid][] = $row;
+                //$rows[0]['pks'] = $pks;
+                //$rows[0]['tables'] = $tables;
                 //$rows[0]['fields'] = $fields;
-                $rows[0]['joins'] = $joins;
+                $this->rows[0]['joins'] = $joins;
+                $this->origRows[0]['joins'] = $joins;
                 foreach ($row as $key => $value) {
                     $table = $fields[$key]->orgtable;
                     $pk = $pks[$table];
-                    $rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
+                    $this->rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
                 }
             } else {
-                $rows[] = $row;
+                $this->rows[] = $row;
             }
         }
         $db->close();
-        return $rows;
+        //return $rows;
     }
 
     public function getPk($table)
