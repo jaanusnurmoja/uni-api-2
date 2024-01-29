@@ -42,11 +42,22 @@ $queryAndResults['readme'] =
 ["Päringustringid - kõik: ?testapi, ainult sql + orig: ?testapi&orig, ainult sql + res: ?testapi&res",
 "Orig: päringutulemused oma algsel kujul, kuid rühmitatud peamise tabeli pk väärtuse (rowid) kaupa",
 "Res: päringutulemused rühmitatult rowid ja tabelite kaupa",
-"res[0]: ühendusi kirjeldavad objektid (klass Join.php) kasutamiseks andmete klassis Entity.php ühenduse liikide kaupa.",
+"res[0] & orig[0]: ühendusi kirjeldavad objektid (klass Join.php) kasutamiseks andmete klassis Entity.php ühenduse liikide kaupa.",
 "EESMÄRK: päringutulemused on kantud Entity.php klassi ning rühmitatud Join.php abiga rowid ja tabelite kaupa nii, et andmed on OMA peamise tabeli all",
-["nt orchestras, orchestras->hasMany->{joinid}->items->{pk}->conductors, orchestras->hasMany->{joinid}->items->{pk}->instruments, orchestras->hasMany{joinid}->->items->{pk}->instruments->hasMany->{joinid}->items->{pk}->players",
-"Infoks: Entity klass on näiteks kujul table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->misiganes: misiganes, hasMany",
-"Kui db aliase eesliide on entity__, siis see on peatabeli kirje; peatabeli nimi on urlis ja sellega algavad ka seotud andmete aliased"]];
+["nt orchestras, orchestras->hasMany[{joinid}]->items[{pk}]->conductors, orchestras->hasMany[{joinid}]->items[{pk}]->instruments, orchestras->hasMany[{joinid}]->items[{pk}]->instruments->hasMany[{joinid}]->items[{pk}]->players",
+"Infoks: Entity klass on näiteks kujul table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->misiganes: misiganes, hasMany || belongsTo || hasManyAndBelongsTo || ...",
+"Kui db aliase eesliide on entity__, siis see on peatabeli kirje; peatabeli nimi on urlis ja sellega algavad ka seotud andmete aliased"],
+"Query strings - all: ?testapi, only sql + orig: ?testapi&orig, only sql + res: ?testapi&res",
+"Orig: Query results in their original form, but grouped by pk value (rowid) of parent table",
+"Res: query results grouped by rows and tables",
+"res[0] & orig[0]: objects describing connections (class Join.php) for use in data class Entity.php by connection types.",
+"OBJECTIVE: The query results are transferred to the Entity.php class and grouped by rows and tables with the help of Join.php so that the data is under OWN main table",
+
+"eg orchestras, orchestras->hasMany[{joinid}]->items[{pk}]->conductors, orchestras->hasMany[{joinid}]->items[{pk}]->instruments, orchestras->hasMany[{joinid}]->items[{pk}]->instruments->hasMany[{joinid}]->items[{pk}]->players",
+"For information: Entity class is for example table:orchestras, pk->name:id, pk->value:1, data->name: Jalisco Philharmonic, data->whatever: whatever, hasMany || belongsTo || hasManyAndBelongsTo || ...",
+"If the db alias prefix is entity__, then it is an entry in the main table; the name of the main table is in the url and the associated data aliases also start with it"
+
+];
 
 $queryAndResults['sql'] = $testSql;
 
