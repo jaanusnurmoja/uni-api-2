@@ -18,6 +18,9 @@ class DbRead
     public array $pks;
     public array $rows;
     public array $origRows;
+    public array $fields;
+    public array $joins;
+
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -53,9 +56,12 @@ class DbRead
                 //$joins['all'][$parts[3]][] = $join;
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
+                $this->joins = $joins;
             }
-        $fields[$field->name] = $field;
+            $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $this->tables = $tables;
+            $this->fields = $fields;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
@@ -65,17 +71,23 @@ class DbRead
                 //$rows[0]['fields'] = $fields;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
-                foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $this->rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
-                }
+                $this->rows[$row->rowid] = $this->makeDataRows($row);
             } else {
                 $this->rows[] = $row;
             }
         }
         $db->close();
         //return $rows;
+    }
+
+
+    public function makeDataRows($row){
+        foreach ($row as $key => $value) {
+            $table = $this->fields[$key]->orgtable;
+            $pk = $this->pks[$table];
+            $rows[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+        }
+        return $rows;
     }
 
     public function getPk($table)
