@@ -71,7 +71,7 @@ class DbRead
                     $pk = $pks[$table];
                     $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
                     $thisEntity = new Entity($table); 
-                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk]));
+                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$fields[$pk]->apiName]));
                     $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
                 }
             } else {

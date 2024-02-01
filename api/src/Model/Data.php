@@ -6,11 +6,13 @@ class Data
 {
     private $table;
 
-    public function __construct($table = null, $data = null) {
+    public function __construct($table = null, $data = null, $excludedFields = []) {
         $this->table = $table;
         if (is_array($data)) {
             foreach ($data as $key => $value) {
-                $this->$key = $value;
+                if (!in_array($key, $excludedFields)) {
+                    $this->$key = $value;
+                }
             }
         }
 
