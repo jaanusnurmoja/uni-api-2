@@ -6,8 +6,14 @@ class Data
 {
     private $table;
 
-    public function __construct($table = null) {
+    public function __construct($table = null, $data = null) {
         $this->table = $table;
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                $this->$key = $value;
+            }
+        }
+
     }
     
     public function __set($name, $value = null) {

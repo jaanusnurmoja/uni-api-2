@@ -65,10 +65,14 @@ class DbRead
                 //$rows[0]['fields'] = $fields;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
+                $rowData = [];
                 foreach ($row as $key => $value) {
                     $table = $fields[$key]->orgtable;
                     $pk = $pks[$table];
-                    $this->rows[$row->rowid][$table][$row->$pk][$fields[$key]->apiName] = $value;
+                    $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
+                    $thisEntity = new Entity($table); 
+                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk]));
+                    $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
                 }
             } else {
                 $this->rows[] = $row;
