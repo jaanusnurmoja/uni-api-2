@@ -1,5 +1,3 @@
-<?php
-
 array(1) {
   [1]=>
   object(Api\Model\Entity)#63 (4) {
@@ -1654,4 +1652,5 @@ array(1) {
     ["hasManyAndBelongsTo"]=>
     uninitialized(?array)
   }
+}
 }
