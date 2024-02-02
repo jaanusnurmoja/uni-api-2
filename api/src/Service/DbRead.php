@@ -41,18 +41,18 @@ class DbRead
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
                 $tables[$field->orgtable]['pk'] = $field->apiName;
                 $parts = explode('__', $field->table);
-                $joinId = $parts[3];
-                $mode = $parts[2];
-                $thisTable = $parts[0];
-                $keyField = $parts[1];
-                $otherKeyField = $parts[4];
-                $otherTable = $parts[5];
-            }
-            if (count($parts) == 6) {
-                $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
-                //$joins['all'][$parts[3]][] = $join;
-                $joins['this'][$thisTable][$mode][$joinId] = $join;
-                $joins['other'][$otherTable][$mode][$joinId] = $join;
+                if (count($parts) == 6) {
+                    $joinId = $parts[3];
+                    $mode = $parts[2];
+                    $thisTable = $parts[0];
+                    $keyField = $parts[1];
+                    $otherKeyField = $parts[4];
+                    $otherTable = $parts[5];
+                    $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
+                    //$joins['all'][$parts[3]][] = $join;
+                    $joins['this'][$thisTable][$mode][$joinId] = $join;
+                    $joins['other'][$otherTable][$mode][$joinId] = $join;
+                }
             }
         $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
