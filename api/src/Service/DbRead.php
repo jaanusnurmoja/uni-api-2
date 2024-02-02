@@ -27,8 +27,6 @@ class DbRead
 
     public function anySelect($query) {
         $db = $this->cnn();
-        $rows = [];
-        //$results = new Result();
         $res = $db->query($query);
         $fields = [];
         $joins = [];
@@ -50,19 +48,15 @@ class DbRead
                 $otherKeyField = $parts[4];
                 $otherTable = $parts[5];
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
-                //$joins['all'][$parts[3]][] = $join;
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
             }
-        $fields[$field->name] = $field;
+            $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
             $this->origRows[$row->rowid][] = $row;
-                //$rows[0]['pks'] = $pks;
-                //$rows[0]['tables'] = $tables;
-                //$rows[0]['fields'] = $fields;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
                 $rowData = [];
@@ -79,7 +73,6 @@ class DbRead
             }
         }
         $db->close();
-        //return $rows;
     }
 
     public function getPk($table)
