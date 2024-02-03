@@ -20,7 +20,7 @@ class DbRead
     public array $pks;
     public array $rows;
     public array $origRows;
-    public array $joinsWithData; 
+    public array $joinsWithData;
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -98,7 +98,9 @@ class DbRead
                             foreach ($thisJoinList as $thisJoinId => $thisJoin) {
                                 if ($thisJoinId == $joinId) {
                                     $joins['other'][$otherTable][$mode][$joinId]->addItem($this->rows[$row->rowid][$otherTable][$row->$pk]);
-                                    $this->rows[$row->rowid][$thisTable][$row->$pk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
+                                    if (!empty($this->rows[$row->rowid][$thisTable][$row->$pk])) {
+                                        $this->rows[$row->rowid][$thisTable][$row->$pk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
+                                    }
                                 }
                             }
                         }
@@ -106,8 +108,12 @@ class DbRead
                 }
             }
         }
-
         $this->joinsWithData = $joins;
+        /*
+        echo '<pre>';
+        print_r($this->joinsWithData);
+        echo '</pre>';
+        */
     }
 
     public function getPk($table)

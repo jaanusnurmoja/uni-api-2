@@ -73,6 +73,8 @@ if (!isset($_GET['orig'])) {
     $queryAndResults['res'] = $dbResults->rows;
 }
 
+//$queryResults['joinsWithData'] = $dbResults->joinsWithData;
+
 if (isset($_GET['testapi'])) {
     echo json_encode($queryAndResults);
     exit;
