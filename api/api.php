@@ -9,7 +9,10 @@ use \Api\Service\QueryMaker;
 use Api\Service\Result;
 
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 0);
+ini_set('display_errors', false);
+if (isset($_GET['debug'])) {
+    ini_set('display_errors', true);
+}
 
 //error_reporting(E_ALL);
 

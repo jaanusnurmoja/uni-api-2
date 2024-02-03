@@ -15,9 +15,12 @@ use Common\Helper;
 class DbRead
 {
     public array $tables;
+    public array $joins;
+    public array $fields;
     public array $pks;
     public array $rows;
     public array $origRows;
+    public array $joinsWithData; 
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -39,41 +42,72 @@ class DbRead
                 $pks[$field->orgtable] = $field->name;
                 $tables[$field->orgtable]['tableAlias'] = $field->table;
                 $tables[$field->orgtable]['pk'] = $field->apiName;
-                $parts = explode('__', $field->table);
+            }
+            $parts = explode('__', $field->table);
+            if (count($parts) == 6) {
                 $joinId = $parts[3];
                 $mode = $parts[2];
                 $thisTable = $parts[0];
                 $keyField = $parts[1];
                 $otherKeyField = $parts[4];
                 $otherTable = $parts[5];
-            }
-            if (count($parts) == 6) {
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
+                $this->joins = $joins;
             }
-        $fields[$field->name] = $field;
+            $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $this->tables = $tables;
+            $this->fields = $fields;
+            $this->pks = $pks;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
-            $this->origRows[$row->rowid][] = $row;
+                $this->origRows[$row->rowid][] = $row;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
-                $rowData = [];
-                foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
-                    $thisEntity = new Entity($table); 
-                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$fields[$pk]->apiName]));
-                    $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
-                }
+                $this->processRow($row);
             } else {
                 $this->rows[] = $row;
             }
         }
         $db->close();
+    }
+
+    public function processRow($row) {
+        $rowData = [];
+        $joins = $this->joins;
+        foreach ($row as $key => $value) {
+            $table = $this->fields[$key]->orgtable;
+            $pk = $this->pks[$table];
+            $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+            $thisEntity = new Entity($table); 
+            $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
+            $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
+        }
+
+        foreach ($joins['other'] as $otherTable => $otherJoinModes) {
+            foreach ($otherJoinModes as $mode => $joinList) {
+                foreach ($joinList as $joinId => $join) {
+                    if (!isset($joins['other'][$otherTable][$mode][$joinId])) {
+                        $joins['other'][$otherTable][$mode][$joinId] = $join;
+                    }
+                    foreach ($joins['this'] as $thisTable => $thisJoinModes) {
+                        foreach ($thisJoinModes as $thisJoinMode => $thisJoinList) {
+                            foreach ($thisJoinList as $thisJoinId => $thisJoin) {
+                                if ($thisJoinId == $joinId) {
+                                    $joins['other'][$otherTable][$mode][$joinId]->addItem($this->rows[$row->rowid][$otherTable][$row->$pk]);
+                                    $this->rows[$row->rowid][$thisTable][$row->$pk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->joinsWithData = $joins;
     }
 
     public function getPk($table)
