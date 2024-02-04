@@ -1,49 +1,35 @@
-    public function anySelect($query) {
-        $db = $this->cnn();
-        $res = $db->query($query);
-        $fields = [];
-        $joins = [];
-        $tables = [];
-        $pks = [];
-        foreach($res->fetch_fields() as $field) {
-            $field->apiName = Helper::camelize($field->orgname, true);
-            if ($field->orgname == $this->getPk($field->orgtable)) {
-                $pks[$field->orgtable] = $field->name;
-                $tables[$field->orgtable]['tableAlias'] = $field->table;
-                $tables[$field->orgtable]['pk'] = $field->apiName;
-            }
-            $parts = explode('__', $field->table);
-            if (count($parts) == 6) {
-                $joinId = $parts[3];
-                $mode = $parts[2];
-                $thisTable = $parts[0];
-                $keyField = $parts[1];
-                $otherKeyField = $parts[4];
-                $otherTable = $parts[5];
-                $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
-                $joins['this'][$thisTable][$mode][$joinId] = $join;
-                $joins['other'][$otherTable][$mode][$joinId] = $join;
-            }
-            $fields[$field->name] = $field;
-            $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+    public function processRow($row) {
+        $rowData = [];
+        $joins = $this->joins;
+        foreach ($row as $key => $value) {
+            $table = $this->fields[$key]->orgtable;
+            $pk = $this->pks[$table];
+            $parentPk = $this->tables[$table]['parent']['pk'];
+            $parentTable = $this->tables[$table]['parent']['table'];
+            $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+            $thisEntity = new Entity($table); 
+            $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
         }
-        while ($row = $res->fetch_object()) {
-            if (isset($row->rowid)) {
-            $this->origRows[$row->rowid][] = $row;
-                $this->rows[0]['joins'] = $joins;
-                $this->origRows[0]['joins'] = $joins;
-                $rowData = [];
-                foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
-                    $thisEntity = new Entity($table); 
-                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$fields[$pk]->apiName]));
-                    $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
+
+        foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
+            foreach ($rowSets as $parentPkValue => $tableRowSet) {
+                foreach ($tableRowSet['related'] as $table => $thisRows) {
+                    foreach ($thisRows as $pkValue => $entity) {
+                        if (isset($this->rows[$row->rowid][$table])) {
+                            foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
+                                if ($otherParentPkValue == $pkValue) {
+                                    foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
+                                        $entity->related[$otherTable] = $otherRowSet;
+                                    }
+                                }
+                            }
+                        }
+                        if (empty($parentTable) && empty($parentPkValue)) {
+                            $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                        }
+                    }
                 }
-            } else {
-                $this->rows[] = $row;
             }
         }
-        $db->close();
     }
