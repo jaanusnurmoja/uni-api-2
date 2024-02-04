@@ -90,18 +90,17 @@ class DbRead
             $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
             $this->rows[$row->rowid][$parentTable][$row->$parentPk][$table][$row->$pk] = $thisEntity;
         }
-        /*
-        foreach ($this->rows[$row->rowid] as $thisTable => $thisRowSets) {
-            foreach ($thisRowSets as $parentPkValue => $thisRows) {
-                foreach ($thisRows as $thisPkValue => $thisEntity) {
-                    foreach ($this->rows[$row->rowid] as $otherTable => $otherRowSets) {
-                        if (isset($joins['other'][$otherTable])) {
-                            foreach ($joins['other'][$otherTable] as $otherMode => $otherJoinList) {
-                                foreach ($otherJoinList as $otherJoinId => $otherJoin) {
-                                    foreach ($otherRowSets[$thisPkValue] as $otherPkValue => $otherEntity) {
-                                        $otherJoin->addItem($otherEntity);
+
+        foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
+            foreach ($rowSets as $parentPkValue => $tableRowSet) {
+                foreach ($tableRowSet as $table => $thisRows) {
+                    foreach ($thisRows as $pkValue => $entity) {
+                        if (isset($this->rows[$row->rowid][$table])) {
+                            foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
+                                if ($otherParentPkValue == $pkValue) {
+                                    foreach ($otherTableSet as $otherTable => $otherRowSet) {
+                                        $entity->$otherTable = $otherRowSet;
                                     }
-                                    $thisEntity->$otherMode[$otherJoinId] = $otherJoin;
                                 }
                             }
                         }
@@ -109,12 +108,6 @@ class DbRead
                 }
             }
         }
-        */
-        /*
-        echo '<pre>';
-        print_r($this->joinsWithData);
-        echo '</pre>';
-        */
     }
 
     public function getPk($table)
