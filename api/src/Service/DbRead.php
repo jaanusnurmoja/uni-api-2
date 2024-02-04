@@ -12,11 +12,9 @@ use Api\Model\Pk;
 use \Api\Model\Join;
 use Common\Helper;
 
-#[\AllowDynamicProperties]
 class DbRead
 {
     public array $tables;
-    public string $mainTable;
     public array $joins;
     public array $fields;
     public array $pks;
@@ -53,8 +51,8 @@ class DbRead
                 $otherKeyField = $parts[4];
                 $otherTable = $parts[5];
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
-                $joins['this'][$thisTable][$mode][$joinId][$otherTable] = $join;
-                $joins['other'][$otherTable][$joinId][$mode][$thisTable] = $join;
+                $joins['this'][$thisTable][$mode][$joinId] = $join;
+                $joins['other'][$otherTable][$mode][$joinId] = $join;
                 $this->joins = $joins;
             }
             $fields[$field->name] = $field;
@@ -105,7 +103,7 @@ class DbRead
                                 }
                             }
                         }
-                        if ((empty($parentTable) && empty($parentPkValue)) || $table == $this->mainTable) {
+                        if (empty($parentTable) && empty($parentPkValue)) {
                             $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
                         }
                     }
