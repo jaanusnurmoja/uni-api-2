@@ -20,7 +20,7 @@ class DbRead
     public array $pks;
     public array $rows;
     public array $origRows;
-    public array $joinsWithData;
+    public array $dataWithRelations;
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -103,6 +103,9 @@ class DbRead
                                     }
                                 }
                             }
+                        }
+                        if (empty($parentTable) && empty($parentPkValue)) {
+                            $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
                         }
                     }
                 }

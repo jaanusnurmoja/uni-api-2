@@ -62,15 +62,16 @@ $queryAndResults['readme'] =
 
 ];
 
+if (!isset($_GET['orig'])) {
+    $queryAndResults['res'] = $dbResults->dataWithRelations;
+}
+
 $queryAndResults['sql'] = $testSql;
 
 //echo '<pre>' . $dbRead->anySelect($testSql) . '</pre>';
 
 if (!isset($_GET['res'])) {
     $queryAndResults['orig'] = $dbResults->origRows;
-}
-if (!isset($_GET['orig'])) {
-    $queryAndResults['res'] = $dbResults->rows;
 }
 
 //$queryResults['joinsWithData'] = $dbResults->joinsWithData;
