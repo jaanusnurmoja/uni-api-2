@@ -88,18 +88,18 @@ class DbRead
             $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
             $thisEntity = new Entity($table); 
             $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
-            $this->rows[$row->rowid][$parentTable][$row->$parentPk][$table][$row->$pk] = $thisEntity;
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
         }
 
         foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
             foreach ($rowSets as $parentPkValue => $tableRowSet) {
-                foreach ($tableRowSet as $table => $thisRows) {
+                foreach ($tableRowSet['related'] as $table => $thisRows) {
                     foreach ($thisRows as $pkValue => $entity) {
                         if (isset($this->rows[$row->rowid][$table])) {
                             foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
                                 if ($otherParentPkValue == $pkValue) {
-                                    foreach ($otherTableSet as $otherTable => $otherRowSet) {
-                                        $entity->$otherTable = $otherRowSet;
+                                    foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
+                                        $entity->related[$otherTable] = $otherRowSet;
                                     }
                                 }
                             }
