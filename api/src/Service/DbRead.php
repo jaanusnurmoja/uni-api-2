@@ -84,52 +84,32 @@ class DbRead
             $table = $this->fields[$key]->orgtable;
             $pk = $this->pks[$table];
             $parentPk = $this->tables[$table]['parent']['pk'];
+            $parentTable = $this->tables[$table]['parent']['table'];
             $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
             $thisEntity = new Entity($table); 
             $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
-            $this->rows[$row->rowid][$table][$row->$parentPk][$row->$pk] = $thisEntity;
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk][$table][$row->$pk] = $thisEntity;
         }
-
-        
-        foreach ($this->rows[$row->rowid] as $otherTable => $otherRowSets) {
-            foreach ($otherRowSets as $parentPkValue => $otherRows) {
-                if (!empty($parentPkValue) && isset($joins['other'][$otherTable])) {
-                    foreach ($joins['other'][$otherTable] as $mode => $joinList) {
-                        foreach ($joinList as $joinId => $join) {
-                            foreach ($otherRows as $otherPk => $otherEntity) {
-                                if (!isset($joins['other'][$otherTable][$mode][$joinId])) {
-                                    $joins['other'][$otherTable][$mode][$joinId] = $join;
-                                    $joins['other'][$otherTable][$mode][$joinId]->addItem($this->rows[$row->rowid][$otherTable][$parentPkValue][$otherPk]);
-                                }
-                            }
-                            foreach ($joins['this'] as $thisTable => $thisJoinModes) {
-                                $thisPk = $this->pks[$thisTable];
-                                $parentPk = $this->tables[$thisTable]['parent']['pk'];
-                                if (empty($parentPk)) $parentPk = 'rowid';
-                                foreach ($thisJoinModes as $thisJoinMode => $thisJoinList) {
-                                    foreach ($thisJoinList as $thisJoinId => $thisJoin) {
-                                        if ($thisJoinId == $joinId && $row->$thisPk == $parentPkValue) {
-                                            if (!empty($this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]) && $row->$thisPk == $parentPkValue) {
-                                                $this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
-                                            }
-                                        }
+        /*
+        foreach ($this->rows[$row->rowid] as $thisTable => $thisRowSets) {
+            foreach ($thisRowSets as $parentPkValue => $thisRows) {
+                foreach ($thisRows as $thisPkValue => $thisEntity) {
+                    foreach ($this->rows[$row->rowid] as $otherTable => $otherRowSets) {
+                        if (isset($joins['other'][$otherTable])) {
+                            foreach ($joins['other'][$otherTable] as $otherMode => $otherJoinList) {
+                                foreach ($otherJoinList as $otherJoinId => $otherJoin) {
+                                    foreach ($otherRowSets[$thisPkValue] as $otherPkValue => $otherEntity) {
+                                        $otherJoin->addItem($otherEntity);
                                     }
+                                    $thisEntity->$otherMode[$otherJoinId] = $otherJoin;
                                 }
                             }
-
                         }
                     }
-                    
-                    /* 
-                    foreach ($otherRows as $otherRow) {
-                        $this->rows[$row->rowid][$otherTable][$parentPkValue][$otherPk] = $otherRow;
-                    }
-                    */
                 }
-
             }
         }
-        $this->joinsWithData = $joins;
+        */
         /*
         echo '<pre>';
         print_r($this->joinsWithData);
