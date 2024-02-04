@@ -54,11 +54,11 @@ class DbRead
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
                 $this->joins = $joins;
+                $tables[$field->orgtable]['parent']['table'] = $thisTable;
+                $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
             }
             $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
-            $tables[$field->orgtable]['parent']['table'] = $thisTable;
-            $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
             $this->tables = $tables;
             $this->fields = $fields;
             $this->pks = $pks;
