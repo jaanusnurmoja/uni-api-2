@@ -23,30 +23,29 @@
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
+                $this->joins = $joins;
+                $tables[$field->orgtable]['parent']['table'] = $thisTable;
+                $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
             }
             $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $this->tables = $tables;
+            $this->fields = $fields;
+            $this->pks = $pks;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
-            $this->origRows[$row->rowid][] = $row;
+                $this->origRows[$row->rowid][] = $row;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
-                $rowData = [];
-                foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
-                    $thisEntity = new Entity($table); 
-                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$fields[$pk]->apiName]));
-                    $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
-                }
+                $this->processRow($row);
             } else {
                 $this->rows[] = $row;
             }
         }
         $db->close();
     }
+
     public function processRow($row) {
         $rowData = [];
         $joins = $this->joins;
