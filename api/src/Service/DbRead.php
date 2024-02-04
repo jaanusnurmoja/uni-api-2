@@ -99,11 +99,19 @@ class DbRead
                             foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
                                 if ($otherParentPkValue == $pkValue) {
                                     foreach ($otherTableSet as $otherTable => $otherRowSet) {
-                                        $entity->$otherTable = $otherRowSet;
+                                        foreach ($otherRowSet as $otherPkValue => $otherEntity) {
+                                            foreach ($joins['other'][$otherTable] as $mode => $joinList) {
+                                                foreach ($joinList as $joinId => $otherJoin) {
+                                                    $otherJoin->setItem($otherEntity);
+                                                    $entity->$mode[$joinId] = $otherJoin;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                        $this->rows[$row->rowid][$parentTable][$parentPkValue][$table][$pkValue] = $entity;
                     }
                 }
             }
