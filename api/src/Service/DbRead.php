@@ -90,37 +90,43 @@ class DbRead
             $this->rows[$row->rowid][$table][$row->$parentPk][$row->$pk] = $thisEntity;
         }
 
-        foreach ($joins['other'] as $otherTable => $otherJoinModes) {
-            $otherPk = $this->pks[$otherTable];
-            foreach ($this->rows[$row->rowid][$otherTable] as $parentPkValue => $otherRows) {
-                foreach ($otherJoinModes as $mode => $joinList) {
-                    foreach ($joinList as $joinId => $join) {
-                        if (!isset($joins['other'][$otherTable][$mode][$joinId])) {
-                            $joins['other'][$otherTable][$mode][$joinId] = $join;
-                        }
-                        foreach ($joins['this'] as $thisTable => $thisJoinModes) {
-                            $thisPk = $this->pks[$thisTable];
-                            $parentPk = $this->tables[$thisTable]['parent']['pk'];
-                            if (empty($parentPk)) $parentPk = 'rowid';
-                            foreach ($thisJoinModes as $thisJoinMode => $thisJoinList) {
-                                foreach ($thisJoinList as $thisJoinId => $thisJoin) {
-                                    if ($thisJoinId == $joinId && $row->$thisPk == $parentPkValue) {
-                                        $joins['other'][$otherTable][$mode][$joinId]->addItem($this->rows[$row->rowid][$otherTable][$row->$thisPk][$row->$otherPk]);
-                                        if (!empty($this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]) && $row->$thisPk == $parentPkValue) {
-                                            $this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
+        
+        foreach ($this->rows[$row->rowid] as $otherTable => $otherRowSets) {
+            foreach ($otherRowSets as $parentPkValue => $otherRows) {
+                if (!empty($parentPkValue) && isset($joins['other'][$otherTable])) {
+                    foreach ($joins['other'][$otherTable] as $mode => $joinList) {
+                        foreach ($joinList as $joinId => $join) {
+                            foreach ($otherRows as $otherPk => $otherEntity) {
+                                if (!isset($joins['other'][$otherTable][$mode][$joinId])) {
+                                    $joins['other'][$otherTable][$mode][$joinId] = $join;
+                                    $joins['other'][$otherTable][$mode][$joinId]->addItem($this->rows[$row->rowid][$otherTable][$parentPkValue][$otherPk]);
+                                }
+                            }
+                            foreach ($joins['this'] as $thisTable => $thisJoinModes) {
+                                $thisPk = $this->pks[$thisTable];
+                                $parentPk = $this->tables[$thisTable]['parent']['pk'];
+                                if (empty($parentPk)) $parentPk = 'rowid';
+                                foreach ($thisJoinModes as $thisJoinMode => $thisJoinList) {
+                                    foreach ($thisJoinList as $thisJoinId => $thisJoin) {
+                                        if ($thisJoinId == $joinId && $row->$thisPk == $parentPkValue) {
+                                            if (!empty($this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]) && $row->$thisPk == $parentPkValue) {
+                                                $this->rows[$row->rowid][$thisTable][$row->$parentPk][$row->$thisPk]->$thisJoinMode[$thisJoinId] = $joins['other'][$otherTable][$mode][$joinId];
+                                            }
                                         }
                                     }
                                 }
                             }
+
                         }
                     }
+                    
+                    /* 
+                    foreach ($otherRows as $otherRow) {
+                        $this->rows[$row->rowid][$otherTable][$parentPkValue][$otherPk] = $otherRow;
+                    }
+                    */
                 }
-                
-                /* 
-                foreach ($otherRows as $otherRow) {
-                    $this->rows[$row->rowid][$otherTable][$parentPkValue][$otherPk] = $otherRow;
-                }
-                 */
+
             }
         }
         $this->joinsWithData = $joins;
