@@ -35,6 +35,7 @@ if (isset($_SERVER['PATH_INFO'])) $request = explode('/', $_SERVER['PATH_INFO'])
     }
 
     $testSql = $result->__toString();
+    $dbRead->anySelect($testSql);
     $dbResults = $result->getDataSetsFromQuery();
 
 //temp debug

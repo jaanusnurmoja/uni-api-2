@@ -7,6 +7,7 @@
  * https: //urielwilson.com/how-to-dynamically-generate-classes-at-runtime-in-php/
 
  */
+#[\AllowDynamicProperties]
 class Entity
 {
     public $table;

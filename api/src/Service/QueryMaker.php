@@ -11,6 +11,7 @@ use stdClass;
 class QueryMaker
 {
     public $model;
+    public $mainTable;
     public $seq = 0;
     public $select;
     public $from;
@@ -25,6 +26,7 @@ class QueryMaker
         $aCtrl = new \Controller\Table;
         $this->model = $aCtrl->getTableByIdOrName(true, $tableName);
         if (!empty($tableName)) {
+            $this->mainTable = $tableName;
             $this->getQueryDataFromModels($tableName);
             $this->where = [];
             $this->whereOpts = [];
@@ -147,7 +149,8 @@ class QueryMaker
         $adminRead = new Read;
 
         foreach ($hasAny as $hasAnyItem) {
-            $items = $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
+            $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
+            $items = $dbRead->rows;
             foreach ($items as $i => $item) {
                     $anyFields = (object) $adminRead->getDefaultFields($item->any_table);
                     $anyFields->fields = (object) $anyFields->dataFields;
