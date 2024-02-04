@@ -15,9 +15,12 @@ use Common\Helper;
 class DbRead
 {
     public array $tables;
+    public array $joins;
+    public array $fields;
     public array $pks;
     public array $rows;
     public array $origRows;
+    public array $dataWithRelations;
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -50,29 +53,63 @@ class DbRead
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
                 $joins['this'][$thisTable][$mode][$joinId] = $join;
                 $joins['other'][$otherTable][$mode][$joinId] = $join;
+                $this->joins = $joins;
             }
             $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $tables[$field->orgtable]['parent']['table'] = $thisTable;
+            $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
+            $this->tables = $tables;
+            $this->fields = $fields;
+            $this->pks = $pks;
         }
         while ($row = $res->fetch_object()) {
             if (isset($row->rowid)) {
-            $this->origRows[$row->rowid][] = $row;
+                $this->origRows[$row->rowid][] = $row;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
-                $rowData = [];
-                foreach ($row as $key => $value) {
-                    $table = $fields[$key]->orgtable;
-                    $pk = $pks[$table];
-                    $rowData[$table][$row->$pk][$fields[$key]->apiName] = $value;
-                    $thisEntity = new Entity($table); 
-                    $thisEntity->setPk(new Pk($table, $fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$fields[$pk]->apiName]));
-                    $this->rows[$row->rowid][$table][$row->$pk] = $thisEntity;
-                }
+                $this->processRow($row);
             } else {
                 $this->rows[] = $row;
             }
         }
         $db->close();
+    }
+
+    public function processRow($row) {
+        $rowData = [];
+        $joins = $this->joins;
+        foreach ($row as $key => $value) {
+            $table = $this->fields[$key]->orgtable;
+            $pk = $this->pks[$table];
+            $parentPk = $this->tables[$table]['parent']['pk'];
+            $parentTable = $this->tables[$table]['parent']['table'];
+            $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+            $thisEntity = new Entity($table); 
+            $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
+        }
+
+        foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
+            foreach ($rowSets as $parentPkValue => $tableRowSet) {
+                foreach ($tableRowSet['related'] as $table => $thisRows) {
+                    foreach ($thisRows as $pkValue => $entity) {
+                        if (isset($this->rows[$row->rowid][$table])) {
+                            foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
+                                if ($otherParentPkValue == $pkValue) {
+                                    foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
+                                        $entity->related[$otherTable] = $otherRowSet;
+                                    }
+                                }
+                            }
+                        }
+                        if (empty($parentTable) && empty($parentPkValue)) {
+                            $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function getPk($table)

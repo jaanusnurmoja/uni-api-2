@@ -9,7 +9,10 @@ use \Api\Service\QueryMaker;
 use Api\Service\Result;
 
 ini_set('always_populate_raw_post_data', -1);
-ini_set('display_errors', 0);
+ini_set('display_errors', false);
+if (isset($_GET['debug'])) {
+    ini_set('display_errors', true);
+}
 
 //error_reporting(E_ALL);
 
@@ -59,6 +62,10 @@ $queryAndResults['readme'] =
 
 ];
 
+if (!isset($_GET['orig'])) {
+    $queryAndResults['res'] = $dbResults->dataWithRelations;
+}
+
 $queryAndResults['sql'] = $testSql;
 
 //echo '<pre>' . $dbRead->anySelect($testSql) . '</pre>';
@@ -66,9 +73,8 @@ $queryAndResults['sql'] = $testSql;
 if (!isset($_GET['res'])) {
     $queryAndResults['orig'] = $dbResults->origRows;
 }
-if (!isset($_GET['orig'])) {
-    $queryAndResults['res'] = $dbResults->rows;
-}
+
+//$queryResults['joinsWithData'] = $dbResults->joinsWithData;
 
 if (isset($_GET['testapi'])) {
     echo json_encode($queryAndResults);

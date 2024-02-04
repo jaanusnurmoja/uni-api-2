@@ -47,3 +47,38 @@
         }
         $db->close();
     }
+    public function processRow($row) {
+        $rowData = [];
+        $joins = $this->joins;
+        foreach ($row as $key => $value) {
+            $table = $this->fields[$key]->orgtable;
+            $pk = $this->pks[$table];
+            $parentPk = $this->tables[$table]['parent']['pk'];
+            $parentTable = $this->tables[$table]['parent']['table'];
+            $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+            $thisEntity = new Entity($table); 
+            $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
+        }
+
+        foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
+            foreach ($rowSets as $parentPkValue => $tableRowSet) {
+                foreach ($tableRowSet['related'] as $table => $thisRows) {
+                    foreach ($thisRows as $pkValue => $entity) {
+                        if (isset($this->rows[$row->rowid][$table])) {
+                            foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
+                                if ($otherParentPkValue == $pkValue) {
+                                    foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
+                                        $entity->related[$otherTable] = $otherRowSet;
+                                    }
+                                }
+                            }
+                        }
+                        if (empty($parentTable) && empty($parentPkValue)) {
+                            $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                        }
+                    }
+                }
+            }
+        }
+    }
