@@ -211,6 +211,7 @@ foreach (json_decode($rel) as $table => $params) {
                 <div>
                     <h4 id="new" class="bg-warning">UUS (05.02.2024): API väljund (sh json vormingus) on saanud soovitud kuju</h4>
                     <p>Võin öelda nii palju, et uue koodiga toimub päringu tulemuste kuvamine oluliselt kiiremini kui seni ning oluliselt lihtsamal moel (mis on ilmselt ka põhjus). Vajuta nupule "uus test" ja veendu.</p>
+                    <p>VAEGTÖID siiski veel on. Eelkõige iseendaga suhtlev tabel products, mis ei anna seni veel teadmata põhjustel andmeid välja (ka vanas versioonis mitte, kuigi varem andis).</p>
                     <h4>Kasutajate automaatne registreerimine</h4>
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
