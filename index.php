@@ -209,7 +209,9 @@ foreach (json_decode($rel) as $table => $params) {
                     lihtsamaid vahendeid ning ka vajalikke php-teeke.
                 </p>
                 <div>
-                    <h4 id="new" class="bg-warning">UUS: kasutajate automaatne registreerimine</h4>
+                    <h4 id="new" class="bg-warning">UUS (05.02.2024): API väljund (sh json vormingus) on saanud soovitud kuju</h4>
+                    <p>Võin öelda nii palju, et uue koodiga toimub päringu tulemuste kuvamine oluliselt kiiremini kui seni ning oluliselt lihtsamal moel (mis on ilmselt ka põhjus). Vajuta nupule "uus test" ja veendu.</p>
+                    <h4>Kasutajate automaatne registreerimine</h4>
                     <p>
                         Kui siiani oli kasutajal võimalik lihtsalt oma sotsiaalkontoga või id-kaardiga sisse logida, et
                         pääseda ligi valmivale halduskeskkonnale, siis alates 24.11.2023 registreeritakse sisseloginu
