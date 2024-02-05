@@ -1,16 +1,16 @@
 <?php namespace Api\Model;
-
+#[\AllowDynamicProperties]
 class Join
 {
     public $id;
-    public $mode;
     public $thisTable;
-    public $keyField;
-    public $keyValue;
-    public $otherKeyField;
+    public $mode;
+    private $keyField;
+    private $keyValue;
+    private $otherKeyField;
     public $otherTable;
-    public ?Entity $item;
-    public ?array $items;
+    private ?Entity $item;
+    private ?array $items;
 
     public function __construct($id=null, $mode=null, $thisTable=null, $keyField = null, $otherKeyField = null, $otherTable=null) {
         $this->id = $id;
@@ -21,8 +21,10 @@ class Join
         $this->otherTable = $otherTable;
         if (in_array($mode, ['belongsTo', 'hasAny'])) {
             $this->item = new Entity($otherTable);
+            //$this->$otherTable = $this->item;
         } else {
             $this->items = [];
+            //$this->$otherTable = $this->items;
         }
     }
 
