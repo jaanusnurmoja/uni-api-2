@@ -118,7 +118,7 @@ class QueryMaker
                 if (is_object($hmabtItem->manyMany)) {
                         array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
                         LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`
-                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk`) 
+                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk`) 
                         AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
                         $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $thisPk .'__related_');
                 } else {
@@ -147,7 +147,8 @@ class QueryMaker
         $adminRead = new Read;
 
         foreach ($hasAny as $hasAnyItem) {
-            $items = $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
+            $dbRead->anySelect("SELECT DISTINCT * FROM uasys_anyref WHERE uasys_anyref.orig_table = '$tableName' GROUP BY uasys_anyref.any_table" );
+            $items = $dbRead->rows;
             foreach ($items as $i => $item) {
                     $anyFields = (object) $adminRead->getDefaultFields($item->any_table);
                     $anyFields->fields = (object) $anyFields->dataFields;
@@ -158,7 +159,7 @@ class QueryMaker
                     ON `uasys_anyref`.`orig_table` = '$tableName'
                     AND `uasys_anyref`.`orig_pk` = `$tableName`.`{$hasAnyItem->table->pk}`
                     LEFT JOIN `{$item->any_table}` `{$tableName}__{$hasAnyItem->table->pk}__hasAny__{$hasAnyItem->id}_{$i}__{$item->any_table}`
-                    ON `{$tableName}__hasAny__{$hasAnyItem->id}_{$i}__{$anyFields->pk}__{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
+                    ON `{$tableName}__{$hasAnyItem->table->pk}__hasAny__{$hasAnyItem->id}_{$i}__{$anyFields->pk}__{$item->any_table}`.`{$anyFields->pk}` = `uasys_anyref`.`any_pk`";
                     array_push($this->join, $sql);
                     $this->getQueryDataFromModels($item->any_table, $tableName, $tableName.'__'.$hasAnyItem->table->pk.'__hasAny__'.$hasAnyItem->id.'_'.$i.'__' . $anyFields->pk .'__', true, true, $anyFields);
 
