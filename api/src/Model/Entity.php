@@ -16,6 +16,7 @@ class Entity
     public ?array $belongsTo;
     public ?array $hasMany;
     public ?array $hasManyAndBelongsTo;
+    public ?array $related;
 
     public function __construct( $table = null) {
         $this->table = $table;

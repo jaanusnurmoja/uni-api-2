@@ -51,8 +51,8 @@ class DbRead
                 $otherKeyField = $parts[4];
                 $otherTable = $parts[5];
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
-                $joins['this'][$thisTable][$mode][$joinId] = $join;
-                $joins['other'][$otherTable][$mode][$joinId] = $join;
+                $joins['this'][$thisTable][$otherTable][$joinId] = $join;
+                $joins['other'][$otherTable][$thisTable][$joinId] = $join;
                 $this->joins = $joins;
                 $tables[$field->orgtable]['parent']['table'] = $thisTable;
                 $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
