@@ -21,10 +21,10 @@ class Join
         $this->otherTable = $otherTable;
         if (in_array($mode, ['belongsTo', 'hasAny'])) {
             $this->item = new Entity($otherTable);
-            $this->$otherTable = $this->item;
+            //$this->$otherTable = $this->item;
         } else {
             $this->items = [];
-            $this->$otherTable = $this->items;
+            //$this->$otherTable = $this->items;
         }
     }
 

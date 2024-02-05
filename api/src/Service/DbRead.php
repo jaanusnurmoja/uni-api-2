@@ -88,23 +88,30 @@ class DbRead
             $thisEntity = new Entity($table); 
             $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
             $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
+            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related']['__properties'] = $joins['this'][$parentTable];
         }
 
         foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
             foreach ($rowSets as $parentPkValue => $tableRowSet) {
                 foreach ($tableRowSet['related'] as $table => $thisRows) {
-                    foreach ($thisRows as $pkValue => $entity) {
-                        if (isset($this->rows[$row->rowid][$table])) {
-                            foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
-                                if ($otherParentPkValue == $pkValue) {
-                                    foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
-                                        $entity->related[$otherTable] = $otherRowSet;
+                    if ($table != '__properties') {
+                        foreach ($thisRows as $pkValue => $entity) {
+                            if (isset($this->rows[$row->rowid][$table])) {
+                                foreach ($this->rows[$row->rowid][$table] as $otherParentPkValue => $otherTableSet) {
+                                    if ($otherParentPkValue == $pkValue) {
+                                        foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
+                                            if ($otherTable != '__properties') {
+                                                $entity->related[$otherTable] = $otherRowSet;
+                                            } else {
+                                                $entity->related['__properties'] = $otherRowSet;
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (empty($parentTable) && empty($parentPkValue)) {
-                            $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                            if (empty($parentTable) && empty($parentPkValue)) {
+                                $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                            }
                         }
                     }
                 }

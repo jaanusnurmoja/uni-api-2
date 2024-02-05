@@ -13,9 +13,9 @@ class Entity
     public $pk;
     public object $data;
     public ?object $createdModified;
-    public ?array $belongsTo;
-    public ?array $hasMany;
-    public ?array $hasManyAndBelongsTo;
+    private ?array $belongsTo;
+    private ?array $hasMany;
+    private ?array $hasManyAndBelongsTo;
     public ?array $related;
 
     public function __construct( $table = null) {
