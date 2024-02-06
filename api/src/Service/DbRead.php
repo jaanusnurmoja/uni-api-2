@@ -37,11 +37,7 @@ class DbRead
         $pks = [];
         foreach($res->fetch_fields() as $field) {
             $field->apiName = Helper::camelize($field->orgname, true);
-            if ($field->orgname == $this->getPk($field->orgtable)) {
-                $pks[$field->orgtable] = $field->name;
-                $tables[$field->orgtable]['tableAlias'] = $field->table;
-                $tables[$field->orgtable]['pk'] = $field->apiName;
-            }
+            $field->finalTable = $field->orgtable;
             $parts = explode('__', $field->table);
             if (count($parts) == 6) {
                 $joinId = $parts[3];
@@ -50,14 +46,20 @@ class DbRead
                 $keyField = $parts[1];
                 $otherKeyField = $parts[4];
                 $otherTable = $parts[5];
+                $field->finalTable = $otherTable;
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
                 $joins['this'][$thisTable][$otherTable][$joinId] = $join;
                 $joins['other'][$otherTable][$thisTable][$joinId] = $join;
-                $tables[$field->orgtable]['parent']['table'] = $thisTable;
-                $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
+                $tables[$field->finalTable]['parent']['table'] = $thisTable;
+                $tables[$field->finalTable]['parent']['pk'] = $pks[$thisTable];
+            }
+            if ($field->orgname == $this->getPk($field->orgtable)) {
+                $pks[$field->orgtable] = $field->name;
+                $tables[$field->finalTable]['tableAlias'] = $field->table;
+                $tables[$field->finalTable]['pk'] = $field->apiName;
             }
             $fields[$field->name] = $field;
-            $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $tables[$field->finalTable]['fields'][$field->apiName] = $field;
             $this->joins = $joins;
             $this->tables = $tables;
             $this->fields = $fields;
@@ -80,7 +82,7 @@ class DbRead
         $rowData = [];
         $joins = $this->joins;
         foreach ($row as $key => $value) {
-            $table = $this->fields[$key]->orgtable;
+            $table = $this->fields[$key]->finalTable;
             $pk = $this->pks[$table];
             $parentPk = $this->tables[$table]['parent']['pk'];
             $parentTable = $this->tables[$table]['parent']['table'];
@@ -101,10 +103,7 @@ class DbRead
                                     if ($otherParentPkValue == $pkValue) {
                                         foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
                                             if ($otherTable != '__properties') {
-                                                if ($otherTable == $parentTable) {
-                                                    $other = 'related_' . $otherTable;
-                                                    $entity->related[$other] = &$otherRowSet;
-                                                } else {
+                                                if ((empty($parentTable) && empty($parentPkValue)) || $otherTable == $parentTable || strpos($otherTable, 'related_')) {
                                                     $entity->related[$otherTable] = $otherRowSet;
                                                 }
                                             } else {
