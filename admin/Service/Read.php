@@ -95,7 +95,7 @@ class Read
                 $rcUser = new User;
                 $rcUser->setId($row['rcu_id'])->setUsername($row['rcu_name'])->setEmail($row['rcu_email'])->setPassword($row['rcu_password'])->setSocial($row['rcu_social'])->setUserToken($row['rcu_usertoken'])->setIdentityToken($row['rcu_id_token'])->setRole($row['rcu_role']);
 
-                $relDetailsCreMod = new CreatedModified($row['rd_id'], 'relation_settings');
+                $relDetailsCreMod = new CreatedModified($row['rd_id'], 'uasys_relation_settings');
                 $relDetailsCreMod->setCreatedBy($rcUser)
                     ->setCreatedWhen($row['rc_when'])
                     ->setModifiedBy($row['rm_who'])

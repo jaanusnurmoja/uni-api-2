@@ -53,12 +53,12 @@ class DbRead
                 $join = new Join($joinId, $mode, $thisTable, $keyField, $otherKeyField, $otherTable);
                 $joins['this'][$thisTable][$otherTable][$joinId] = $join;
                 $joins['other'][$otherTable][$thisTable][$joinId] = $join;
-                $this->joins = $joins;
                 $tables[$field->orgtable]['parent']['table'] = $thisTable;
                 $tables[$field->orgtable]['parent']['pk'] = $pks[$thisTable];
             }
             $fields[$field->name] = $field;
             $tables[$field->orgtable]['fields'][$field->apiName] = $field;
+            $this->joins = $joins;
             $this->tables = $tables;
             $this->fields = $fields;
             $this->pks = $pks;
@@ -101,7 +101,12 @@ class DbRead
                                     if ($otherParentPkValue == $pkValue) {
                                         foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
                                             if ($otherTable != '__properties') {
-                                                $entity->related[$otherTable] = $otherRowSet;
+                                                if ($otherTable == $parentTable) {
+                                                    $other = 'related_' . $otherTable;
+                                                    $entity->related[$other] = &$otherRowSet;
+                                                } else {
+                                                    $entity->related[$otherTable] = $otherRowSet;
+                                                }
                                             } else {
                                                 $entity->related['__properties'] = $otherRowSet;
                                             }
@@ -109,10 +114,12 @@ class DbRead
                                     }
                                 }
                             }
-                            if (empty($parentTable) && empty($parentPkValue)) {
+                            if (empty($parentTable) && empty($parentPkValue) || $parentTable == $table) {
                                 $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
                             }
                         }
+                        
+                
                     }
                 }
             }

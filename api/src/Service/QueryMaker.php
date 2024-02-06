@@ -14,7 +14,7 @@ class QueryMaker
     public $seq = 0;
     public $select;
     public $from;
-    public $join = [];
+    public array $join;
     public array $where;
     public array $whereOpts;
     public $orderBy;
@@ -56,6 +56,10 @@ class QueryMaker
             $fields = $any ? $dataFields : $model->data;
 
             $this->select .= ", $pkSelect AS `$seqPref{$pkAlias}`, {$this->getFieldsForQuery($fields, false, $seqPref)}";
+        }
+
+        if(isset($model->hasMany, $model->belongsTo, $model->hasManyAndBelongsTo, $model->hasAny)) {
+            if (!isset($this->join)) $this->join = [];
         }
 
         if (isset($model->hasMany) && $model->hasMany != [] && !$noHasMany) {
@@ -114,29 +118,36 @@ class QueryMaker
         foreach ($hmAbt as $hmabtItem) {
             $thisTable = $hmabtItem->table->tableName;
             $thisPk = $hmabtItem->table->pk;
-            if ($hmabtItem->otherTable != '/'.$parentName) {
-                if (is_object($hmabtItem->manyMany)) {
-                        array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                        LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`
-                        ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk`) 
-                        AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)");
-                        $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $thisPk .'__related_');
-                } else {
-                            $otherTable = null;
-                            $otherPk = null;
-                        foreach ($hmabtItem->manyMany as $manyManyPart) {
-                            if ($manyManyPart->table != $hmabtItem->table->tableName) {
-                                $otherTable = $manyManyPart->table;
-                                $otherPk = $manyManyPart->pk;
-                                array_push($this->join, "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
-                                AND JSON_EXTRACT(table_value, '$.$thisTable') = `{$seqPref}{$thisTable}`.`$thisPk`
-                                LEFT JOIN `$otherTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$otherPk}__{$otherTable}` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$otherPk}__{$otherTable}`.`$otherPk`");
-                                $this->getQueryDataFromModels($otherTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $otherPk . '__');
-                            }
-                        }
-                }
+                
+            if (is_array($hmabtItem->manyMany) && $hmabtItem->otherTable != '/'.$parentName) {
+                    foreach ($hmabtItem->manyMany as $manyManyPart) {
+                    if ($manyManyPart->table != $hmabtItem->table->tableName) {
+                        $otherTable = $manyManyPart->table;
+                        $otherPk = $manyManyPart->pk;
+                        $queryPart = "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS_PATH(`table_value`, 'ALL','$.$thisTable','$.$otherTable')
+                        AND JSON_EXTRACT(table_value, '$.$thisTable') = `{$seqPref}{$thisTable}`.`$thisPk`
+                        LEFT JOIN `$otherTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$otherPk}__{$otherTable}` ON JSON_EXTRACT(`table_value`, '$.$otherTable') = `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$otherPk}__{$otherTable}`.`$otherPk`";
 
-            }
+                        if (!in_array($queryPart, $this->join)) {
+                            array_push($this->join, $queryPart);
+                        }
+                        $this->getQueryDataFromModels($otherTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $otherPk . '__');
+                    }
+                }
+            } else if (!$parentName) {
+                $queryPart = "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
+                LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`
+                ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`.`$thisPk`) 
+                AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)";
+                if (!in_array($queryPart, $this->join)) {
+                    array_push($this->join, $queryPart);
+                }
+                    $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $thisPk .'__');
+            } 
+                // echo '<pre>';
+                // print_r($this);
+                // echo '</pre>';
+
             $seq++;
         }
     }
