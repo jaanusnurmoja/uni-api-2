@@ -21,6 +21,9 @@ class DbRead
     public array $rows;
     public array $origRows;
     public array $dataWithRelations;
+    public $mysqlTotalTime;
+    public $totaltime;
+
     protected function cnn() {
         $cnf = parse_ini_file(__DIR__ . '/../../../config/connection.ini');
         $mysqli = new \mysqli($cnf["servername"], $cnf["username"], $cnf["password"], $cnf["dbname"]);
@@ -30,6 +33,7 @@ class DbRead
 
     public function anySelect($query) {
         $db = $this->cnn();
+        $startTime = microtime(true);
         $res = $db->query($query);
         $fields = [];
         $joins = [];
@@ -68,7 +72,9 @@ class DbRead
                 $this->origRows[$row->rowid][] = $row;
                 $this->rows[0]['joins'] = $joins;
                 $this->origRows[0]['joins'] = $joins;
-                $this->processRow($row);
+                $mysqlEndTime = microtime(true);
+                $this->mysqlTotalTime = $mysqlEndTime - $startTime;
+                $this->processRow($row, $startTime);
             } else {
                 $this->rows[] = $row;
             }
@@ -76,7 +82,7 @@ class DbRead
         $db->close();
     }
 
-    public function processRow($row) {
+    public function processRow($row, $startTime) {
         $rowData = [];
         $joins = $this->joins;
         foreach ($row as $key => $value) {
@@ -116,10 +122,10 @@ class DbRead
                             }
                             if (empty($parentTable) && empty($parentPkValue) || $parentTable == $table) {
                                 $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
+                                $endTime = microtime(true);
+                                $this->totaltime = $endTime - $startTime;
                             }
                         }
-                        
-                
                     }
                 }
             }

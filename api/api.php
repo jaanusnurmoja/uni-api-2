@@ -63,7 +63,9 @@ $queryAndResults['readme'] =
 ];
 
 if (!isset($_GET['orig'])) {
-    $queryAndResults['res'] = $dbResults->dataWithRelations;
+    $queryAndResults['res']['mysqlTotal'] = $dbResults->mysqlTotalTime;
+    $queryAndResults['res']['total'] = $dbResults->totaltime;
+    $queryAndResults['res']['data'] = $dbResults->dataWithRelations;
 }
 
 $queryAndResults['sql'] = $testSql;
