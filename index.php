@@ -212,8 +212,7 @@ foreach (json_decode($rel) as $table => $params) {
                 <div>
                     <h4 id="new" class="bg-warning">UUS (15.02.2024): Lahenes iseendaga suhtleva tabeli probleem!</h4>
                     <p>Seega sai tehtud ilmselt kõige keerukam vaegtöö (vt märkust allpool)</p>
-                    <p>Sellega seoses on jäänud lahendada vaid küsimus - mida teha selleks, et seotud andmete puudumisel ei kuvataks tühja entityt.</p>
-                    <p>Nn paindlike andmeseoste funktsionaalsusega tegelen millalgi kaugemas tulevikus. Pean silmas seda, et kasutaja saab andmeid sisestades valida, millisest tabelist ta soovib andmeid oma kirjega siduda.</p>
+                    <p>Nn paindlike andmeseoste funktsionaalsusega tegelen millalgi kaugemas tulevikus. Pean silmas seda, et kasutaja saab andmeid sisestades valida, millisest tabelist ta soovib andmeid oma kirjega siduda. Lisaluksus, millega pole kiiret.</p>
                     <h4 id="new" class="bg-warning">UUS (13.02.2024): Andmete laadimise aeg on kiirenenud ca 87 korda</h4>
                     <p>Sarnaselt vanema koodiversiooniga on lisatud microtime(), et teha kindlaks, kui palju aega kulub päringu tegemisest tulemuste kuvamiseni</p>
                     <h4 id="new" class="bg-warning">UUS (05.02.2024): API väljund (sh json vormingus) on saanud soovitud kuju</h4>
