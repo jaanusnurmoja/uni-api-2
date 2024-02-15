@@ -94,10 +94,12 @@ class DbRead
             $parentTable = $this->tables[$table]['parent']['table'];
             $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
             //echo "table: " . $table . " pk: " . $pk . " parentPk: " . $parentPk . " parentTable: " . $parentTable . " value: " . $value . "<br>";
-            $thisEntity = new Entity($table); 
-            $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
-            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
-            $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related']['__properties'] = $joins['this'][$parentTable];
+            if (!empty($value)) {
+                $thisEntity = new Entity($table); 
+                $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
+                $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
+                $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related']['__properties'] = $joins['this'][$parentTable];
+            }
         }
 
         foreach($this->rows[$row->rowid] as $parentTable => $rowSets) {
