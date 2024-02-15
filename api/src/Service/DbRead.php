@@ -104,9 +104,9 @@ class DbRead
                                     if ($otherParentPkValue == $pkValue) {
                                         foreach ($otherTableSet['related'] as $otherTable => $otherRowSet) {
                                             if ($otherTable != '__properties') {
-                                                if ((empty($parentTable) && empty($parentPkValue)) || $otherTable == $parentTable || strpos($otherTable, 'related_')) {
+                                                //if ((empty($parentTable) && empty($parentPkValue)) || $otherTable == $parentTable || strpos($otherTable, 'related_')) {
                                                     $entity->related[$otherTable] = $otherRowSet;
-                                                }
+                                                //}
                                             } else {
                                                 $entity->related['__properties'] = $otherRowSet;
                                             }
