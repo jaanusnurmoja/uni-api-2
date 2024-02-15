@@ -170,10 +170,11 @@ if (loggedIn()) {?>
 echo 'Uuri asja lähemalt siit: <a href="README.md">UNI-API RAKENDUS</a>';
 $rel = file_get_contents('api/relations.json'); ?>
                 <h3>Näidisandmed</h3>
+                <p>NB! on ka tabel manufacturers, kuid see praegu ei tööta. Põhjus on arvatavasti seadistuses admini osas</p>
                 <table class="table table-striped">
                     <?php
 foreach (json_decode($rel) as $table => $params) {
-    if ($table != 'hasManyAndBelongsTo') {
+    if ($table != 'hasManyAndBelongsTo' && $table != 'manufacturers') {
 
         echo "<tr><td class='warning'><a href='api/$table'>$table</a></td><td>$params->description</td><td style='white-space:nowrap'><a class='btn btn-small btn-warning' href='api/$table/?testapi'>Uus test</a></td></tr>";
     }
