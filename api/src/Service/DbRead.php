@@ -54,7 +54,7 @@ class DbRead
                 $tables[$field->finalTable]['parent']['pk'] = $pks[$thisTable];
             }
             if ($field->orgname == $this->getPk($field->orgtable)) {
-                $pks[$field->orgtable] = $field->name;
+                $pks[$field->finalTable] = $field->name;
                 $tables[$field->finalTable]['tableAlias'] = $field->table;
                 $tables[$field->finalTable]['pk'] = $field->apiName;
             }
@@ -87,6 +87,7 @@ class DbRead
             $parentPk = $this->tables[$table]['parent']['pk'];
             $parentTable = $this->tables[$table]['parent']['table'];
             $rowData[$table][$row->$pk][$this->fields[$key]->apiName] = $value;
+            //echo "table: " . $table . " pk: " . $pk . " parentPk: " . $parentPk . " parentTable: " . $parentTable . " value: " . $value . "<br>";
             $thisEntity = new Entity($table); 
             $thisEntity->setPk(new Pk($table, $this->fields[$pk]->apiName, $row->$pk))->setData(new Data($table, $rowData[$table][$row->$pk], [$this->fields[$pk]->apiName]));
             $this->rows[$row->rowid][$parentTable][$row->$parentPk]['related'][$table][$row->$pk] = $thisEntity;
