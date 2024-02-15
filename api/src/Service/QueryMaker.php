@@ -136,13 +136,13 @@ class QueryMaker
                 }
             } else if (!$parentName) {
                 $queryPart = "LEFT JOIN `uasys_crossref` ON JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `$thisTable`.`$thisPk`)
-                LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`
-                ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`.`$thisPk`) 
-                AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)";
+                LEFT JOIN `$thisTable` `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`
+                ON (JSON_CONTAINS(JSON_EXTRACT(`table_value`, '$.$thisTable'), `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk`) 
+                AND `{$thisTable}__{$thisPk}__hasManyAndBelongsTo__{$hmabtItem->id}__{$thisPk}__related_$thisTable`.`$thisPk` <> `{$seqPref}{$thisTable}`.`$thisPk`)";
                 if (!in_array($queryPart, $this->join)) {
                     array_push($this->join, $queryPart);
                 }
-                    $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $thisPk .'__');
+                    $this->getQueryDataFromModels($thisTable, $thisTable, $thisTable.'__'.$thisPk.'__hasManyAndBelongsTo__' . $hmabtItem->id . '__' . $thisPk .'__related_');
             } 
                 // echo '<pre>';
                 // print_r($this);
