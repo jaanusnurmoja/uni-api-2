@@ -112,7 +112,7 @@ class DbRead
                                     }
                                 }
                             }
-                            if (empty($parentTable) && empty($parentPkValue) || $parentTable == $table) {
+                            if (empty($parentTable) && empty($parentPkValue)) {
                                 $this->dataWithRelations[$pkValue] = $thisRows[$pkValue];
                             }
                         }
